@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/i18n/translations.g.dart';
+import 'package:minimum/routes.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   LocaleSettings.useDeviceLocale();
-  runApp(const MinimumApp());
+  runApp(
+    TranslationProvider(child: const MinimumApp()),
+  );
 }
 
 class MinimumApp extends StatelessWidget {
@@ -13,16 +17,21 @@ class MinimumApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final translation = context.translations;
     return MaterialApp(
-      title: translations.appName,
+      title: translation.appName,
       locale: TranslationProvider.of(context).flutterLocale,
       supportedLocales: AppLocaleUtils.supportedLocales,
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        appBarTheme: const AppBarTheme(
+          elevation: 1,
+        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
         useMaterial3: true,
       ),
-      home: Container(),
+      initialRoute: ApplicationsScreen.route,
+      onGenerateRoute: onGenerateRoute,
     );
   }
 }
