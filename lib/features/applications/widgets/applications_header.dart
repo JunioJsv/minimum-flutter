@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:minimum/features/preferences/screens/preferences_screen.dart';
 import 'package:minimum/i18n/translations.g.dart';
 
 class ApplicationsHeader extends StatelessWidget
@@ -20,7 +21,9 @@ class ApplicationsHeader extends StatelessWidget
           icon: const Icon(Icons.camera_alt_outlined),
         ),
         IconButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushNamed(PreferencesScreen.route);
+          },
           icon: const Icon(Icons.settings_outlined),
         ),
       ],

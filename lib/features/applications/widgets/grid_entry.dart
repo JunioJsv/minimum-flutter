@@ -20,9 +20,17 @@ class GridEntry extends EntryWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SizedBox.square(
-                dimension: 48,
-                child: icon,
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxHeight: 48,
+                      maxWidth: 48
+                    ),
+                    child: icon,
+                  ),
+                ),
               ),
               const SizedBox(height: 8),
               Text(label)

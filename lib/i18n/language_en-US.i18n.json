@@ -1,4 +1,9 @@
 {
   "app_name": "Minimum",
-  "search": "Search"
+  "search": "Search",
+  "preferences": "Preferences",
+  "appearance": "Appearance",
+  "grid_view": "Grid view",
+  "enable_grid_view": "Enable grid view",
+  "grid_cross_axis_count": "Grid cross axis count"
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/preferences/screens/preferences_screen.dart';
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   final route = routes[settings.name];
@@ -29,6 +30,9 @@ class AppRoute {
 
 final Map<String, AppRoute> routes = {
   ApplicationsScreen.route: AppRoute(
-    builder: (context) => const ApplicationsScreen()
+    builder: (context) => const ApplicationsScreen(),
+  ),
+  PreferencesScreen.route: AppRoute(
+    builder: (context) => const PreferencesScreen(),
   )
 };
