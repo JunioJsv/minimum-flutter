@@ -1,0 +1,26 @@
+name: minimum
+description: "Android app launcher"
+publish_to: 'none'
+
+version: 2.0.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  slang: 3.31.1
+  slang_flutter: 3.31.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: 3.0.0
+  build_runner: 2.4.11
+  slang_build_runner: 3.31.0
+
+flutter:
+  uses-material-design: true

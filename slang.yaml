@@ -1,0 +1,8 @@
+base_locale: en-US
+fallback_strategy: base_locale
+translate_var: translations
+key_case: camel
+key_map_case: camel
+param_case: camel
+input_directory: lib/i18n
+output_file_name: translations.g.dart
