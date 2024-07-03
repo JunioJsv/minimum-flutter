@@ -1,0 +1,21 @@
+targets:
+  $default:
+    builders:
+      slang_build_runner:
+        options:
+          base_locale: en-US
+          fallback_strategy: base_locale
+          translate_var: translations
+          key_case: camel
+          key_map_case: snake
+          param_case: camel
+          input_directory: lib/i18n
+          output_file_name: translations.g.dart
+      json_serializable:
+        options:
+          checked: false
+          explicit_to_json: true
+          field_rename: snake
+        generate_for:
+          include:
+            - "lib/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart"

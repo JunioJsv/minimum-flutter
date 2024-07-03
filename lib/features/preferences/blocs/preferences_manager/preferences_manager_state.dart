@@ -1,5 +1,6 @@
 part of 'preferences_manager_cubit.dart';
 
+@JsonSerializable()
 class PreferencesManagerState extends Equatable {
   final bool isGridLayoutEnabled;
   final int gridCrossAxisCount;
@@ -18,6 +19,12 @@ class PreferencesManagerState extends Equatable {
       gridCrossAxisCount: gridCrossAxisCount ?? this.gridCrossAxisCount,
     );
   }
+
+  factory PreferencesManagerState.fromJson(Map<String, dynamic> json) {
+    return _$PreferencesManagerStateFromJson(json);
+  }
+
+  Map<String, dynamic> toJson() => _$PreferencesManagerStateToJson(this);
 
   @override
   List<Object> get props => [isGridLayoutEnabled, gridCrossAxisCount];
