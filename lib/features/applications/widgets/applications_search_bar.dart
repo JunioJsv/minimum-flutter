@@ -68,9 +68,10 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   Widget build(BuildContext context) {
     final translation = context.translations;
     final applications = widget.applications;
+    final theme = Theme.of(context);
     return SearchAnchor(
       searchController: controller,
-      dividerColor: Theme.of(context).colorScheme.outlineVariant,
+      dividerColor: theme.colorScheme.outlineVariant,
       builder: (context, controller) {
         return SearchBar(
           focusNode: focusNode,

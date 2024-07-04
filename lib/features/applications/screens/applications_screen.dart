@@ -60,7 +60,9 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
+                            .add(const EdgeInsets.only(top: 8)),
                     child: ApplicationsSearchBar(
                       applications: state.applications,
                     ),
@@ -128,7 +130,9 @@ class _SliverApplications extends StatelessWidget {
                 ).toList(),
                 delegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: state.gridCrossAxisCount,
-                ))
+                  childAspectRatio: 3 / 4,
+                ),
+              )
             : SliverApplicationsListLayout(
                 children: applications.mapIndexed(
                 (index, arguments) {

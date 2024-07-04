@@ -22,15 +22,21 @@ class GridEntry extends EntryWidget {
               Expanded(
                 child: ConstrainedBox(
                   constraints:
-                      const BoxConstraints(maxHeight: 48, maxWidth: 48),
+                  const BoxConstraints(maxHeight: 48, maxWidth: 48),
                   child: icon,
                 ),
               ),
-              const SizedBox(height: 8),
-              Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 2)
+                      .add(const EdgeInsets.only(top: 8)),
+                  child: Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                  ),
+                ),
               )
             ],
           ),
