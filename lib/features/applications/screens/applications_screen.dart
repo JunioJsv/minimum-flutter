@@ -10,8 +10,10 @@ import 'package:minimum/features/applications/widgets/grid_entry.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
 import 'package:minimum/features/applications/widgets/sliver_applications.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
+import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/widgets/confirmation_dialog.dart';
 
 class ApplicationsScreen extends StatefulWidget {
   static final String route = '$ApplicationsScreen';
@@ -25,11 +27,49 @@ class ApplicationsScreen extends StatefulWidget {
 class ApplicationsScreenState extends State<ApplicationsScreen> {
   final scroll = ScrollController();
   final ApplicationsManagerCubit applications = dependencies();
+  late final translation = context.translations;
+  late final PreferencesManagerCubit preferences = dependencies();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final isAlreadyCurrentLauncher =
+          await applications.service.isAlreadyCurrentLauncher();
+      final isPromptingSetAsCurrentLauncher =
+          preferences.state.isPromptingSetAsCurrentLauncher;
+      if (!isAlreadyCurrentLauncher && isPromptingSetAsCurrentLauncher) {
+        if (mounted) {
+          _showSetHasCurrentLauncherDialog(context);
+        }
+      }
+    });
+  }
 
   @override
   void dispose() {
     super.dispose();
     scroll.dispose();
+  }
+
+  Future<void> _showSetHasCurrentLauncherDialog(BuildContext context) async {
+    final confirmation = await showDialog<bool?>(
+      context: context,
+      builder: (context) => ConfirmationDialog(
+        title: translation.setHasDefaultLauncher,
+        message: translation.askSetHasDefaultLauncher,
+      ),
+    );
+    if (confirmation == true) {
+      await applications.service.openCurrentLauncherSystemSettings();
+    }
+    if (confirmation == false) {
+      preferences.update(
+        (preferences) => preferences.copyWith(
+          isPromptingSetAsCurrentLauncher: false,
+        ),
+      );
+    }
   }
 
   Future<void> onApplicationTap(Application application) async {

@@ -4,5 +4,9 @@
   "appearance": "Aparência",
   "grid_view": "Visualização em grade",
   "enable_grid_view": "Habilitar visualização em grade",
-  "grid_cross_axis_count": "Número de colunas da grade"
+  "grid_cross_axis_count": "Número de colunas da grade",
+  "set_has_default_launcher": "Definir como Launcher padrão",
+  "ask_set_has_default_launcher": "Você deseja definir esse aplicativo como Launcher padrão?",
+  "yes": "Sim",
+  "no": "Não"
 }

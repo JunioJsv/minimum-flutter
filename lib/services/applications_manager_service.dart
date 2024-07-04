@@ -5,8 +5,10 @@ class ApplicationsManagerService {
   static const kChannelName = 'juniojsv.minimum/applications_manager_plugin';
   static const kGetInstalledApplications = 'get_installed_applications';
   static const kLaunchApplication = 'launch_application';
-
   static const kGetApplicationIcon = 'get_application_icon';
+  static const kIsAlreadyCurrentLauncher = 'is_already_current_launcher';
+  static const kOpenCurrentLauncherSystemSettings =
+      'open_current_launcher_system_settings';
 
   final channel = const MethodChannel(kChannelName);
 
@@ -32,5 +34,17 @@ class ApplicationsManagerService {
     );
 
     return bytes!;
+  }
+
+  Future<bool> isAlreadyCurrentLauncher() async {
+    final result = await channel.invokeMethod<bool>(
+      kIsAlreadyCurrentLauncher,
+    );
+
+    return result == true;
+  }
+
+  Future<void> openCurrentLauncherSystemSettings() async {
+    await channel.invokeMethod(kOpenCurrentLauncherSystemSettings);
   }
 }

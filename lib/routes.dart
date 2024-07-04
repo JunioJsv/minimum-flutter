@@ -3,36 +3,16 @@ import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/preferences/screens/preferences_screen.dart';
 
 Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-  final route = routes[settings.name];
-  if (route == null) return null;
+  final builder = routes[settings.name];
+  if (builder == null) return null;
 
-  return switch (route.type) {
-    AppRouteType.page => MaterialPageRoute(
-        settings: settings,
-        builder: route.builder,
-      )
-  };
+  return MaterialPageRoute(
+    settings: settings,
+    builder: builder,
+  );
 }
 
-enum AppRouteType {
-  page,
-}
-
-class AppRoute {
-  final AppRouteType type;
-  final WidgetBuilder builder;
-
-  AppRoute({
-    this.type = AppRouteType.page,
-    required this.builder,
-  });
-}
-
-final Map<String, AppRoute> routes = {
-  ApplicationsScreen.route: AppRoute(
-    builder: (context) => const ApplicationsScreen(),
-  ),
-  PreferencesScreen.route: AppRoute(
-    builder: (context) => const PreferencesScreen(),
-  )
+final Map<String, WidgetBuilder> routes = {
+  ApplicationsScreen.route: (context) => const ApplicationsScreen(),
+  PreferencesScreen.route: (context) => const PreferencesScreen(),
 };

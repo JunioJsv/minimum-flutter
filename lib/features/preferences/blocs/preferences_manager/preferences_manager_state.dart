@@ -4,19 +4,24 @@ part of 'preferences_manager_cubit.dart';
 class PreferencesManagerState extends Equatable {
   final bool isGridLayoutEnabled;
   final int gridCrossAxisCount;
+  final bool isPromptingSetAsCurrentLauncher;
 
   const PreferencesManagerState({
     this.isGridLayoutEnabled = false,
     this.gridCrossAxisCount = 4,
+    this.isPromptingSetAsCurrentLauncher = true,
   });
 
   PreferencesManagerState copyWith({
     bool? isGridLayoutEnabled,
     int? gridCrossAxisCount,
+    bool? isPromptingSetAsCurrentLauncher,
   }) {
     return PreferencesManagerState(
       isGridLayoutEnabled: isGridLayoutEnabled ?? this.isGridLayoutEnabled,
       gridCrossAxisCount: gridCrossAxisCount ?? this.gridCrossAxisCount,
+      isPromptingSetAsCurrentLauncher: isPromptingSetAsCurrentLauncher ??
+          this.isPromptingSetAsCurrentLauncher,
     );
   }
 
@@ -27,5 +32,9 @@ class PreferencesManagerState extends Equatable {
   Map<String, dynamic> toJson() => _$PreferencesManagerStateToJson(this);
 
   @override
-  List<Object> get props => [isGridLayoutEnabled, gridCrossAxisCount];
+  List<Object> get props => [
+        isGridLayoutEnabled,
+        gridCrossAxisCount,
+        isPromptingSetAsCurrentLauncher,
+      ];
 }

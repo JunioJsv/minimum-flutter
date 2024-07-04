@@ -1,10 +1,12 @@
 package juniojsv.minimum
 
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Build
+import android.provider.Settings
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -23,6 +25,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         const val GET_INSTALLED_APPLICATIONS = "get_installed_applications"
         const val LAUNCH_APPLICATION = "launch_application"
         const val GET_APPLICATION_ICON = "get_application_icon"
+        const val IS_ALREADY_CURRENT_LAUNCHER = "is_already_current_launcher"
+        const val OPEN_CURRENT_LAUNCHER_SYSTEM_SETTINGS = "open_current_launcher_system_settings"
         const val TAG = "Plugin"
     }
 
@@ -60,6 +64,13 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
             GET_INSTALLED_APPLICATIONS -> getInstalledApplications(result)
             LAUNCH_APPLICATION -> launchApplication(call, result)
             GET_APPLICATION_ICON -> getApplicationIcon(call, result)
+            IS_ALREADY_CURRENT_LAUNCHER -> {
+                result.success(isAlreadyCurrentLauncher())
+            }
+            OPEN_CURRENT_LAUNCHER_SYSTEM_SETTINGS -> {
+                val intent = Intent(Settings.ACTION_HOME_SETTINGS)
+                activity.startActivity(intent)
+            }
             else -> result.notImplemented()
         }
     }
@@ -133,5 +144,16 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         } catch (e: Exception) {
             result.error(GET_APPLICATION_ICON, e.message, null)
         }
+    }
+
+    private fun isAlreadyCurrentLauncher(): Boolean {
+        return getCurrentLauncherClassName() == activity.componentName.className
+    }
+
+    private fun getCurrentLauncherClassName(): String? {
+        return pm.resolveActivity(Intent(Intent.ACTION_MAIN).apply {
+            addCategory(Intent.CATEGORY_HOME)
+            addCategory(Intent.CATEGORY_DEFAULT)
+        }, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.name
     }
 }
