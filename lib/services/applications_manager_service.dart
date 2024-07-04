@@ -10,9 +10,6 @@ class ApplicationsManagerService {
 
   final channel = const MethodChannel(kChannelName);
 
-  final int _maxIconsCached = 30;
-  final Map<String, Uint8List> _iconsCache = {};
-
   Future<List<Application>> getInstalledApplications() async {
     final json = await channel.invokeListMethod<Map>(kGetInstalledApplications);
     final applications =
@@ -29,17 +26,11 @@ class ApplicationsManagerService {
   }
 
   Future<Uint8List> getApplicationIcon(String package) async {
-    var bytes = _iconsCache[package];
-    if (bytes != null) return bytes;
-    bytes = await channel.invokeMethod<Uint8List>(
+    final bytes = await channel.invokeMethod<Uint8List>(
       kGetApplicationIcon,
       {'package_name': package},
     );
-    if (_iconsCache.length == _maxIconsCached) {
-      _iconsCache.remove(_iconsCache.keys.first);
-    }
-    _iconsCache[package] = bytes!;
 
-    return bytes;
+    return bytes!;
   }
 }
