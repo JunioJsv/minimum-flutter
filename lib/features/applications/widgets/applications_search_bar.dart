@@ -4,6 +4,7 @@ import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
 import 'package:minimum/i18n/translations.g.dart';
+import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
 
 class ApplicationsSearchBar extends StatefulWidget {
@@ -15,22 +16,58 @@ class ApplicationsSearchBar extends StatefulWidget {
   State<ApplicationsSearchBar> createState() => _ApplicationsSearchBarState();
 }
 
-class _ApplicationsSearchBarState extends State<ApplicationsSearchBar> {
+class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
+    implements RouteAware {
   final focusNode = FocusNode();
   final controller = SearchController();
+
+  late final screen =
+      context.findAncestorStateOfType<ApplicationsScreenState>()!;
+
+  @override
+  void initState() {
+    screen.scroll.addListener(_onApplicationsScrollControllerListener);
+    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+      observer.subscribe(this, ModalRoute.of(context)!);
+    });
+    super.initState();
+  }
 
   @override
   void dispose() {
     focusNode.dispose();
     controller.dispose();
+    screen.scroll.removeListener(_onApplicationsScrollControllerListener);
+    observer.unsubscribe(this);
     super.dispose();
+  }
+
+  @override
+  void didPop() {}
+
+  @override
+  void didPopNext() {}
+
+  @override
+  void didPush() {}
+
+  @override
+  void didPushNext() {
+    if (focusNode.hasFocus) {
+      focusNode.unfocus();
+    }
+  }
+
+  void _onApplicationsScrollControllerListener() {
+    if (focusNode.hasFocus) {
+      focusNode.unfocus();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
     final applications = widget.applications;
-    final screen = context.findAncestorStateOfType<ApplicationsScreenState>()!;
     return SearchAnchor(
       searchController: controller,
       dividerColor: Theme.of(context).colorScheme.outlineVariant,

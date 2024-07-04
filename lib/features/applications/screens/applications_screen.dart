@@ -23,7 +23,14 @@ class ApplicationsScreen extends StatefulWidget {
 }
 
 class ApplicationsScreenState extends State<ApplicationsScreen> {
+  final scroll = ScrollController();
   final ApplicationsManagerCubit applications = dependencies();
+
+  @override
+  void dispose() {
+    super.dispose();
+    scroll.dispose();
+  }
 
   Future<void> onApplicationTap(Application application) async {
     return applications.service.launchApplication(application.package);
@@ -31,31 +38,42 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: const ApplicationsHeader(),
-      body: BlocBuilder<ApplicationsManagerCubit, ApplicationsManagerState>(
-        bloc: applications,
-        builder: (context, state) {
-          if (state is! ApplicationsManagerFetchSuccess) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: ApplicationsSearchBar(
-                    applications: state.applications,
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) {
+        scroll.animateTo(
+          0,
+          duration: kThemeAnimationDuration,
+          curve: Curves.linear,
+        );
+      },
+      child: Scaffold(
+        appBar: const ApplicationsHeader(),
+        body: BlocBuilder<ApplicationsManagerCubit, ApplicationsManagerState>(
+          bloc: applications,
+          builder: (context, state) {
+            if (state is! ApplicationsManagerFetchSuccess) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            return CustomScrollView(
+              controller: scroll,
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: ApplicationsSearchBar(
+                      applications: state.applications,
+                    ),
                   ),
                 ),
-              ),
-              _SliverApplications(state),
-              const SliverToBoxAdapter(
-                child: SizedBox(height: kToolbarHeight),
-              )
-            ],
-          );
-        },
+                _SliverApplications(state),
+                const SliverToBoxAdapter(
+                  child: SizedBox(height: kToolbarHeight),
+                )
+              ],
+            );
+          },
+        ),
       ),
     );
   }

@@ -13,6 +13,7 @@ import 'package:minimum/themes.dart';
 import 'package:path_provider/path_provider.dart';
 
 final dependencies = GetIt.instance;
+final observer = RouteObserver<ModalRoute>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -74,6 +75,7 @@ class _MinimumAppState extends State<MinimumApp> {
         darkTheme: theme(darkDynamic),
         themeMode: ThemeMode.system,
         initialRoute: ApplicationsScreen.route,
+        navigatorObservers: [observer],
         onGenerateRoute: onGenerateRoute,
       );
     });
