@@ -19,3 +19,4 @@ targets:
         generate_for:
           include:
             - "lib/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart"
+            - "lib/models/application.dart"

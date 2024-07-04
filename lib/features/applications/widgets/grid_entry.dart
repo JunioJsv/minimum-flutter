@@ -24,16 +24,18 @@ class GridEntry extends EntryWidget {
                 child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxHeight: 48,
-                      maxWidth: 48
-                    ),
+                    constraints:
+                        const BoxConstraints(maxHeight: 48, maxWidth: 48),
                     child: icon,
                   ),
                 ),
               ),
               const SizedBox(height: 8),
-              Text(label)
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              )
             ],
           ),
         ),
