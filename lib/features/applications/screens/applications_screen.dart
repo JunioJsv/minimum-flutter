@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
+import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
 import 'package:minimum/features/applications/widgets/grid_entry.dart';
@@ -84,7 +85,10 @@ class _SliverApplications extends StatelessWidget {
                 children: applications.map(
                   (application) {
                     return GridEntry(
-                      icon: const Placeholder(),
+                      icon: ApplicationIcon(
+                        key: ValueKey('${application.package}#icon'),
+                        package: application.package,
+                      ),
                       label: application.label,
                       onTap: () => onTap(application),
                     );
@@ -97,7 +101,10 @@ class _SliverApplications extends StatelessWidget {
                 children: applications.map(
                 (application) {
                   return ListEntry(
-                    icon: const Placeholder(),
+                    icon: ApplicationIcon(
+                      key: ValueKey('${application.package}#icon'),
+                      package: application.package,
+                    ),
                     label: application.label,
                     onTap: () => onTap(application),
                   );

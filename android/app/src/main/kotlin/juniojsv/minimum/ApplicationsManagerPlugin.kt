@@ -2,6 +2,8 @@ package juniojsv.minimum
 
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
 import android.os.Build
 import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -9,6 +11,7 @@ import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import java.io.ByteArrayOutputStream
 
 class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
     private lateinit var channel: MethodChannel
@@ -19,6 +22,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         const val CHANNEL_NAME = "juniojsv.minimum/applications_manager_plugin"
         const val GET_INSTALLED_APPLICATIONS = "get_installed_applications"
         const val LAUNCH_APPLICATION = "launch_application"
+        const val GET_APPLICATION_ICON = "get_application_icon"
         const val TAG = "Plugin"
     }
 
@@ -55,6 +59,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         when (call.method) {
             GET_INSTALLED_APPLICATIONS -> getInstalledApplications(result)
             LAUNCH_APPLICATION -> launchApplication(call, result)
+            GET_APPLICATION_ICON -> getApplicationIcon(call, result)
             else -> result.notImplemented()
         }
     }
@@ -100,7 +105,33 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
             activity.startActivity(intent)
             result.success(null)
         } catch (e: Exception) {
-            result.error("launch_application", e.message, null)
+            result.error(LAUNCH_APPLICATION, e.message, null)
+        }
+    }
+
+    private fun getApplicationIcon(call: MethodCall, result: MethodChannel.Result) {
+        val packageName = call.argument<String>("package_name")
+        if (packageName == null) {
+            result.error("package_name_is_null", null, null)
+            return
+        }
+        try {
+            val icon = pm.getApplicationIcon(packageName)
+            val bitmap = Bitmap.createBitmap(
+                icon.intrinsicWidth,
+                icon.intrinsicHeight,
+                Bitmap.Config.ARGB_8888
+            )
+            val canvas = Canvas(bitmap)
+            icon.setBounds(0, 0, canvas.width, canvas.height)
+            icon.draw(canvas)
+            val bytes = ByteArrayOutputStream().use {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+                it.toByteArray()
+            }
+            result.success(bytes)
+        } catch (e: Exception) {
+            result.error(GET_APPLICATION_ICON, e.message, null)
         }
     }
 }
