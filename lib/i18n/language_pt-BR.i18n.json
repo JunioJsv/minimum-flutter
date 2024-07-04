@@ -1,3 +1,8 @@
 {
-
+  "search": "Buscar",
+  "preferences": "Preferências",
+  "appearance": "Aparência",
+  "grid_view": "Visualização em grade",
+  "enable_grid_view": "Habilitar visualização em grade",
+  "grid_cross_axis_count": "Número de colunas da grade"
 }

@@ -39,16 +39,21 @@ class PreferencesScreen extends StatelessWidget {
               );
             },
           ),
-          BlocSelector<PreferencesManagerCubit, PreferencesManagerState, int>(
+          BlocSelector<PreferencesManagerCubit, PreferencesManagerState,
+              ({bool isEnabled, int count})>(
             bloc: preferences,
             selector: (state) {
-              return state.gridCrossAxisCount;
+              return (
+                isEnabled: state.isGridLayoutEnabled,
+                count: state.gridCrossAxisCount,
+              );
             },
-            builder: (context, value) {
+            builder: (context, preference) {
               return SliderListTile(
-                value: value,
                 min: 2,
                 max: 5,
+                isEnabled: preference.isEnabled,
+                value: preference.count,
                 onChange: (int value) => preferences.update((preferences) {
                   return preferences.copyWith(gridCrossAxisCount: value);
                 }),

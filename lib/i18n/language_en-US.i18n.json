@@ -5,5 +5,5 @@
   "appearance": "Appearance",
   "grid_view": "Grid view",
   "enable_grid_view": "Enable grid view",
-  "grid_cross_axis_count": "Grid cross axis count"
+  "grid_cross_axis_count": "Number of grid columns"
 }

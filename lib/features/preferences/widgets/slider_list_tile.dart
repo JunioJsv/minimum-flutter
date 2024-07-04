@@ -6,10 +6,12 @@ class SliderListTile extends StatefulWidget {
   final void Function(int value) onChange;
   final int min;
   final int max;
+  final bool isEnabled;
 
   const SliderListTile({
     super.key,
     required this.value,
+    this.isEnabled = true,
     required this.onChange,
     required this.min,
     required this.max,
@@ -42,11 +44,13 @@ class _SliderListTileState extends State<SliderListTile> {
             min: widget.min.toDouble(),
             max: widget.max.toDouble(),
             label: '${_value.round()}',
-            onChanged: (value) {
-              setState(() {
-                _value = value;
-              });
-            },
+            onChanged: widget.isEnabled
+                ? (value) {
+                    setState(() {
+                      _value = value;
+                    });
+                  }
+                : null,
             onChangeEnd: (value) {
               widget.onChange(value.round());
             },
