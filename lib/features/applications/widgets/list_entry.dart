@@ -4,13 +4,12 @@ import 'package:minimum/features/applications/widgets/entry_widget.dart';
 class ListEntry extends EntryWidget {
   const ListEntry({
     super.key,
-    required super.icon,
-    required super.label,
-    required super.onTap,
+    required super.arguments,
   });
 
   @override
   Widget build(BuildContext context) {
+    final EntryWidgetArguments(:label, :icon, :onTap) = arguments;
     return ListTile(
       leading: SizedBox.square(
         dimension: 48,

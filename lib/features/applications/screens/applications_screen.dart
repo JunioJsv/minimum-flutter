@@ -1,26 +1,36 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
+import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/grid_entry.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
 import 'package:minimum/features/applications/widgets/sliver_applications.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
-import 'package:minimum/services/applications_manager_service.dart';
 
-class ApplicationsScreen extends StatelessWidget {
+class ApplicationsScreen extends StatefulWidget {
   static final String route = '$ApplicationsScreen';
 
   const ApplicationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final ApplicationsManagerCubit applications = dependencies();
+  State<ApplicationsScreen> createState() => ApplicationsScreenState();
+}
 
+class ApplicationsScreenState extends State<ApplicationsScreen> {
+  final ApplicationsManagerCubit applications = dependencies();
+
+  Future<void> onApplicationTap(Application application) async {
+    return applications.service.launchApplication(application.package);
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: const ApplicationsHeader(),
       body: BlocBuilder<ApplicationsManagerCubit, ApplicationsManagerState>(
@@ -32,16 +42,17 @@ class ApplicationsScreen extends StatelessWidget {
           return CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    ApplicationsSearchBar(
-                      onChange: (query) {},
-                    ),
-                    const Divider(height: 0),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ApplicationsSearchBar(
+                    applications: state.applications,
+                  ),
                 ),
               ),
               _SliverApplications(state),
+              const SliverToBoxAdapter(
+                child: SizedBox(height: kToolbarHeight),
+              )
             ],
           );
         },
@@ -66,15 +77,22 @@ class _SliverApplications extends StatelessWidget {
     return getPreferencesProps(previous) != getPreferencesProps(current);
   }
 
-  void onTap(Application application) {
-    dependencies<ApplicationsManagerService>()
-        .launchApplication(application.package);
-  }
-
   @override
   Widget build(BuildContext context) {
+    final screen = context.findAncestorStateOfType<ApplicationsScreenState>()!;
     final PreferencesManagerCubit preferences = dependencies();
-    final applications = state.applications;
+    final applications = state.applications.mapIndexed(
+      (index, application) {
+        return EntryWidgetArguments(
+          icon: ApplicationIcon(
+            key: ValueKey('${application.package}#icon'),
+            package: application.package,
+          ),
+          label: application.label,
+          onTap: () => screen.onApplicationTap(application),
+        );
+      },
+    );
 
     return BlocBuilder<PreferencesManagerCubit, PreferencesManagerState>(
       bloc: preferences,
@@ -82,15 +100,11 @@ class _SliverApplications extends StatelessWidget {
       builder: (context, state) {
         final layout = state.isGridLayoutEnabled
             ? SliverApplicationsGridLayout(
-                children: applications.map(
-                  (application) {
+                children: applications.mapIndexed(
+                  (index, arguments) {
                     return GridEntry(
-                      icon: ApplicationIcon(
-                        key: ValueKey('${application.package}#icon'),
-                        package: application.package,
-                      ),
-                      label: application.label,
-                      onTap: () => onTap(application),
+                      key: ValueKey(index),
+                      arguments: arguments,
                     );
                   },
                 ).toList(),
@@ -98,15 +112,11 @@ class _SliverApplications extends StatelessWidget {
                   crossAxisCount: state.gridCrossAxisCount,
                 ))
             : SliverApplicationsListLayout(
-                children: applications.map(
-                (application) {
+                children: applications.mapIndexed(
+                (index, arguments) {
                   return ListEntry(
-                    icon: ApplicationIcon(
-                      key: ValueKey('${application.package}#icon'),
-                      package: application.package,
-                    ),
-                    label: application.label,
-                    onTap: () => onTap(application),
+                    key: ValueKey(index),
+                    arguments: arguments,
                   );
                 },
               ).toList());

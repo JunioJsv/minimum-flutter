@@ -4,7 +4,7 @@ sealed class ApplicationsManagerState extends Equatable {
   const ApplicationsManagerState();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
 final class ApplicationsManagerInitial extends ApplicationsManagerState {}

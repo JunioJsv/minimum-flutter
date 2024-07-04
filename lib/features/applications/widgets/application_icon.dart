@@ -27,7 +27,16 @@ class ApplicationIconState extends State<ApplicationIcon>
           child: () {
             final bytes = snapshot.data;
             if (bytes == null) return const SizedBox();
-            return Image.memory(bytes);
+            return DecoratedBox(
+              decoration: BoxDecoration(boxShadow: <BoxShadow>[
+                BoxShadow(
+                  color: Colors.black.withOpacity(.1),
+                  blurRadius: 10,
+                  offset: const Offset(0, 0),
+                )
+              ]),
+              child: Image.memory(bytes),
+            );
           }(),
         );
       },

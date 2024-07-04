@@ -4,13 +4,12 @@ import 'package:minimum/features/applications/widgets/entry_widget.dart';
 class GridEntry extends EntryWidget {
   const GridEntry({
     super.key,
-    required super.icon,
-    required super.label,
-    required super.onTap,
+    required super.arguments,
   });
 
   @override
   Widget build(BuildContext context) {
+    final EntryWidgetArguments(:label, :icon, :onTap) = arguments;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,

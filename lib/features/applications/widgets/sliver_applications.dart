@@ -51,15 +51,12 @@ class SliverApplications extends StatelessWidget {
       delegate: SliverChildBuilderDelegate(
         (context, index) {
           final child = children[index];
-          if (index != children.length - 1) {
-            return Column(
-              children: [
-                child,
-                const Divider(height: 0),
-              ],
-            );
-          }
-          return child;
+          return Column(
+            children: [
+              child,
+              const Divider(height: 0),
+            ],
+          );
         },
         childCount: children.length,
       ),
