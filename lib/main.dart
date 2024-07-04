@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
@@ -8,6 +9,7 @@ import 'package:minimum/features/preferences/blocs/preferences_manager/preferenc
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/routes.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:minimum/themes.dart';
 import 'package:path_provider/path_provider.dart';
 
 final dependencies = GetIt.instance;
@@ -59,20 +61,21 @@ class _MinimumAppState extends State<MinimumApp> {
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
-    return MaterialApp(
-      title: translation.appName,
-      locale: TranslationProvider.of(context).flutterLocale,
-      supportedLocales: AppLocaleUtils.supportedLocales,
-      localizationsDelegates: GlobalMaterialLocalizations.delegates,
-      theme: ThemeData(
-        appBarTheme: const AppBarTheme(
-          elevation: 1,
-        ),
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
-        useMaterial3: true,
-      ),
-      initialRoute: ApplicationsScreen.route,
-      onGenerateRoute: onGenerateRoute,
-    );
+    return DynamicColorBuilder(builder: (
+      ColorScheme? lightDynamic,
+      ColorScheme? darkDynamic,
+    ) {
+      return MaterialApp(
+        title: translation.appName,
+        locale: TranslationProvider.of(context).flutterLocale,
+        supportedLocales: AppLocaleUtils.supportedLocales,
+        localizationsDelegates: GlobalMaterialLocalizations.delegates,
+        theme: theme(lightDynamic),
+        darkTheme: theme(darkDynamic),
+        themeMode: ThemeMode.system,
+        initialRoute: ApplicationsScreen.route,
+        onGenerateRoute: onGenerateRoute,
+      );
+    });
   }
 }
