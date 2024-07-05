@@ -2,9 +2,11 @@ package juniojsv.minimum
 
 import android.app.Activity
 import android.content.Intent
+import android.content.Intent.ACTION_DELETE
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
@@ -27,6 +29,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         const val GET_APPLICATION_ICON = "get_application_icon"
         const val IS_ALREADY_CURRENT_LAUNCHER = "is_already_current_launcher"
         const val OPEN_CURRENT_LAUNCHER_SYSTEM_SETTINGS = "open_current_launcher_system_settings"
+        const val OPEN_APPLICATION_DETAILS = "open_application_details"
+        const val UNINSTALL_APPLICATION = "uninstall_application"
         const val TAG = "Plugin"
     }
 
@@ -67,9 +71,16 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
             IS_ALREADY_CURRENT_LAUNCHER -> {
                 result.success(isAlreadyCurrentLauncher())
             }
+
             OPEN_CURRENT_LAUNCHER_SYSTEM_SETTINGS -> {
                 val intent = Intent(Settings.ACTION_HOME_SETTINGS)
                 activity.startActivity(intent)
+            }
+            OPEN_APPLICATION_DETAILS -> {
+                openApplicationDetails(call, result)
+            }
+            UNINSTALL_APPLICATION -> {
+                uninstallApplication(call, result)
             }
             else -> result.notImplemented()
         }
@@ -102,12 +113,20 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         result.success(json)
     }
 
-    private fun launchApplication(call: MethodCall, result: MethodChannel.Result) {
+    private fun getPackageNameFromMethodCall(
+        call: MethodCall,
+        result: MethodChannel.Result
+    ): String? {
         val packageName = call.argument<String>("package_name")
         if (packageName == null) {
             result.error("package_name_is_null", null, null)
-            return
         }
+
+        return packageName;
+    }
+
+    private fun launchApplication(call: MethodCall, result: MethodChannel.Result) {
+        val packageName = getPackageNameFromMethodCall(call, result) ?: return
         try {
             val intent = pm.getLaunchIntentForPackage(packageName)
             if (intent == null) {
@@ -121,11 +140,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
     }
 
     private fun getApplicationIcon(call: MethodCall, result: MethodChannel.Result) {
-        val packageName = call.argument<String>("package_name")
-        if (packageName == null) {
-            result.error("package_name_is_null", null, null)
-            return
-        }
+        val packageName = getPackageNameFromMethodCall(call, result) ?: return
         try {
             val icon = pm.getApplicationIcon(packageName)
             val bitmap = Bitmap.createBitmap(
@@ -143,6 +158,36 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
             result.success(bytes)
         } catch (e: Exception) {
             result.error(GET_APPLICATION_ICON, e.message, null)
+        }
+    }
+
+    private fun openApplicationDetails(call: MethodCall, result: MethodChannel.Result) {
+        val packageName = getPackageNameFromMethodCall(call, result) ?: return
+        try {
+            activity.startActivity(
+                Intent(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.parse("package:${packageName}")
+                )
+            )
+            result.success(null)
+        } catch (e: Exception) {
+            result.error(OPEN_APPLICATION_DETAILS, e.message, null)
+        }
+    }
+
+    private fun uninstallApplication(call: MethodCall, result: MethodChannel.Result) {
+        val packageName = getPackageNameFromMethodCall(call, result) ?: return
+        try {
+            activity.startActivity(
+                Intent(
+                    ACTION_DELETE,
+                    Uri.parse("package:${packageName}")
+                )
+            )
+            result.success(null)
+        } catch (e: Exception) {
+            result.error(UNINSTALL_APPLICATION, e.message, null)
         }
     }
 

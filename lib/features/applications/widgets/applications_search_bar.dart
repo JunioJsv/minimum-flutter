@@ -21,8 +21,7 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   final focusNode = FocusNode();
   final controller = SearchController();
 
-  late final screen =
-      context.findAncestorStateOfType<ApplicationsScreenState>()!;
+  late final ApplicationsScreenState screen = dependencies();
 
   @override
   void initState() {
@@ -106,10 +105,11 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
                     icon: ApplicationIcon(package: application.package),
                     label: application.label,
                     onTap: () async {
-                      await screen.onApplicationTap(application);
+                      await screen.onApplicationTap(context, application);
                       controller.closeView('');
                       focusNode.unfocus();
                     },
+                    onLongTap: () {},
                   ),
                 ),
                 const Divider(height: 0),

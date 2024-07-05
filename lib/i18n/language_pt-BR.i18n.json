@@ -8,5 +8,8 @@
   "set_has_default_launcher": "Definir como Launcher padrão",
   "ask_set_has_default_launcher": "Você deseja definir esse aplicativo como Launcher padrão?",
   "yes": "Sim",
-  "no": "Não"
+  "no": "Não",
+  "pin": "Fixar",
+  "info": "Informações",
+  "uninstall": "Desinstalar"
 }

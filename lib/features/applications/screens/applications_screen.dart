@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
+import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
@@ -33,6 +34,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   @override
   void initState() {
     super.initState();
+    dependencies.registerSingleton<ApplicationsScreenState>(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final isAlreadyCurrentLauncher =
           await applications.service.isAlreadyCurrentLauncher();
@@ -40,7 +42,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
           preferences.state.isPromptingSetAsCurrentLauncher;
       if (!isAlreadyCurrentLauncher && isPromptingSetAsCurrentLauncher) {
         if (mounted) {
-          _showSetHasCurrentLauncherDialog(context);
+          _showSetAsCurrentLauncherDialog(context);
         }
       }
     });
@@ -49,10 +51,11 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   @override
   void dispose() {
     super.dispose();
+    dependencies.unregister<ApplicationsScreenState>();
     scroll.dispose();
   }
 
-  Future<void> _showSetHasCurrentLauncherDialog(BuildContext context) async {
+  Future<void> _showSetAsCurrentLauncherDialog(BuildContext context) async {
     final confirmation = await showDialog<bool?>(
       context: context,
       builder: (context) => ConfirmationDialog(
@@ -72,8 +75,24 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     }
   }
 
-  Future<void> onApplicationTap(Application application) async {
-    return applications.service.launchApplication(application.package);
+  Future<void> onApplicationTap(
+    BuildContext context,
+    Application application,
+  ) async {
+    return applications.launch(application);
+  }
+
+  Future<void> onApplicationLongTap(
+    BuildContext context,
+    Application application,
+  ) async {
+    await showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (context) {
+        return ApplicationActionsBottomSheet(application: application);
+      },
+    );
   }
 
   @override
@@ -149,7 +168,8 @@ class _SliverApplications extends StatelessWidget {
             package: application.package,
           ),
           label: application.label,
-          onTap: () => screen.onApplicationTap(application),
+          onTap: () => screen.onApplicationTap(context, application),
+          onLongTap: () => screen.onApplicationLongTap(context, application),
         );
       },
     );

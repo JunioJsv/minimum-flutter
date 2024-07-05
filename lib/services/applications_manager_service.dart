@@ -10,6 +10,9 @@ class ApplicationsManagerService {
   static const kOpenCurrentLauncherSystemSettings =
       'open_current_launcher_system_settings';
 
+  static const kOpenApplicationDetails = 'open_application_details';
+  static const kUninstallApplication = 'uninstall_application';
+
   final channel = const MethodChannel(kChannelName);
 
   Future<List<Application>> getInstalledApplications() async {
@@ -46,5 +49,19 @@ class ApplicationsManagerService {
 
   Future<void> openCurrentLauncherSystemSettings() async {
     await channel.invokeMethod(kOpenCurrentLauncherSystemSettings);
+  }
+
+  Future<void> openApplicationDetails(String package) async {
+    await channel.invokeMethod(
+      kOpenApplicationDetails,
+      {'package_name': package},
+    );
+  }
+
+  Future<void> uninstallApplication(String package) async {
+    await channel.invokeMethod(
+      kUninstallApplication,
+      {'package_name': package},
+    );
   }
 }

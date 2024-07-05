@@ -9,10 +9,16 @@ class GridEntry extends EntryWidget {
 
   @override
   Widget build(BuildContext context) {
-    final EntryWidgetArguments(:label, :icon, :onTap) = arguments;
+    final EntryWidgetArguments(
+      :label,
+      :icon,
+      :onTap,
+      :onLongTap,
+    ) = arguments;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
+      onLongPress: onLongTap,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -22,7 +28,7 @@ class GridEntry extends EntryWidget {
               Expanded(
                 child: ConstrainedBox(
                   constraints:
-                  const BoxConstraints(maxHeight: 48, maxWidth: 48),
+                      const BoxConstraints(maxHeight: 48, maxWidth: 48),
                   child: icon,
                 ),
               ),

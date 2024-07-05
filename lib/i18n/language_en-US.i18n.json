@@ -9,5 +9,8 @@
   "set_has_default_launcher": "Set as default launcher",
   "ask_set_has_default_launcher": "Do you want to set this app as the default launcher?",
   "yes": "Yes",
-  "no": "No"
+  "no": "No",
+  "pin": "Pin",
+  "info": "About",
+  "uninstall": "Uninstall"
 }

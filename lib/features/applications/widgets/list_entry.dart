@@ -9,7 +9,12 @@ class ListEntry extends EntryWidget {
 
   @override
   Widget build(BuildContext context) {
-    final EntryWidgetArguments(:label, :icon, :onTap) = arguments;
+    final EntryWidgetArguments(
+      :label,
+      :icon,
+      :onTap,
+      :onLongTap,
+    ) = arguments;
     return ListTile(
       leading: SizedBox.square(
         dimension: 48,
@@ -21,6 +26,7 @@ class ListEntry extends EntryWidget {
       ),
       title: Text(label),
       onTap: onTap,
+      onLongPress: onLongTap,
     );
   }
 }

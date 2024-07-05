@@ -12,7 +12,7 @@ class ApplicationsManagerCubit extends Cubit<ApplicationsManagerState> {
 
   ApplicationsManagerCubit(this.service) : super(ApplicationsManagerInitial());
 
-  Future<void> getInstalledApplications() async {
+  Future<void> getInstalled() async {
     emit(ApplicationsManagerFetchRunning());
     try {
       final applications = await service.getInstalledApplications();
@@ -25,5 +25,17 @@ class ApplicationsManagerCubit extends Cubit<ApplicationsManagerState> {
         print(s);
       }
     }
+  }
+
+  Future<void> uninstall(Application application) async {
+    await service.uninstallApplication(application.package);
+  }
+
+  Future<void> details(Application application) async {
+    await service.openApplicationDetails(application.package);
+  }
+
+  Future<void> launch(Application application) async {
+    await service.launchApplication(application.package);
   }
 }
