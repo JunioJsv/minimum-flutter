@@ -1,15 +1,15 @@
-import 'package:bloc/bloc.dart';
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_preferences.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 
 part 'applications_manager_state.dart';
 
-class ApplicationsManagerCubit extends Cubit<ApplicationsManagerState> {
+class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   final ApplicationsManagerService service;
 
   ApplicationsManagerCubit(this.service) : super(ApplicationsManagerInitial());
@@ -71,5 +71,32 @@ class ApplicationsManagerCubit extends Cubit<ApplicationsManagerState> {
 
   Future<void> launch(Application application) async {
     await service.launchApplication(application.package);
+  }
+
+  @override
+  ApplicationsManagerState? fromJson(Map<String, dynamic> json) {
+    final preferences = json['preferences'] as Map?;
+    if (preferences != null) {
+      _preferences = BuiltMap.from(preferences.map(
+        (key, json) {
+          return MapEntry(
+            key,
+            ApplicationPreferences.fromJson((json as Map).cast()),
+          );
+        },
+      ));
+    }
+    return null;
+  }
+
+  @override
+  Map<String, dynamic>? toJson(ApplicationsManagerState state) {
+    return {
+      'preferences': _preferences.map(
+        (key, preference) {
+          return MapEntry(key, preference.toJson());
+        },
+      ).toMap()
+    };
   }
 }

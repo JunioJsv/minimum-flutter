@@ -109,7 +109,11 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
                       controller.closeView('');
                       focusNode.unfocus();
                     },
-                    onLongTap: () {},
+                    onLongTap: () async {
+                      await screen.onApplicationLongTap(context, application);
+                      controller.closeView('');
+                      focusNode.unfocus();
+                    },
                   ),
                 ),
                 const Divider(height: 0),
