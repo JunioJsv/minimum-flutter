@@ -19,33 +19,32 @@ class GridEntry extends EntryWidget {
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
       onLongPress: onLongTap,
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxHeight: 48, maxWidth: 48),
-                  child: icon,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: ConstrainedBox(
+                constraints:
+                    const BoxConstraints(maxHeight: 48, maxWidth: 48),
+                child: icon,
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 2)
+                    .add(const EdgeInsets.only(top: 8)),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 2,
                 ),
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 2)
-                      .add(const EdgeInsets.only(top: 8)),
-                  child: Text(
-                    label,
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 2,
-                  ),
-                ),
-              )
-            ],
-          ),
+            )
+          ],
         ),
       ),
     );

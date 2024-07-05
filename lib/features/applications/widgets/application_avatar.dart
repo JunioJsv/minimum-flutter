@@ -12,11 +12,12 @@ class ApplicationAvatar extends StatelessWidget {
     final theme = Theme.of(context);
     final preferences = application.preferences;
     return Stack(
+      alignment: Alignment.center,
       children: [
         ApplicationIcon(package: application.package),
         if (preferences.isPinned)
           Align(
-            alignment: Alignment.topRight * 1.8,
+            alignment: Alignment.topRight * 2,
             child: _ApplicationTag(
               background: theme.colorScheme.primary,
               foreground: theme.colorScheme.onPrimary,
