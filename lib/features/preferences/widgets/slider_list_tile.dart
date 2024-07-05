@@ -32,30 +32,24 @@ class _SliderListTileState extends State<SliderListTile> {
     final translation = context.translations;
     return ListTile(
       title: Text(translation.gridCrossAxisCount),
-      subtitle: SliderTheme(
-        data: SliderThemeData(
-          overlayShape: SliderComponentShape.noOverlay,
-          showValueIndicator: ShowValueIndicator.always,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.only(top: 16),
-          child: Slider(
-            value: _value,
-            min: widget.min.toDouble(),
-            max: widget.max.toDouble(),
-            label: '${_value.round()}',
-            onChanged: widget.isEnabled
-                ? (value) {
-                    setState(() {
-                      _value = value;
-                    });
-                  }
-                : null,
-            onChangeEnd: (value) {
-              widget.onChange(value.round());
-            },
-            divisions: widget.max - widget.min,
-          ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: Slider(
+          value: _value,
+          min: widget.min.toDouble(),
+          max: widget.max.toDouble(),
+          label: '${_value.round()}',
+          onChanged: widget.isEnabled
+              ? (value) {
+                  setState(() {
+                    _value = value;
+                  });
+                }
+              : null,
+          onChangeEnd: (value) {
+            widget.onChange(value.round());
+          },
+          divisions: widget.max - widget.min,
         ),
       ),
     );
