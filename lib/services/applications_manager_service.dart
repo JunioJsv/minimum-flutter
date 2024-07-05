@@ -1,5 +1,6 @@
 import 'package:flutter/services.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/utils/memory_cache.dart';
 
 class ApplicationsManagerService {
   static const kChannelName = 'juniojsv.minimum/applications_manager_plugin';
@@ -14,6 +15,8 @@ class ApplicationsManagerService {
   static const kUninstallApplication = 'uninstall_application';
 
   final channel = const MethodChannel(kChannelName);
+
+  final _icons = MemoryCache<Uint8List>(capacity: 100);
 
   Future<List<Application>> getInstalledApplications() async {
     final json = await channel.invokeListMethod<Map>(kGetInstalledApplications);
@@ -31,12 +34,18 @@ class ApplicationsManagerService {
   }
 
   Future<Uint8List> getApplicationIcon(String package) async {
-    final bytes = await channel.invokeMethod<Uint8List>(
-      kGetApplicationIcon,
-      {'package_name': package},
-    );
+    final bytes = await _icons.get(
+      package,
+      () async {
+        final bytes = await channel.invokeMethod<Uint8List>(
+          kGetApplicationIcon,
+          {'package_name': package},
+        );
 
-    return bytes!;
+        return bytes!;
+      },
+    );
+    return bytes;
   }
 
   Future<bool> isAlreadyCurrentLauncher() async {

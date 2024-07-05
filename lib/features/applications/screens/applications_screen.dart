@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
-import 'package:minimum/features/applications/widgets/application_icon.dart';
+import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
@@ -160,13 +160,11 @@ class _SliverApplications extends StatelessWidget {
   Widget build(BuildContext context) {
     final screen = context.findAncestorStateOfType<ApplicationsScreenState>()!;
     final PreferencesManagerCubit preferences = dependencies();
-    final applications = state.applications.mapIndexed(
+    final applications = state.applications;
+    final arguments = applications.mapIndexed(
       (index, application) {
         return EntryWidgetArguments(
-          icon: ApplicationIcon(
-            key: ValueKey('${application.package}#icon'),
-            package: application.package,
-          ),
+          icon: ApplicationAvatar(application: application),
           label: application.label,
           onTap: () => screen.onApplicationTap(context, application),
           onLongTap: () => screen.onApplicationLongTap(context, application),
@@ -177,27 +175,29 @@ class _SliverApplications extends StatelessWidget {
     return BlocBuilder<PreferencesManagerCubit, PreferencesManagerState>(
       bloc: preferences,
       buildWhen: hasPreferencesChanges,
-      builder: (context, state) {
-        final layout = state.isGridLayoutEnabled
+      builder: (context, preferences) {
+        final layout = preferences.isGridLayoutEnabled
             ? SliverApplicationsGridLayout(
-                children: applications.mapIndexed(
+                children: arguments.mapIndexed(
                   (index, arguments) {
+                    final package = applications[index].package;
                     return GridEntry(
-                      key: ValueKey(index),
+                      key: ValueKey(package),
                       arguments: arguments,
                     );
                   },
                 ).toList(),
                 delegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: state.gridCrossAxisCount,
+                  crossAxisCount: preferences.gridCrossAxisCount,
                   childAspectRatio: 3 / 4,
                 ),
               )
             : SliverApplicationsListLayout(
-                children: applications.mapIndexed(
+                children: arguments.mapIndexed(
                 (index, arguments) {
+                  final package = applications[index].package;
                   return ListEntry(
-                    key: ValueKey(index),
+                    key: ValueKey(package),
                     arguments: arguments,
                   );
                 },

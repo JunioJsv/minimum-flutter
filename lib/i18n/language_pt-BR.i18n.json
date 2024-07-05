@@ -10,6 +10,7 @@
   "yes": "Sim",
   "no": "Não",
   "pin": "Fixar",
+  "unpin": "Desafixar",
   "info": "Informações",
   "uninstall": "Desinstalar"
 }

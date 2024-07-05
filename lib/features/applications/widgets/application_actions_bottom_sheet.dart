@@ -18,6 +18,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
     final translation = context.translations;
     final ApplicationsScreenState screen = dependencies();
     final applications = screen.applications;
+    final isApplicationPinned = application.preferences.isPinned;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -34,8 +35,14 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
         ),
         ListTile(
           leading: const Icon(Icons.push_pin_outlined),
-          title: Text(translation.pin),
+          title: Text(
+            isApplicationPinned ? translation.unpin : translation.pin,
+          ),
           onTap: () {
+            applications.pin(
+              application,
+              !isApplicationPinned,
+            );
             Navigator.pop(context);
           },
         ),
