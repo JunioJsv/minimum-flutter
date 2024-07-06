@@ -12,5 +12,7 @@
   "pin": "Fixar",
   "unpin": "Desafixar",
   "info": "Informações",
-  "uninstall": "Desinstalar"
+  "uninstall": "Desinstalar",
+  "ordering": "Ordenação",
+  "create_group": "Criar grupo"
 }

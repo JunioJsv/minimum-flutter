@@ -16,6 +16,14 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
 
   const ApplicationsManagerFetchSuccess({required this.applications});
 
+  ApplicationsManagerFetchSuccess copyWith({
+    List<Application>? applications,
+  }) {
+    return ApplicationsManagerFetchSuccess(
+      applications: applications ?? this.applications,
+    );
+  }
+
   @override
   List<Object> get props => [applications];
 }

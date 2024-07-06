@@ -6,6 +6,7 @@ import 'package:minimum/features/applications/widgets/application_actions_bottom
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
+import 'package:minimum/features/applications/widgets/applications_shortcuts.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/grid_entry.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
@@ -125,6 +126,12 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
                     child: ApplicationsSearchBar(
                       applications: state.applications,
                     ),
+                  ),
+                ),
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ApplicationsShortcuts(),
                   ),
                 ),
                 _SliverApplications(state),

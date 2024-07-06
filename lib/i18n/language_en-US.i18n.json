@@ -13,5 +13,7 @@
   "pin": "Pin",
   "unpin": "Unpin",
   "info": "About",
-  "uninstall": "Uninstall"
+  "uninstall": "Uninstall",
+  "ordering": "Ordering",
+  "create_group": "Create group"
 }
