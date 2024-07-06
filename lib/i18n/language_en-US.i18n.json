@@ -15,5 +15,7 @@
   "info": "About",
   "uninstall": "Uninstall",
   "ordering": "Ordering",
-  "create_group": "Create group"
+  "create_group": "Create group",
+  "type_name_to_search": "Type a name to search",
+  "no_results_for": "No results for \"${query}\""
 }

@@ -30,8 +30,6 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   final scroll = ScrollController();
   final ApplicationsManagerCubit applications = dependencies();
   late final translation = context.translations;
-  late final PreferencesManagerCubit preferences = dependencies();
-
   @override
   void initState() {
     super.initState();
@@ -39,9 +37,8 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final isAlreadyCurrentLauncher =
           await applications.service.isAlreadyCurrentLauncher();
-      final isPromptingSetAsCurrentLauncher =
-          preferences.state.isPromptingSetAsCurrentLauncher;
-      if (!isAlreadyCurrentLauncher && isPromptingSetAsCurrentLauncher) {
+
+      if (!isAlreadyCurrentLauncher) {
         if (mounted) {
           _showSetAsCurrentLauncherDialog(context);
         }
@@ -66,13 +63,6 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     );
     if (confirmation == true) {
       await applications.service.openCurrentLauncherSystemSettings();
-    }
-    if (confirmation == false) {
-      preferences.update(
-        (preferences) => preferences.copyWith(
-          isPromptingSetAsCurrentLauncher: false,
-        ),
-      );
     }
   }
 

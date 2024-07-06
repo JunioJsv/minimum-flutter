@@ -14,5 +14,7 @@
   "info": "Informações",
   "uninstall": "Desinstalar",
   "ordering": "Ordenação",
-  "create_group": "Criar grupo"
+  "create_group": "Criar grupo",
+  "type_name_to_search": "Digite um nome para buscar",
+  "no_results_for": "Nenhum resultado para \"${query}\""
 }

@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
-import 'package:minimum/features/applications/widgets/application_icon.dart';
+import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/widgets/warning_container.dart';
 
 class ApplicationsSearchBar extends StatefulWidget {
   final List<Application> applications;
@@ -26,7 +27,7 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   @override
   void initState() {
     screen.scroll.addListener(_onApplicationsScrollControllerListener);
-    WidgetsBinding.instance.addPersistentFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       observer.subscribe(this, ModalRoute.of(context)!);
     });
     super.initState();
@@ -64,6 +65,21 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   }
 
   @override
+  void didUpdateWidget(covariant ApplicationsSearchBar oldWidget) {
+    if (widget.applications != oldWidget.applications) {
+      if (controller.isOpen) {
+        WidgetsBinding.instance.addPostFrameCallback(
+          (_) {
+            controller.closeView('');
+            focusNode.unfocus();
+          },
+        );
+      }
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final translation = context.translations;
     final applications = widget.applications;
@@ -71,6 +87,7 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
     return SearchAnchor(
       searchController: controller,
       dividerColor: theme.colorScheme.outlineVariant,
+      viewHintText: translation.search,
       builder: (context, controller) {
         return SearchBar(
           focusNode: focusNode,
@@ -86,6 +103,30 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
           },
         );
       },
+      viewBuilder: (suggestions) {
+        final query = controller.text;
+        if (query.isEmpty) {
+          return WarningContainer(
+            icon: Icons.search,
+            color: theme.colorScheme.onSurface,
+            message: translation.typeNameToSearch,
+          );
+        }
+
+        if (query.isNotEmpty && suggestions.isEmpty) {
+          return WarningContainer(
+            icon: Icons.search_off,
+            color: theme.colorScheme.onSurface,
+            message: translation.noResultsFor(query: query),
+          );
+        }
+        return ListView.separated(
+          padding: EdgeInsets.zero,
+          itemBuilder: (context, index) => suggestions.elementAt(index),
+          separatorBuilder: (context, index) => const Divider(height: 0),
+          itemCount: suggestions.length,
+        );
+      },
       suggestionsBuilder: (context, controller) {
         if (controller.text.isEmpty) return [];
         return applications.where(
@@ -96,28 +137,20 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
           },
         ).map(
           (application) {
-            return Column(
+            return ListEntry(
               key: ValueKey(application.package),
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ListEntry(
-                  arguments: EntryWidgetArguments(
-                    icon: ApplicationIcon(package: application.package),
-                    label: application.label,
-                    onTap: () async {
-                      await screen.onApplicationTap(context, application);
-                      controller.closeView('');
-                      focusNode.unfocus();
-                    },
-                    onLongTap: () async {
-                      await screen.onApplicationLongTap(context, application);
-                      controller.closeView('');
-                      focusNode.unfocus();
-                    },
-                  ),
-                ),
-                const Divider(height: 0),
-              ],
+              arguments: EntryWidgetArguments(
+                icon: ApplicationAvatar(application: application),
+                label: application.label,
+                onTap: () async {
+                  await screen.onApplicationTap(context, application);
+                  controller.closeView('');
+                  focusNode.unfocus();
+                },
+                onLongTap: () async {
+                  await screen.onApplicationLongTap(context, application);
+                },
+              ),
             );
           },
         );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/i18n/translations.g.dart';
@@ -32,7 +33,20 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
+          subtitle: Text(
+            application.package,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+          ),
+          trailing: IconButton(
+            icon: const Icon(Icons.copy),
+            onPressed: () {
+              final text = '${application.label}(${application.package})';
+              Clipboard.setData(ClipboardData(text: text));
+            },
+          ),
         ),
+        const Divider(height: 0),
         ListTile(
           leading: const Icon(Icons.push_pin_outlined),
           title: Text(
