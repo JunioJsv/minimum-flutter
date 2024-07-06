@@ -35,20 +35,29 @@ class SliverApplications extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = _layout.children;
+    int? findChildIndexCallback(Key key) {
+      final index = children.indexWhere((child) => child.key == key);
+      if (index == -1) return null;
+      return index;
+    }
+
     if (_layout is SliverApplicationsGridLayout) {
       return SliverGrid(
         gridDelegate: _layout.delegate,
         delegate: SliverChildBuilderDelegate(
+          findChildIndexCallback: findChildIndexCallback,
+          childCount: children.length,
           (context, index) {
             return children[index];
           },
-          childCount: children.length,
         ),
       );
     }
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
+        findChildIndexCallback: findChildIndexCallback,
+        childCount: children.length,
         (context, index) {
           final child = children[index];
           return Column(
@@ -58,7 +67,6 @@ class SliverApplications extends StatelessWidget {
             ],
           );
         },
-        childCount: children.length,
       ),
     );
   }

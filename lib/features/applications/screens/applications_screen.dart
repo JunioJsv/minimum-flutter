@@ -30,6 +30,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   final scroll = ScrollController();
   final ApplicationsManagerCubit applications = dependencies();
   late final translation = context.translations;
+
   @override
   void initState() {
     super.initState();
@@ -51,6 +52,14 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     super.dispose();
     dependencies.unregister<ApplicationsScreenState>();
     scroll.dispose();
+  }
+
+  Future<void> onScrollTo(double offset) {
+    return scroll.animateTo(
+      offset,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.easeOutQuart,
+    );
   }
 
   Future<void> _showSetAsCurrentLauncherDialog(BuildContext context) async {
@@ -86,16 +95,22 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     );
   }
 
+  void onToggleApplicationPin(BuildContext context, Application application) {
+    final isPinned = !application.preferences.isPinned;
+    applications.pin(application, isPinned);
+    if (isPinned) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onScrollTo(0);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
-        scroll.animateTo(
-          0,
-          duration: kThemeAnimationDuration,
-          curve: Curves.linear,
-        );
+        onScrollTo(0);
       },
       child: Scaffold(
         appBar: const ApplicationsHeader(),
@@ -179,7 +194,7 @@ class _SliverApplications extends StatelessWidget {
                   (index, arguments) {
                     final package = applications[index].package;
                     return GridEntry(
-                      key: ValueKey(package),
+                      key: GlobalObjectKey(package),
                       arguments: arguments,
                     );
                   },
@@ -194,7 +209,7 @@ class _SliverApplications extends StatelessWidget {
                 (index, arguments) {
                   final package = applications[index].package;
                   return ListEntry(
-                    key: ValueKey(package),
+                    key: GlobalObjectKey(package),
                     arguments: arguments,
                   );
                 },

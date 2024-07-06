@@ -53,10 +53,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
             isApplicationPinned ? translation.unpin : translation.pin,
           ),
           onTap: () {
-            applications.pin(
-              application,
-              !isApplicationPinned,
-            );
+            screen.onToggleApplicationPin(context, application);
             Navigator.pop(context);
           },
         ),
