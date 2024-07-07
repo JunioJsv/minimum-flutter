@@ -8,6 +8,7 @@ part 'application.g.dart';
 class Application extends Equatable implements Comparable<Application> {
   final String label;
   final String package;
+  final String version;
 
   final ApplicationPreferences preferences;
 
@@ -16,6 +17,7 @@ class Application extends Equatable implements Comparable<Application> {
   const Application({
     required this.label,
     required this.package,
+    required this.version,
     this.preferences = const ApplicationPreferences(),
   });
 
@@ -36,15 +38,17 @@ class Application extends Equatable implements Comparable<Application> {
   Application copyWith({
     String? label,
     String? package,
+    String? version,
     ApplicationPreferences? preferences,
   }) {
     return Application(
       label: label ?? this.label,
       package: package ?? this.package,
+      version: version ?? this.version,
       preferences: preferences ?? this.preferences,
     );
   }
 
   @override
-  List<Object> get props => [label, package, preferences];
+  List<Object> get props => [label, package, version, preferences];
 }

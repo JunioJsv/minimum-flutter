@@ -45,8 +45,7 @@ class _MinimumAppState extends State<MinimumApp> {
     );
     dependencies.registerLazySingleton(
       () {
-        return ApplicationsManagerCubit(dependencies())
-          ..getInstalled();
+        return ApplicationsManagerCubit(dependencies())..getInstalled();
       },
       dispose: (cubit) async => cubit.close(),
     );

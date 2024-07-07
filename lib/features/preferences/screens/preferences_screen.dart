@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:minimum/environment.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/features/preferences/widgets/category_text.dart';
 import 'package:minimum/features/preferences/widgets/slider_list_tile.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
+import 'package:minimum/models/application.dart';
+import 'package:minimum/services/applications_manager_service.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class PreferencesScreen extends StatelessWidget {
   static final String route = '$PreferencesScreen';
@@ -15,6 +19,7 @@ class PreferencesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final translation = context.translations;
     final PreferencesManagerCubit preferences = dependencies();
+    final ApplicationsManagerService service = dependencies();
     return Scaffold(
       appBar: AppBar(
         title: Text(translation.preferences),
@@ -22,6 +27,7 @@ class PreferencesScreen extends StatelessWidget {
       ),
       body: ListView(
         children: [
+          const SizedBox(height: 16),
           CategoryText(text: translation.appearance),
           BlocSelector<PreferencesManagerCubit, PreferencesManagerState, bool>(
             bloc: preferences,
@@ -57,6 +63,43 @@ class PreferencesScreen extends StatelessWidget {
                 onChange: (int value) => preferences.update((preferences) {
                   return preferences.copyWith(gridCrossAxisCount: value);
                 }),
+              );
+            },
+          ),
+          const Divider(height: 48),
+          CategoryText(text: translation.about),
+          FutureBuilder<Application>(
+              future: service.getApplication('juniojsv.minimum'),
+              builder: (context, snapshot) {
+                final application = snapshot.data;
+                return ListTile(
+                  title: Text(translation.appName),
+                  subtitle: application != null
+                      ? Text(
+                          '${translation.version}'
+                          ' ${application.version}',
+                        )
+                      : null,
+                  onTap: () {
+                    launchUrlString(kGithubProjectUrl);
+                  },
+                );
+              }),
+          ListTile(
+            title: Text(translation.author),
+            subtitle: Text(translation.createdByJuniojsv),
+            onTap: () {
+              launchUrlString(kGithubProfileUrl);
+            },
+          ),
+          ListTile(
+            title: Text(translation.licences),
+            subtitle: Text(translation.infoAboutLicenses),
+            onTap: () {
+              showLicensePage(
+                context: context,
+                applicationName: translation.appName,
+                applicationLegalese: translation.copyright,
               );
             },
           ),

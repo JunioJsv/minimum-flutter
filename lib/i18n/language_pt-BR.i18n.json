@@ -16,5 +16,11 @@
   "ordering": "Ordenação",
   "create_group": "Criar grupo",
   "type_name_to_search": "Digite um nome para buscar",
-  "no_results_for": "Nenhum resultado para \"${query}\""
+  "no_results_for": "Nenhum resultado para \"${query}\"",
+  "about": "Sobre",
+  "version": "Versão",
+  "author": "Autor",
+  "created_by_juniojsv": "Desenvolvido por Jeovane Viana, Aka JunioJsv",
+  "licences": "Licenças",
+  "info_about_licenses": "Informações sobre as licenças de uso"
 }

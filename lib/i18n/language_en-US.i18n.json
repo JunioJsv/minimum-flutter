@@ -1,4 +1,5 @@
 {
+  "copyright": "Copyright (c) 2024 Jeovane Viana",
   "app_name": "Minimum",
   "search": "Search",
   "preferences": "Preferences",
@@ -17,5 +18,11 @@
   "ordering": "Ordering",
   "create_group": "Create group",
   "type_name_to_search": "Type a name to search",
-  "no_results_for": "No results for \"${query}\""
+  "no_results_for": "No results for \"${query}\"",
+  "about": "About",
+  "version": "Version",
+  "author": "Author",
+  "created_by_juniojsv": "Developed by Jeovane Viana, Aka JunioJsv",
+  "licences": "Licenses",
+  "info_about_licenses": "Information about usage licenses"
 }

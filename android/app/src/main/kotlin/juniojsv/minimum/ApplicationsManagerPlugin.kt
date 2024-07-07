@@ -3,6 +3,7 @@ package juniojsv.minimum
 import android.app.Activity
 import android.content.Intent
 import android.content.Intent.ACTION_DELETE
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -31,6 +32,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         const val OPEN_CURRENT_LAUNCHER_SYSTEM_SETTINGS = "open_current_launcher_system_settings"
         const val OPEN_APPLICATION_DETAILS = "open_application_details"
         const val UNINSTALL_APPLICATION = "uninstall_application"
+        const val GET_APPLICATION = "get_application"
         const val TAG = "Plugin"
     }
 
@@ -68,20 +70,15 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
             GET_INSTALLED_APPLICATIONS -> getInstalledApplications(result)
             LAUNCH_APPLICATION -> launchApplication(call, result)
             GET_APPLICATION_ICON -> getApplicationIcon(call, result)
-            IS_ALREADY_CURRENT_LAUNCHER -> {
-                result.success(isAlreadyCurrentLauncher())
-            }
-
+            IS_ALREADY_CURRENT_LAUNCHER -> result.success(isAlreadyCurrentLauncher())
             OPEN_CURRENT_LAUNCHER_SYSTEM_SETTINGS -> {
                 val intent = Intent(Settings.ACTION_HOME_SETTINGS)
                 activity.startActivity(intent)
             }
-            OPEN_APPLICATION_DETAILS -> {
-                openApplicationDetails(call, result)
-            }
-            UNINSTALL_APPLICATION -> {
-                uninstallApplication(call, result)
-            }
+
+            OPEN_APPLICATION_DETAILS -> openApplicationDetails(call, result)
+            UNINSTALL_APPLICATION -> uninstallApplication(call, result)
+            GET_APPLICATION -> getApplication(call, result)
             else -> result.notImplemented()
         }
     }
@@ -94,23 +91,57 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
             pm.getInstalledApplications(flags)
         }
 
-        val json = mutableListOf<Map<String, String>>()
+        val json = mutableListOf<Map<String, Any>>()
 
         for (app in apps) {
             val packageName = app.packageName
             val isMinimumAppPackage = packageName == BuildConfig.APPLICATION_ID
             val isLaunchable = pm.getLaunchIntentForPackage(packageName) != null
             if (!isMinimumAppPackage && isLaunchable) {
-                json.add(
-                    mapOf(
-                        "label" to app.loadLabel(pm) as String,
-                        "package" to packageName
-                    )
-                )
+                json.add(getApplicationJson(app, flags))
             }
         }
 
         result.success(json)
+    }
+
+    private fun getApplicationJson(app: ApplicationInfo, flags: Int): Map<String, Any> {
+        val packageName = app.packageName
+        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            pm.getPackageInfo(
+                packageName,
+                PackageManager.PackageInfoFlags.of(flags.toLong())
+            )
+        } else {
+            pm.getPackageInfo(packageName, flags)
+        }
+
+        return mapOf(
+            "label" to app.loadLabel(pm) as String,
+            "package" to packageName,
+            "version" to packageInfo.versionName
+        );
+    }
+
+    private fun getApplication(
+        call: MethodCall,
+        result: MethodChannel.Result
+    ) {
+        val flags = PackageManager.GET_META_DATA
+        val packageName = getPackageNameFromMethodCall(call, result) ?: return
+        try {
+            val app = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                pm.getApplicationInfo(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(flags.toLong())
+                )
+            } else {
+                pm.getApplicationInfo(packageName, flags)
+            }
+            result.success(getApplicationJson(app, flags))
+        } catch (e: Exception) {
+            result.error(GET_APPLICATION, e.message, null)
+        }
     }
 
     private fun getPackageNameFromMethodCall(

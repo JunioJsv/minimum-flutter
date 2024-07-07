@@ -20,28 +20,29 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
     final ApplicationsScreenState screen = dependencies();
     final applications = screen.applications;
     final isApplicationPinned = application.preferences.isPinned;
+    final Application(:label, :package, :version) = application;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
           leading: SizedBox.square(
             dimension: 24,
-            child: ApplicationIcon(package: application.package),
+            child: ApplicationIcon(package: package),
           ),
           title: Text(
-            application.label,
+            label,
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
           subtitle: Text(
-            application.package,
+            '${translation.version} $version',
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
           ),
           trailing: IconButton(
             icon: const Icon(Icons.copy),
             onPressed: () {
-              final text = '${application.label}(${application.package})';
+              final text = '$package:$version';
               Clipboard.setData(ClipboardData(text: text));
             },
           ),

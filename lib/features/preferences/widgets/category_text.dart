@@ -13,7 +13,7 @@ class CategoryText extends StatelessWidget {
       child: Text(
         text,
         style: theme.textTheme.labelLarge!
-            .copyWith(color: theme.colorScheme.onSurface),
+            .copyWith(color: theme.colorScheme.onSurfaceVariant),
       ),
     );
   }

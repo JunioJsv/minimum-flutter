@@ -14,6 +14,8 @@ class ApplicationsManagerService {
   static const kOpenApplicationDetails = 'open_application_details';
   static const kUninstallApplication = 'uninstall_application';
 
+  static const kGetApplication = 'get_application';
+
   final channel = const MethodChannel(kChannelName);
 
   final _icons = MemoryCache<Uint8List>(capacity: 100);
@@ -72,5 +74,14 @@ class ApplicationsManagerService {
       kUninstallApplication,
       {'package_name': package},
     );
+  }
+
+  Future<Application> getApplication(String package) async {
+    final json = await channel.invokeMethod(
+      kGetApplication,
+      {'package_name': package},
+    );
+
+    return Application.fromJson((json as Map).cast());
   }
 }
