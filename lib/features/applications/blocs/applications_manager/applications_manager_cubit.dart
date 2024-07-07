@@ -1,9 +1,11 @@
 import 'dart:async';
+
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_preferences.dart';
 import 'package:minimum/models/order.dart';
@@ -13,10 +15,29 @@ part 'applications_manager_state.dart';
 
 class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   final ApplicationsManagerService service;
+  final PreferencesManagerCubit preferences;
 
-  ApplicationsManagerCubit(this.service) : super(ApplicationsManagerInitial());
+  ApplicationsManagerCubit(this.service, this.preferences)
+      : super(ApplicationsManagerInitial()) {
+    _subscriptions.add(
+      preferences.stream.listen((preferences) {
+        final state = this.state;
+        if (state is! ApplicationsManagerFetchSuccess) return;
+        final isShowingHidden = preferences.showHidden;
+        if (isShowingHidden != state.isShowingHidden) {
+          emit(state.copyWith(
+            isShowingHidden: isShowingHidden,
+          ));
+        }
+      }),
+    );
+  }
+
+  final List<StreamSubscription> _subscriptions = [];
 
   final order = ValueNotifier(Order.asc);
+
+  /// Internal applications preferences
   var _preferences = BuiltMap<String, ApplicationPreferences>();
 
   List<Application> _onSetupApplications(List<Application> applications) {
@@ -30,6 +51,10 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
         return application;
       },
     ).sorted(_onCompareApplications);
+  }
+
+  List<Application> _getApplications(ApplicationsManagerFetchSuccess state) {
+    return _onSetupApplications(state._applications);
   }
 
   int _onCompareApplications(Application application, Application other) {
@@ -58,6 +83,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
       final applications = await service.getInstalledApplications();
       emit(ApplicationsManagerFetchSuccess(
         applications: _onSetupApplications(applications),
+        isShowingHidden: preferences.state.showHidden,
       ));
     } catch (_, s) {
       emit(ApplicationsManagerFetchFailure());
@@ -70,9 +96,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   void sort() {
     final state = this.state;
     if (state is ApplicationsManagerFetchSuccess) {
-      emit(state.copyWith(
-        applications: _onSetupApplications(state.applications),
-      ));
+      emit(state.copyWith(applications: _getApplications(state)));
     }
   }
 
@@ -87,9 +111,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
             ifAbsent: () => ApplicationPreferences(isPinned: value),
           );
       });
-      emit(ApplicationsManagerFetchSuccess(
-        applications: _onSetupApplications(state.applications),
-      ));
+      emit(state.copyWith(applications: _getApplications(state)));
     }
   }
 
@@ -104,9 +126,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
             ifAbsent: () => ApplicationPreferences(isHidden: value),
           );
       });
-      emit(ApplicationsManagerFetchSuccess(
-        applications: _onSetupApplications(state.applications),
-      ));
+      emit(state.copyWith(applications: _getApplications(state)));
     }
   }
 
@@ -125,6 +145,9 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   @override
   Future<void> close() {
     order.dispose();
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
     return super.close();
   }
 

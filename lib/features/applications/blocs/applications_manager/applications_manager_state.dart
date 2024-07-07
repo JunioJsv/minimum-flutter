@@ -12,20 +12,32 @@ final class ApplicationsManagerInitial extends ApplicationsManagerState {}
 final class ApplicationsManagerFetchRunning extends ApplicationsManagerState {}
 
 final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
-  final List<Application> applications;
+  final bool isShowingHidden;
+  final List<Application> _applications;
 
-  const ApplicationsManagerFetchSuccess({required this.applications});
+  List<Application> get applications => !isShowingHidden
+      ? _applications
+          .where((application) => !application.preferences.isHidden)
+          .toList()
+      : _applications;
+
+  const ApplicationsManagerFetchSuccess({
+    required List<Application> applications,
+    required this.isShowingHidden,
+  }) : _applications = applications;
 
   ApplicationsManagerFetchSuccess copyWith({
     List<Application>? applications,
+    bool? isShowingHidden,
   }) {
     return ApplicationsManagerFetchSuccess(
-      applications: applications ?? this.applications,
+      applications: applications ?? _applications,
+      isShowingHidden: isShowingHidden ?? this.isShowingHidden,
     );
   }
 
   @override
-  List<Object> get props => [applications];
+  List<Object> get props => [_applications, isShowingHidden];
 }
 
 final class ApplicationsManagerFetchFailure extends ApplicationsManagerState {}
