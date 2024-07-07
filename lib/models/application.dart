@@ -12,7 +12,13 @@ class Application extends Equatable implements Comparable<Application> {
 
   final ApplicationPreferences preferences;
 
-  int get priority => preferences.isPinned ? 1 : 0;
+  int get priority {
+    var value = 0;
+    if (preferences.isPinned) value += 1;
+    if (preferences.isHidden) value += 2;
+
+    return value;
+  }
 
   const Application({
     required this.label,

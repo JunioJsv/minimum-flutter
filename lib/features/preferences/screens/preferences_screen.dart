@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/environment.dart';
+import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/features/preferences/widgets/category_text.dart';
 import 'package:minimum/features/preferences/widgets/slider_list_tile.dart';
@@ -20,6 +21,7 @@ class PreferencesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
+    final ApplicationsScreenState screen = dependencies();
     final PreferencesManagerCubit preferences = dependencies();
     final ApplicationsManagerService service = dependencies();
     final LocalAuthenticationService auth = dependencies();
@@ -59,7 +61,7 @@ class PreferencesScreen extends StatelessWidget {
             },
             builder: (context, preference) {
               return SliderListTile(
-                min: 2,
+                min: 3,
                 max: 5,
                 isEnabled: preference.isEnabled,
                 value: preference.count,
@@ -107,6 +109,7 @@ class PreferencesScreen extends StatelessWidget {
                       ),
                     );
                   }
+                  if (value) screen.onScrollTo(0);
                   preferences.update((preferences) {
                     return preferences.copyWith(showHidden: value);
                   });
