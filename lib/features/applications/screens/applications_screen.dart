@@ -15,6 +15,7 @@ import 'package:minimum/features/preferences/blocs/preferences_manager/preferenc
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/widgets/confirmation_dialog.dart';
 
 class ApplicationsScreen extends StatefulWidget {
@@ -29,6 +30,7 @@ class ApplicationsScreen extends StatefulWidget {
 class ApplicationsScreenState extends State<ApplicationsScreen> {
   final scroll = ScrollController();
   final ApplicationsManagerCubit applications = dependencies();
+  final LocalAuthenticationService auth = dependencies();
   late final translation = context.translations;
 
   @override
@@ -68,6 +70,8 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
       builder: (context) => ConfirmationDialog(
         title: translation.setHasDefaultLauncher,
         message: translation.askSetHasDefaultLauncher,
+        confirm: translation.yes,
+        decline: translation.no,
       ),
     );
     if (confirmation == true) {
@@ -103,6 +107,31 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
         onScrollTo(0);
       });
     }
+  }
+
+  Future<void> onToggleApplicationHide(
+    BuildContext context,
+    Application application,
+  ) async {
+    final isHidden = !application.preferences.isHidden;
+    final isDeviceSecure = await auth.isDeviceSecure();
+    if (!isDeviceSecure && isHidden) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showDialog(
+          context: context,
+          builder: (context) => ConfirmationDialog(
+            title: translation.lockscreenRequired,
+            message: translation.setupLockscreen(
+              to: translation.hideApplications.toLowerCase(),
+            ),
+            confirm: translation.understood,
+          ),
+        );
+      });
+      return;
+    }
+
+    applications.hide(application, isHidden);
   }
 
   @override

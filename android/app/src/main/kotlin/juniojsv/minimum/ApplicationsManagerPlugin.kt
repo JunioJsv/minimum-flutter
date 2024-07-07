@@ -10,7 +10,6 @@ import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -33,36 +32,30 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         const val OPEN_APPLICATION_DETAILS = "open_application_details"
         const val UNINSTALL_APPLICATION = "uninstall_application"
         const val GET_APPLICATION = "get_application"
-        const val TAG = "Plugin"
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        Log.d(TAG, "onAttachedToEngine")
         channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {
             setMethodCallHandler(::onMethodCall)
         }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
-        Log.d(TAG, "onDetachedFromEngine")
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-        Log.d(TAG, "onAttachedToActivity")
         activity = binding.activity
         pm = binding.activity.packageManager
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        Log.d(TAG, "onDetachedFromActivityForConfigChanges")
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
-        Log.d(TAG, "onReattachedToActivityForConfigChanges")
+        onAttachedToActivity(binding)
     }
 
     override fun onDetachedFromActivity() {
-        Log.d(TAG, "onDetachedFromActivity")
     }
 
     private fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {

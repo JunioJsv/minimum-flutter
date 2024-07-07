@@ -8,6 +8,8 @@ import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:minimum/services/local_authentication_service.dart';
+import 'package:minimum/widgets/confirmation_dialog.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class PreferencesScreen extends StatelessWidget {
@@ -20,6 +22,7 @@ class PreferencesScreen extends StatelessWidget {
     final translation = context.translations;
     final PreferencesManagerCubit preferences = dependencies();
     final ApplicationsManagerService service = dependencies();
+    final LocalAuthenticationService auth = dependencies();
     return Scaffold(
       appBar: AppBar(
         title: Text(translation.preferences),
@@ -63,6 +66,51 @@ class PreferencesScreen extends StatelessWidget {
                 onChange: (int value) => preferences.update((preferences) {
                   return preferences.copyWith(gridCrossAxisCount: value);
                 }),
+              );
+            },
+          ),
+          const Divider(height: 48),
+          CategoryText(text: translation.general),
+          BlocSelector<PreferencesManagerCubit, PreferencesManagerState, bool>(
+            bloc: preferences,
+            selector: (state) {
+              return state.showHidden;
+            },
+            builder: (context, isShowingHidden) {
+              return SwitchListTile(
+                title: Text(translation.showHidden),
+                subtitle: Text(translation.showHiddenApplications),
+                value: isShowingHidden,
+                onChanged: (value) async {
+                  final isDeviceSecure = await auth.isDeviceSecure();
+                  if (!isDeviceSecure) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      showDialog(
+                        context: context,
+                        builder: (context) => ConfirmationDialog(
+                          title: translation.lockscreenRequired,
+                          message: translation.setupLockscreen(
+                            to: translation.showHiddenApplications
+                                .toLowerCase(),
+                          ),
+                          confirm: translation.understood,
+                        ),
+                      );
+                    });
+                    return;
+                  }
+                  if (value && isDeviceSecure) {
+                    await auth.authenticate(
+                      title: translation.authenticationRequired,
+                      subtitle: translation.useAuthentication(
+                        to: translation.showHiddenApplications.toLowerCase(),
+                      ),
+                    );
+                  }
+                  preferences.update((preferences) {
+                    return preferences.copyWith(showHidden: value);
+                  });
+                },
               );
             },
           ),

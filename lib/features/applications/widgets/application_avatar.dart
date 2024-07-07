@@ -23,7 +23,16 @@ class ApplicationAvatar extends StatelessWidget {
               foreground: theme.colorScheme.onPrimary,
               icon: Icons.push_pin,
             ),
-          )
+          ),
+        if (preferences.isHidden)
+          Align(
+            alignment: Alignment.topLeft * 2,
+            child: _ApplicationTag(
+              background: theme.colorScheme.secondary,
+              foreground: theme.colorScheme.onSecondary,
+              icon: Icons.visibility_off,
+            ),
+          ),
       ],
     );
   }

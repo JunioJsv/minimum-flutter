@@ -20,6 +20,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
     final ApplicationsScreenState screen = dependencies();
     final applications = screen.applications;
     final isApplicationPinned = application.preferences.isPinned;
+    final isApplicationHidden = application.preferences.isHidden;
     final Application(:label, :package, :version) = application;
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -54,8 +55,22 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
             isApplicationPinned ? translation.unpin : translation.pin,
           ),
           onTap: () {
-            screen.onToggleApplicationPin(context, application);
             Navigator.pop(context);
+            screen.onToggleApplicationPin(context, application);
+          },
+        ),
+        ListTile(
+          leading: Icon(
+            isApplicationHidden
+                ? Icons.visibility_outlined
+                : Icons.visibility_off_outlined,
+          ),
+          title: Text(
+            isApplicationHidden ? translation.unhide : translation.hide,
+          ),
+          onTap: () {
+            Navigator.pop(context);
+            screen.onToggleApplicationHide(context, application);
           },
         ),
         ListTile(

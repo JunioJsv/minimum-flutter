@@ -22,5 +22,16 @@
   "author": "Autor",
   "created_by_juniojsv": "Desenvolvido por Jeovane Viana, Aka JunioJsv",
   "licences": "Licenças",
-  "info_about_licenses": "Informações sobre as licenças de uso"
+  "info_about_licenses": "Informações sobre as licenças de uso",
+  "general": "Geral",
+  "show_hidden": "Ver ocultos",
+  "show_hidden_applications": "Exibir aplicativos ocultados",
+  "lockscreen_required": "Bloqueio de tela necessário",
+  "setup_lockscreen": "Configure o bloqueio de tela para ${to}",
+  "understood": "Entendi",
+  "authentication_required": "Autenticação necessária",
+  "use_authentication": "Use suas credenciais para ${to}",
+  "hide": "Ocultar",
+  "unhide": "Desocultar",
+  "hide_applications": "@:hide aplicativos"
 }

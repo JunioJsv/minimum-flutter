@@ -10,6 +10,7 @@ import 'package:minimum/features/preferences/blocs/preferences_manager/preferenc
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/routes.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/themes.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -39,6 +40,7 @@ class _MinimumAppState extends State<MinimumApp> {
   void initState() {
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     dependencies.registerSingleton(ApplicationsManagerService());
+    dependencies.registerSingleton(LocalAuthenticationService());
     dependencies.registerSingleton(
       PreferencesManagerCubit(),
       dispose: (cubit) async => cubit.close(),
@@ -57,6 +59,7 @@ class _MinimumAppState extends State<MinimumApp> {
     dependencies.unregister<PreferencesManagerCubit>();
     dependencies.unregister<ApplicationsManagerCubit>();
     dependencies.unregister<ApplicationsManagerService>();
+    dependencies.unregister<LocalAuthenticationService>();
     super.dispose();
   }
 

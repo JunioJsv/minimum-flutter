@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:built_collection/built_collection.dart';
 import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
@@ -84,6 +85,23 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
             application.package,
             (preference) => preference.copyWith(isPinned: value),
             ifAbsent: () => ApplicationPreferences(isPinned: value),
+          );
+      });
+      emit(ApplicationsManagerFetchSuccess(
+        applications: _onSetupApplications(state.applications),
+      ));
+    }
+  }
+
+  void hide(Application application, bool value) {
+    final state = this.state;
+    if (state is ApplicationsManagerFetchSuccess) {
+      _preferences = _preferences.rebuild((preferences) {
+        return preferences
+          ..updateValue(
+            application.package,
+            (preference) => preference.copyWith(isHidden: value),
+            ifAbsent: () => ApplicationPreferences(isHidden: value),
           );
       });
       emit(ApplicationsManagerFetchSuccess(

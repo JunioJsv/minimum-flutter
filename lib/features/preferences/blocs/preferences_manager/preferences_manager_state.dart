@@ -4,20 +4,24 @@ part of 'preferences_manager_cubit.dart';
 class PreferencesManagerState extends Equatable {
   final bool isGridLayoutEnabled;
   final int gridCrossAxisCount;
+  @JsonKey(includeToJson: false)
+  final bool showHidden;
 
   const PreferencesManagerState({
     this.isGridLayoutEnabled = false,
     this.gridCrossAxisCount = 4,
+    this.showHidden = false,
   });
 
   PreferencesManagerState copyWith({
     bool? isGridLayoutEnabled,
     int? gridCrossAxisCount,
+    bool? showHidden,
   }) {
     return PreferencesManagerState(
-      isGridLayoutEnabled: isGridLayoutEnabled ?? this.isGridLayoutEnabled,
-      gridCrossAxisCount: gridCrossAxisCount ?? this.gridCrossAxisCount,
-    );
+        isGridLayoutEnabled: isGridLayoutEnabled ?? this.isGridLayoutEnabled,
+        gridCrossAxisCount: gridCrossAxisCount ?? this.gridCrossAxisCount,
+        showHidden: showHidden ?? this.showHidden);
   }
 
   factory PreferencesManagerState.fromJson(Map<String, dynamic> json) {
@@ -30,5 +34,6 @@ class PreferencesManagerState extends Equatable {
   List<Object> get props => [
         isGridLayoutEnabled,
         gridCrossAxisCount,
+        showHidden,
       ];
 }
