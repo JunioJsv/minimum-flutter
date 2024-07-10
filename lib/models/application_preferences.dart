@@ -7,19 +7,23 @@ part 'application_preferences.g.dart';
 class ApplicationPreferences extends Equatable {
   final bool isPinned;
   final bool isHidden;
+  final bool isNew;
 
   const ApplicationPreferences({
     this.isPinned = false,
     this.isHidden = false,
+    this.isNew = false,
   });
 
   ApplicationPreferences copyWith({
     bool? isPinned,
     bool? isHidden,
+    bool? isNew,
   }) {
     return ApplicationPreferences(
       isPinned: isPinned ?? this.isPinned,
       isHidden: isHidden ?? this.isHidden,
+      isNew: isNew ?? this.isNew,
     );
   }
 
@@ -30,5 +34,5 @@ class ApplicationPreferences extends Equatable {
   Map<String, dynamic> toJson() => _$ApplicationPreferencesToJson(this);
 
   @override
-  List<Object> get props => [isPinned, isHidden];
+  List<Object> get props => [isPinned, isHidden, isNew];
 }

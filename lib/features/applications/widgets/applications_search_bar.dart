@@ -106,18 +106,26 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
       viewBuilder: (suggestions) {
         final query = controller.text;
         if (query.isEmpty) {
-          return WarningContainer(
-            icon: Icons.search,
-            color: theme.colorScheme.onSurface,
-            message: translation.typeNameToSearch,
+          return FractionallySizedBox(
+            heightFactor: .7,
+            alignment: Alignment.topCenter,
+            child: WarningContainer(
+              icon: Icons.search,
+              color: theme.colorScheme.onSurface,
+              message: translation.typeNameToSearch,
+            ),
           );
         }
 
         if (query.isNotEmpty && suggestions.isEmpty) {
-          return WarningContainer(
-            icon: Icons.search_off,
-            color: theme.colorScheme.onSurface,
-            message: translation.noResultsFor(query: query),
+          return FractionallySizedBox(
+            heightFactor: .7,
+            alignment: Alignment.topCenter,
+            child: WarningContainer(
+              icon: Icons.search_off,
+              color: theme.colorScheme.onSurface,
+              message: translation.noResultsFor(query: query),
+            ),
           );
         }
         return ListView.separated(

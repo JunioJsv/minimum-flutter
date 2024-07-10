@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/models/application_event.dart';
 import 'package:minimum/models/application_preferences.dart';
 import 'package:minimum/models/order.dart';
 import 'package:minimum/services/applications_manager_service.dart';
@@ -31,6 +32,11 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
         }
       }),
     );
+    Future.microtask(() async {
+      await for (final event in service.eventsStream) {
+        await _onApplicationEvent(event);
+      }
+    });
   }
 
   final List<StreamSubscription> _subscriptions = [];
@@ -39,6 +45,75 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
 
   /// Internal applications preferences
   var _preferences = BuiltMap<String, ApplicationPreferences>();
+
+  Future<void> _onApplicationEvent(ApplicationEvent event) async {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final isAlreadyAdded = _getApplicationIndex(event.package) != null;
+    switch (event.action) {
+      case ApplicationIntentAction.packageAdded:
+        final application = await service.getApplication(event.package);
+        if (event.isReplacing) {
+          setIsNew(application, true);
+        } else if(!isAlreadyAdded) {
+          add(application);
+        }
+        break;
+      case ApplicationIntentAction.packageRemoved:
+        if (!event.isReplacing) {
+          remove(event.package);
+        }
+        break;
+      case ApplicationIntentAction.packageChanged:
+        if (!event.canLaunch) {
+          remove(event.package);
+        } else if (!isAlreadyAdded) {
+          final application = await service.getApplication(event.package);
+          add(application);
+        }
+        break;
+    }
+  }
+
+  int? _getApplicationIndex(String package) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return null;
+    final index = state._applications.indexWhere(
+      (application) => application.package == package,
+    );
+    if (index == -1) return null;
+    return index;
+  }
+
+  void add(Application application) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final applications = BuiltList<Application>(state._applications).rebuild(
+      (applications) {
+        applications.add(application);
+        return applications;
+      },
+    );
+    setIsNew(application, true, shouldEmit: false);
+    final newState = state.copyWith(
+      applications: _onSetupApplications(applications.toList()),
+    );
+    emit(newState);
+  }
+
+  void remove(String package) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final index = _getApplicationIndex(package);
+    if (index == null) return;
+    final applications = BuiltList<Application>(state._applications).rebuild(
+      (applications) => applications..removeAt(index),
+    );
+    final newState = state.copyWith(
+      applications: _onSetupApplications(applications.toList()),
+    );
+    emit(newState);
+  }
 
   List<Application> _onSetupApplications(List<Application> applications) {
     return applications.map(
@@ -100,34 +175,56 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     }
   }
 
-  void pin(Application application, bool value) {
+  void _onUpdateApplicationPreferences(
+    Application application, {
+    required ApplicationPreferences Function(ApplicationPreferences preferenses)
+        update,
+    ApplicationPreferences Function()? ifAbsent,
+    bool shouldEmit = true,
+  }) {
     final state = this.state;
     if (state is ApplicationsManagerFetchSuccess) {
       _preferences = _preferences.rebuild((preferences) {
         return preferences
           ..updateValue(
             application.package,
-            (preference) => preference.copyWith(isPinned: value),
-            ifAbsent: () => ApplicationPreferences(isPinned: value),
+            update,
+            ifAbsent: ifAbsent,
           );
       });
-      emit(state.copyWith(applications: _getApplications(state)));
+      if (shouldEmit) {
+        emit(state.copyWith(applications: _getApplications(state)));
+      }
     }
   }
 
-  void hide(Application application, bool value) {
-    final state = this.state;
-    if (state is ApplicationsManagerFetchSuccess) {
-      _preferences = _preferences.rebuild((preferences) {
-        return preferences
-          ..updateValue(
-            application.package,
-            (preference) => preference.copyWith(isHidden: value),
-            ifAbsent: () => ApplicationPreferences(isHidden: value),
-          );
-      });
-      emit(state.copyWith(applications: _getApplications(state)));
-    }
+  void setIsPinned(Application application, bool value) {
+    _onUpdateApplicationPreferences(
+      application,
+      update: (preference) => preference.copyWith(isPinned: value),
+      ifAbsent: () => ApplicationPreferences(isPinned: value),
+    );
+  }
+
+  void setIsHidden(Application application, bool value) {
+    _onUpdateApplicationPreferences(
+      application,
+      update: (preference) => preference.copyWith(isHidden: value),
+      ifAbsent: () => ApplicationPreferences(isHidden: value),
+    );
+  }
+
+  void setIsNew(
+    Application application,
+    bool value, {
+    bool shouldEmit = true,
+  }) {
+    _onUpdateApplicationPreferences(
+      application,
+      update: (preference) => preference.copyWith(isNew: value),
+      ifAbsent: () => ApplicationPreferences(isNew: value),
+      shouldEmit: shouldEmit,
+    );
   }
 
   Future<void> uninstall(Application application) async {

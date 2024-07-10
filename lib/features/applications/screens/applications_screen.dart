@@ -83,7 +83,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     BuildContext context,
     Application application,
   ) async {
-    return applications.launch(application);
+    await applications.launch(application);
+    if (application.preferences.isNew) {
+      applications.setIsNew(application, false);
+    }
   }
 
   Future<void> onApplicationLongTap(
@@ -101,7 +104,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 
   void onToggleApplicationPin(BuildContext context, Application application) {
     final isPinned = !application.preferences.isPinned;
-    applications.pin(application, isPinned);
+    applications.setIsPinned(application, isPinned);
     if (isPinned) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onScrollTo(0);
@@ -131,7 +134,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
       return;
     }
 
-    applications.hide(application, isHidden);
+    applications.setIsHidden(application, isHidden);
   }
 
   @override

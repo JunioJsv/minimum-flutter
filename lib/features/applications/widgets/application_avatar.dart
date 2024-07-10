@@ -33,6 +33,15 @@ class ApplicationAvatar extends StatelessWidget {
               icon: Icons.visibility_off,
             ),
           ),
+        if (preferences.isNew)
+          Align(
+            alignment: Alignment.bottomRight * 2,
+            child: _ApplicationTag(
+              background: theme.colorScheme.tertiary,
+              foreground: theme.colorScheme.onTertiary,
+              icon: Icons.new_releases,
+            ),
+          ),
       ],
     );
   }

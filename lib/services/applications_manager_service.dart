@@ -1,9 +1,11 @@
 import 'package:flutter/services.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/models/application_event.dart';
 import 'package:minimum/utils/memory_cache.dart';
 
 class ApplicationsManagerService {
   static const kChannelName = 'juniojsv.minimum/applications_manager_plugin';
+  static const kEventsChannelName = 'juniojsv.minimum/applications_events';
   static const kGetInstalledApplications = 'get_installed_applications';
   static const kLaunchApplication = 'launch_application';
   static const kGetApplicationIcon = 'get_application_icon';
@@ -17,7 +19,13 @@ class ApplicationsManagerService {
   static const kGetApplication = 'get_application';
 
   final channel = const MethodChannel(kChannelName);
-
+  final eventsChannel = const EventChannel(kEventsChannelName);
+  late final eventsStream = eventsChannel.receiveBroadcastStream().map(
+    (event) {
+      final json = event as Map;
+      return ApplicationEvent.fromJson(json.cast());
+    },
+  );
   final _icons = MemoryCache<Uint8List>(capacity: 100);
 
   Future<List<Application>> getInstalledApplications() async {

@@ -3,6 +3,7 @@ package juniojsv.minimum
 import android.app.Activity
 import android.content.Intent
 import android.content.Intent.ACTION_DELETE
+import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -13,6 +14,7 @@ import android.provider.Settings
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import java.io.ByteArrayOutputStream
@@ -38,6 +40,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {
             setMethodCallHandler(::onMethodCall)
         }
+        pm = binding.applicationContext.packageManager
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -45,7 +48,6 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        pm = binding.activity.packageManager
     }
 
     override fun onDetachedFromActivityForConfigChanges() {

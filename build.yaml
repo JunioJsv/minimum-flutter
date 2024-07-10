@@ -22,3 +22,4 @@ targets:
             - "lib/models/application.dart"
             - "lib/models/application_preferences.dart"
             - "lib/models/order.dart"
+            - "lib/models/application_event.dart"
