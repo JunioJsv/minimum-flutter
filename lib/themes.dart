@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 const useMaterial3 = true;
 const appBarTheme = AppBarTheme(elevation: 1);
 
-SliderThemeData sliderTheme(ColorScheme colorsScheme) {
+SliderThemeData sliderTheme(ColorScheme colorScheme) {
   return SliderThemeData(
     overlayShape: SliderComponentShape.noOverlay,
-    inactiveTrackColor: colorsScheme.primary.withOpacity(.2),
+    inactiveTrackColor: colorScheme.primary.withOpacity(.2),
   );
 }
 
-SearchBarThemeData searchBarTheme(ColorScheme colorsScheme) {
+SearchBarThemeData searchBarTheme(ColorScheme colorScheme) {
   return const SearchBarThemeData(
     padding: WidgetStatePropertyAll(
       EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -18,12 +18,17 @@ SearchBarThemeData searchBarTheme(ColorScheme colorsScheme) {
   );
 }
 
-ThemeData theme(ColorScheme colorsScheme) {
+CardTheme cardTheme(ColorScheme colorScheme) {
+  return const CardTheme();
+}
+
+ThemeData theme(ColorScheme colorScheme) {
   return ThemeData(
     appBarTheme: appBarTheme,
-    sliderTheme: sliderTheme(colorsScheme),
-    searchBarTheme: searchBarTheme(colorsScheme),
-    colorScheme: colorsScheme,
+    sliderTheme: sliderTheme(colorScheme),
+    searchBarTheme: searchBarTheme(colorScheme),
+    cardTheme: cardTheme(colorScheme),
+    colorScheme: colorScheme,
     useMaterial3: useMaterial3,
   );
 }

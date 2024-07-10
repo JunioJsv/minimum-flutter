@@ -18,7 +18,7 @@ class ApplicationAvatar extends StatelessWidget {
         if (preferences.isPinned)
           Align(
             alignment: Alignment.topRight * 2,
-            child: _ApplicationTag(
+            child: ApplicationTag(
               background: theme.colorScheme.primary,
               foreground: theme.colorScheme.onPrimary,
               icon: Icons.push_pin,
@@ -27,7 +27,7 @@ class ApplicationAvatar extends StatelessWidget {
         if (preferences.isHidden)
           Align(
             alignment: Alignment.topLeft * 2,
-            child: _ApplicationTag(
+            child: ApplicationTag(
               background: theme.colorScheme.secondary,
               foreground: theme.colorScheme.onSecondary,
               icon: Icons.visibility_off,
@@ -36,7 +36,7 @@ class ApplicationAvatar extends StatelessWidget {
         if (preferences.isNew)
           Align(
             alignment: Alignment.bottomRight * 2,
-            child: _ApplicationTag(
+            child: ApplicationTag(
               background: theme.colorScheme.tertiary,
               foreground: theme.colorScheme.onTertiary,
               icon: Icons.new_releases,
@@ -47,13 +47,14 @@ class ApplicationAvatar extends StatelessWidget {
   }
 }
 
-class _ApplicationTag extends StatelessWidget {
+class ApplicationTag extends StatelessWidget {
   final Color background;
   final Color foreground;
 
   final IconData icon;
 
-  const _ApplicationTag({
+  const ApplicationTag({
+    super.key,
     required this.background,
     required this.foreground,
     required this.icon,

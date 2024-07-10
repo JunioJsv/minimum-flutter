@@ -60,7 +60,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     return scroll.animateTo(
       offset,
       duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutQuart,
+      curve: Curves.fastOutSlowIn,
     );
   }
 

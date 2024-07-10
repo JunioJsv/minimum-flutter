@@ -55,7 +55,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
         final application = await service.getApplication(event.package);
         if (event.isReplacing) {
           setIsNew(application, true);
-        } else if(!isAlreadyAdded) {
+        } else if (!isAlreadyAdded) {
           add(application);
         }
         break;

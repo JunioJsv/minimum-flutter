@@ -26,7 +26,7 @@ class ApplicationIconState extends State<ApplicationIcon>
           duration: kThemeAnimationDuration,
           child: () {
             final bytes = snapshot.data;
-            if (bytes == null) return const SizedBox();
+            if (bytes == null) return const SizedBox.expand();
             return DecoratedBox(
               decoration: BoxDecoration(boxShadow: <BoxShadow>[
                 BoxShadow(

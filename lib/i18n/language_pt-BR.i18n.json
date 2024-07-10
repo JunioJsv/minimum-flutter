@@ -33,5 +33,10 @@
   "use_authentication": "Use suas credenciais para ${to}",
   "hide": "Ocultar",
   "unhide": "Desocultar",
-  "hide_applications": "@:hide aplicativos"
+  "hide_applications": "@:hide aplicativos",
+  "confirm": "Confirmar",
+  "added": "Adicionados",
+  "no_applications_added_on_group": "Nenhum aplicativo adicionado ao grupo",
+  "all_applications_added_on_group": "Todos os aplicativos foram adicionados ao grupo",
+  "applications": "Aplicativos"
 }

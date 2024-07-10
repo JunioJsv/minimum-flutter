@@ -27,8 +27,7 @@ class GridEntry extends EntryWidget {
           children: [
             Flexible(
               child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxHeight: 48, maxWidth: 48),
+                constraints: const BoxConstraints(maxHeight: 48, maxWidth: 48),
                 child: icon,
               ),
             ),

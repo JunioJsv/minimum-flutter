@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/order.dart';
@@ -36,6 +37,13 @@ class ApplicationsShortcuts extends StatelessWidget {
           ActionChip(
             label: Text(translation.createGroup),
             avatar: const Icon(Icons.apps),
+            onPressed: () {
+              Navigator.pushNamed(
+                context,
+                CreateApplicationsGroupScreen.route,
+                arguments: CreateApplicationsGroupScreenArguments(),
+              );
+            },
           ),
         ],
       ),
