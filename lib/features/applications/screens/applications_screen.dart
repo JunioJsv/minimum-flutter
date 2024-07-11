@@ -87,7 +87,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   ) async {
     await applications.launch(application);
     if (application.preferences.isNew) {
-      applications.setIsNew(application.package, false);
+      applications.addOrUpdateApplicationPreferences(
+        application.package,
+        (preferences) => preferences.copyWith(isNew: false),
+      );
     }
   }
 
@@ -106,7 +109,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 
   void onToggleApplicationPin(BuildContext context, Application application) {
     final isPinned = !application.preferences.isPinned;
-    applications.setIsPinned(application.package, isPinned);
+    applications.addOrUpdateApplicationPreferences(
+      application.package,
+      (preferences) => preferences.copyWith(isPinned: isPinned),
+    );
     if (isPinned) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onScrollTo(0);
@@ -136,7 +142,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
       return;
     }
 
-    applications.setIsHidden(application.package, isHidden);
+    applications.addOrUpdateApplicationPreferences(
+      application.package,
+      (preferences) => preferences.copyWith(isHidden: isHidden),
+    );
   }
 
   @override
