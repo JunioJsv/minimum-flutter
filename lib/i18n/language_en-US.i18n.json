@@ -40,5 +40,12 @@
   "added": "Added",
   "no_applications_added_on_group": "No applications added to the group",
   "all_applications_added_on_group": "All applications have been added to the group",
-  "applications": "Applications"
+  "applications": "Applications",
+  "description": "Description",
+  "add_description_optional": "Add a description (optional)",
+  "group_name_required": "Group name is required",
+  "title": "Title",
+  "type_group_name": "Type the group name",
+  "confirm_group": "@:confirm group",
+  "contain_n_thing": "Contains ${count} ${thing}"
 }

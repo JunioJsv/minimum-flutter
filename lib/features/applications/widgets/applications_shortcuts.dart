@@ -41,7 +41,9 @@ class ApplicationsShortcuts extends StatelessWidget {
               Navigator.pushNamed(
                 context,
                 CreateApplicationsGroupScreen.route,
-                arguments: CreateApplicationsGroupScreenArguments(),
+                arguments: CreateApplicationsGroupScreenArguments(
+                  onConfirm: (title, description, packages) {},
+                ),
               );
             },
           ),

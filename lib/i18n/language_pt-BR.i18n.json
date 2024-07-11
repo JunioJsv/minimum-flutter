@@ -38,5 +38,12 @@
   "added": "Adicionados",
   "no_applications_added_on_group": "Nenhum aplicativo adicionado ao grupo",
   "all_applications_added_on_group": "Todos os aplicativos foram adicionados ao grupo",
-  "applications": "Aplicativos"
+  "applications": "Aplicativos",
+  "description": "Descrição",
+  "add_description_optional": "Adicione uma descrição (opcional)",
+  "group_name_required": "O nome do grupo é obrigatório",
+  "title": "Titulo",
+  "type_group_name": "Digite o nome do grupo",
+  "confirm_group": "@:confirm grupo",
+  "contain_n_thing": "Contém ${count} ${thing}"
 }

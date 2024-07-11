@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
+import 'package:minimum/features/applications/widgets/applications_group_icon.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/grid_entry.dart';
 import 'package:minimum/features/applications/widgets/sliver_applications.dart';
@@ -15,7 +16,15 @@ import 'package:minimum/routes.dart';
 import 'package:minimum/widgets/warning_container.dart';
 
 class CreateApplicationsGroupScreenArguments {
-  CreateApplicationsGroupScreenArguments of(BuildContext context) {
+  final void Function(
+    String title,
+    String? description,
+    Set<String> packages,
+  ) onConfirm;
+
+  CreateApplicationsGroupScreenArguments({required this.onConfirm});
+
+  static CreateApplicationsGroupScreenArguments of(BuildContext context) {
     return ModalRoute.of(context)!.arguments();
   }
 }
@@ -32,11 +41,31 @@ class CreateApplicationsGroupScreen extends StatefulWidget {
 
 class CreateApplicationsGroupScreenState
     extends State<CreateApplicationsGroupScreen> {
-  final group = GlobalKey<_GroupManagerState>();
+  late final arguments = CreateApplicationsGroupScreenArguments.of(context);
+  final packages = ValueNotifier<Set<String>>({});
 
   @override
   void dispose() {
+    packages.dispose();
     super.dispose();
+  }
+
+  void _onConfirm(BuildContext context) async {
+    final packages = this.packages.value;
+    await showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      isScrollControlled: true,
+      builder: (context) {
+        return _ConfirmationBottomSheet(
+          packages: packages,
+          onConfirm: (title, description) {
+            Navigator.pop(context);
+            arguments.onConfirm(title, description, packages);
+          },
+        );
+      },
+    );
   }
 
   @override
@@ -44,27 +73,53 @@ class CreateApplicationsGroupScreenState
     final translation = Translations.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: Text(translation.confirm),
-        icon: const Icon(
-          Icons.check,
-        ),
+      floatingActionButton: ValueListenableBuilder(
+          valueListenable: packages,
+          builder: (context, packages, child) {
+            final isEnabled = packages.length >= 2;
+
+            return AnimatedScale(
+              duration: kThemeAnimationDuration,
+              scale: isEnabled ? 1 : 0,
+              child: FloatingActionButton.extended(
+                onPressed: isEnabled
+                    ? () {
+                        _onConfirm(context);
+                      }
+                    : null,
+                label: Text(translation.confirm),
+                icon: const Icon(
+                  Icons.save,
+                ),
+              ),
+            );
+          }),
+      body: _GroupManager(
+        initial: packages.value,
+        onChange: (packages) {
+          this.packages.value = packages;
+        },
       ),
-      body: _GroupManager(key: group),
     );
   }
 }
 
 class _GroupManager extends StatefulWidget {
-  const _GroupManager({super.key});
+  final Set<String> initial;
+  final void Function(Set<String> packages) onChange;
+
+  const _GroupManager({
+    super.key,
+    this.initial = const {},
+    required this.onChange,
+  });
 
   @override
   State<_GroupManager> createState() => _GroupManagerState();
 }
 
 class _GroupManagerState extends State<_GroupManager> {
-  final Set<String> group = {};
+  late final Set<String> group = widget.initial;
 
   // Group scroll controller
   final scroll = ScrollController();
@@ -108,6 +163,12 @@ class _GroupManagerState extends State<_GroupManager> {
     debounce(() {
       setState(() {});
     });
+  }
+
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    widget.onChange(Set.from(group));
   }
 
   @override
@@ -313,6 +374,120 @@ class _Card extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 0),
       child: child,
+    );
+  }
+}
+
+class _ConfirmationBottomSheet extends StatefulWidget {
+  final String? title;
+  final String? description;
+  final Set<String> packages;
+  final void Function(String title, String? description) onConfirm;
+
+  const _ConfirmationBottomSheet({
+    super.key,
+    this.title,
+    this.description,
+    required this.packages,
+    required this.onConfirm,
+  });
+
+  @override
+  State<_ConfirmationBottomSheet> createState() =>
+      _ConfirmationBottomSheetState();
+}
+
+class _ConfirmationBottomSheetState extends State<_ConfirmationBottomSheet> {
+  final form = GlobalKey<FormState>();
+  late final title = TextEditingController(text: widget.title);
+  late final description = TextEditingController(text: widget.description);
+
+  @override
+  void dispose() {
+    title.dispose();
+    description.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final translation = Translations.of(context);
+    const inputDecoration = InputDecoration(
+      border: OutlineInputBorder(),
+    );
+    final content = Form(
+      key: form,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ListTile(
+            leading: ApplicationsGroupIcon(packages: widget.packages),
+            title: Text(translation.confirmGroup),
+            subtitle: Text(
+              translation.containNThing(
+                count: widget.packages.length,
+                thing: translation.applications.toLowerCase(),
+              ),
+            ),
+            trailing: IconButton(
+              onPressed: () {
+                if (form.currentState?.validate() == true) {
+                  Navigator.pop(context);
+                  final description = this.description.text;
+                  widget.onConfirm(
+                    title.text,
+                    description.isEmpty ? null : description,
+                  );
+                }
+              },
+              icon: const Icon(Icons.save),
+            ),
+          ),
+          const Divider(height: 0),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: TextFormField(
+              autofocus: true,
+              controller: title,
+              decoration: inputDecoration.copyWith(
+                labelText: translation.title,
+                hintText: translation.typeGroupName,
+              ),
+              autovalidateMode: AutovalidateMode.onUserInteraction,
+              textCapitalization: TextCapitalization.sentences,
+              validator: (value) {
+                if (value?.isEmpty == true) {
+                  return translation.groupNameRequired;
+                }
+
+                return null;
+              },
+            ),
+          ),
+          const SizedBox(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: TextFormField(
+              controller: description,
+              decoration: inputDecoration.copyWith(
+                labelText: translation.description,
+                hintText: translation.addDescriptionOptional,
+              ),
+              maxLines: 3,
+              minLines: 1,
+              textCapitalization: TextCapitalization.sentences,
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+
+    return Padding(
+      padding: MediaQuery.viewInsetsOf(context),
+      child: content,
     );
   }
 }
