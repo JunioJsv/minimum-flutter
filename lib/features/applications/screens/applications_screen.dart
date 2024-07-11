@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
+import 'package:minimum/features/applications/widgets/applications_group_icon.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
 import 'package:minimum/features/applications/widgets/applications_shortcuts.dart';
@@ -15,6 +16,7 @@ import 'package:minimum/features/preferences/blocs/preferences_manager/preferenc
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/models/applications_group.dart';
 import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/widgets/confirmation_dialog.dart';
 
@@ -85,7 +87,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   ) async {
     await applications.launch(application);
     if (application.preferences.isNew) {
-      applications.setIsNew(application, false);
+      applications.setIsNew(application.package, false);
     }
   }
 
@@ -104,7 +106,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 
   void onToggleApplicationPin(BuildContext context, Application application) {
     final isPinned = !application.preferences.isPinned;
-    applications.setIsPinned(application, isPinned);
+    applications.setIsPinned(application.package, isPinned);
     if (isPinned) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         onScrollTo(0);
@@ -134,7 +136,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
       return;
     }
 
-    applications.setIsHidden(application, isHidden);
+    applications.setIsHidden(application.package, isHidden);
   }
 
   @override
@@ -204,17 +206,30 @@ class _SliverApplications extends StatelessWidget {
   Widget build(BuildContext context) {
     final screen = context.findAncestorStateOfType<ApplicationsScreenState>()!;
     final PreferencesManagerCubit preferences = dependencies();
-    final applications = state.applications;
-    final arguments = applications.mapIndexed(
-      (index, application) {
-        return EntryWidgetArguments(
-          icon: ApplicationAvatar(application: application),
-          label: application.label,
-          onTap: () => screen.onApplicationTap(context, application),
-          onLongTap: () => screen.onApplicationLongTap(context, application),
-        );
+    final entries = state.entries.map(
+      (entry) {
+        if (entry is Application) {
+          return EntryWidgetArguments(
+            id: entry.package,
+            icon: ApplicationAvatar(application: entry),
+            label: entry.label,
+            onTap: () => screen.onApplicationTap(context, entry),
+            onLongTap: () => screen.onApplicationLongTap(context, entry),
+          );
+        }
+        if (entry is ApplicationsGroup) {
+          return EntryWidgetArguments(
+            id: entry.id,
+            icon: ApplicationsGroupIcon(packages: entry.packages),
+            label: entry.label,
+            onTap: () {},
+            onLongTap: () {},
+          );
+        }
+
+        throw UnimplementedError();
       },
-    );
+    ).toList();
 
     return BlocBuilder<PreferencesManagerCubit, PreferencesManagerState>(
       bloc: preferences,
@@ -222,9 +237,9 @@ class _SliverApplications extends StatelessWidget {
       builder: (context, preferences) {
         final layout = preferences.isGridLayoutEnabled
             ? SliverApplicationsGridLayout(
-                children: arguments.mapIndexed(
+                children: entries.mapIndexed(
                   (index, arguments) {
-                    final package = applications[index].package;
+                    final package = arguments.id!;
                     return GridEntry(
                       key: GlobalObjectKey(package),
                       arguments: arguments,
@@ -237,9 +252,9 @@ class _SliverApplications extends StatelessWidget {
                 ),
               )
             : SliverApplicationsListLayout(
-                children: arguments.mapIndexed(
+                children: entries.mapIndexed(
                 (index, arguments) {
-                  final package = applications[index].package;
+                  final package = arguments.id!;
                   return ListEntry(
                     key: GlobalObjectKey(package),
                     arguments: arguments,

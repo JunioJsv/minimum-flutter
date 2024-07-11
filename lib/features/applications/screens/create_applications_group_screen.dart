@@ -12,15 +12,13 @@ import 'package:minimum/features/applications/widgets/sliver_applications.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/models/applications_group.dart';
 import 'package:minimum/routes.dart';
 import 'package:minimum/widgets/warning_container.dart';
+import 'package:uuid/uuid.dart';
 
 class CreateApplicationsGroupScreenArguments {
-  final void Function(
-    String title,
-    String? description,
-    Set<String> packages,
-  ) onConfirm;
+  final void Function(ApplicationsGroup group) onConfirm;
 
   CreateApplicationsGroupScreenArguments({required this.onConfirm});
 
@@ -61,7 +59,13 @@ class CreateApplicationsGroupScreenState
           packages: packages,
           onConfirm: (title, description) {
             Navigator.pop(context);
-            arguments.onConfirm(title, description, packages);
+            final group = ApplicationsGroup(
+              id: const Uuid().v4(),
+              label: title,
+              description: description,
+              packages: packages,
+            );
+            arguments.onConfirm(group);
           },
         );
       },
@@ -193,7 +197,7 @@ class _GroupManagerState extends State<_GroupManager> {
         final unselected = <Application>[];
         final selected = <Application>[];
 
-        for (final application in state.applications) {
+        for (final application in state.entries.whereType<Application>()) {
           if (group.contains(application.package)) {
             selected.add(application);
           } else {

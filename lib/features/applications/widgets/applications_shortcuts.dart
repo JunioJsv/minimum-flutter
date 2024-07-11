@@ -3,6 +3,7 @@ import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
+import 'package:minimum/models/entry.dart';
 import 'package:minimum/models/order.dart';
 
 class ApplicationsShortcuts extends StatelessWidget {
@@ -16,18 +17,19 @@ class ApplicationsShortcuts extends StatelessWidget {
     return SingleChildScrollView(
       child: Row(
         children: [
-          ValueListenableBuilder(
-            valueListenable: applications.order,
-            builder: (context, order, _) {
+          StatefulBuilder(
+            builder: (context, setState) {
               return ActionChip(
                 label: Text(translation.ordering),
                 avatar: Icon(
-                  order == Order.desc
+                  Entry.orderBy == Order.desc
                       ? Icons.keyboard_arrow_down
                       : Icons.keyboard_arrow_up,
                 ),
                 onPressed: () {
-                  applications.order.value = order.toggle();
+                  setState(() {
+                    Entry.orderBy = Entry.orderBy.toggle();
+                  });
                   applications.sort();
                 },
               );
@@ -42,7 +44,7 @@ class ApplicationsShortcuts extends StatelessWidget {
                 context,
                 CreateApplicationsGroupScreen.route,
                 arguments: CreateApplicationsGroupScreenArguments(
-                  onConfirm: (title, description, packages) {},
+                  onConfirm: applications.addOrUpdateGroup,
                 ),
               );
             },

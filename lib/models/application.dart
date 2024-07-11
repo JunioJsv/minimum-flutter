@@ -1,17 +1,17 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:minimum/models/application_preferences.dart';
+import 'package:minimum/models/entry.dart';
 
 part 'application.g.dart';
 
 @JsonSerializable()
-class Application extends Equatable implements Comparable<Application> {
-  final String label;
+class Application extends Entry {
   final String package;
   final String version;
 
   final ApplicationPreferences preferences;
 
+  @override
   int get priority {
     var value = 0;
     if (preferences.isPinned) value += 1;
@@ -21,7 +21,7 @@ class Application extends Equatable implements Comparable<Application> {
   }
 
   const Application({
-    required this.label,
+    required super.label,
     required this.package,
     required this.version,
     this.preferences = const ApplicationPreferences(),
@@ -32,14 +32,6 @@ class Application extends Equatable implements Comparable<Application> {
   }
 
   Map<String, dynamic> toJson() => _$ApplicationToJson(this);
-
-  @override
-  int compareTo(other) {
-    if (priority != other.priority) {
-      return other.priority.compareTo(priority);
-    }
-    return label.toLowerCase().compareTo(other.label.toLowerCase());
-  }
 
   Application copyWith({
     String? label,
@@ -56,5 +48,5 @@ class Application extends Equatable implements Comparable<Application> {
   }
 
   @override
-  List<Object> get props => [label, package, version, preferences];
+  List<Object?> get props => [...super.props, package, version, preferences];
 }

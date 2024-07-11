@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:built_collection/built_collection.dart';
-import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
@@ -9,6 +8,8 @@ import 'package:minimum/features/preferences/blocs/preferences_manager/preferenc
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_event.dart';
 import 'package:minimum/models/application_preferences.dart';
+import 'package:minimum/models/applications_group.dart';
+import 'package:minimum/models/entry.dart';
 import 'package:minimum/models/order.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 
@@ -41,8 +42,6 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
 
   final List<StreamSubscription> _subscriptions = [];
 
-  final order = ValueNotifier(Order.asc);
-
   /// Internal applications preferences
   var _preferences = BuiltMap<String, ApplicationPreferences>();
 
@@ -54,7 +53,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
       case ApplicationIntentAction.packageAdded:
         final application = await service.getApplication(event.package);
         if (event.isReplacing) {
-          setIsNew(application, true);
+          setIsNew(application.package, true);
         } else if (!isAlreadyAdded) {
           add(application);
         }
@@ -85,6 +84,16 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     return index;
   }
 
+  int? _getGroupIndex(String id) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return null;
+    final index = state.groups.indexWhere(
+      (group) => group.id == id,
+    );
+    if (index == -1) return null;
+    return index;
+  }
+
   void add(Application application) {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;
@@ -94,7 +103,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
         return applications;
       },
     );
-    setIsNew(application, true, shouldEmit: false);
+    setIsNew(application.package, true, shouldEmit: false);
     final newState = state.copyWith(
       applications: _onSetupApplications(applications.toList()),
     );
@@ -115,6 +124,25 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     emit(newState);
   }
 
+  void addOrUpdateGroup(ApplicationsGroup group) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final index = _getGroupIndex(group.id);
+    final groups = BuiltList<ApplicationsGroup>(state.groups).rebuild(
+      (groups) {
+        if (index != null) {
+          groups[index] = group;
+        } else {
+          groups.add(group);
+        }
+
+        return groups;
+      },
+    );
+    final newState = state.copyWith(groups: groups.toList());
+    emit(newState);
+  }
+
   List<Application> _onSetupApplications(List<Application> applications) {
     return applications.map(
       (application) {
@@ -125,31 +153,12 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
 
         return application;
       },
-    ).sorted(_onCompareApplications);
+    ).toList()
+      ..sort();
   }
 
   List<Application> _getApplications(ApplicationsManagerFetchSuccess state) {
     return _onSetupApplications(state._applications);
-  }
-
-  int _onCompareApplications(Application application, Application other) {
-    final order = this.order.value;
-    final Application(
-      priority: priority,
-      label: label,
-    ) = application;
-
-    final Application(
-      priority: otherPriority,
-      label: otherLabel,
-    ) = other;
-
-    if (priority != otherPriority) return otherPriority.compareTo(priority);
-    if (order == Order.desc) {
-      return otherLabel.toLowerCase().compareTo(label.toLowerCase());
-    }
-
-    return label.toLowerCase().compareTo(otherLabel.toLowerCase());
   }
 
   Future<void> getInstalled() async {
@@ -158,6 +167,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
       final applications = await service.getInstalledApplications();
       emit(ApplicationsManagerFetchSuccess(
         applications: _onSetupApplications(applications),
+        groups: [],
         isShowingHidden: preferences.state.showHidden,
       ));
     } catch (_, s) {
@@ -176,8 +186,8 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   }
 
   void _onUpdateApplicationPreferences(
-    Application application, {
-    required ApplicationPreferences Function(ApplicationPreferences preferenses)
+    String package, {
+    required ApplicationPreferences Function(ApplicationPreferences preference)
         update,
     ApplicationPreferences Function()? ifAbsent,
     bool shouldEmit = true,
@@ -187,7 +197,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
       _preferences = _preferences.rebuild((preferences) {
         return preferences
           ..updateValue(
-            application.package,
+            package,
             update,
             ifAbsent: ifAbsent,
           );
@@ -198,29 +208,29 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     }
   }
 
-  void setIsPinned(Application application, bool value) {
+  void setIsPinned(String package, bool value) {
     _onUpdateApplicationPreferences(
-      application,
+      package,
       update: (preference) => preference.copyWith(isPinned: value),
       ifAbsent: () => ApplicationPreferences(isPinned: value),
     );
   }
 
-  void setIsHidden(Application application, bool value) {
+  void setIsHidden(String package, bool value) {
     _onUpdateApplicationPreferences(
-      application,
+      package,
       update: (preference) => preference.copyWith(isHidden: value),
       ifAbsent: () => ApplicationPreferences(isHidden: value),
     );
   }
 
   void setIsNew(
-    Application application,
+    String package,
     bool value, {
     bool shouldEmit = true,
   }) {
     _onUpdateApplicationPreferences(
-      application,
+      package,
       update: (preference) => preference.copyWith(isNew: value),
       ifAbsent: () => ApplicationPreferences(isNew: value),
       shouldEmit: shouldEmit,
@@ -241,7 +251,6 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
 
   @override
   Future<void> close() {
-    order.dispose();
     for (final subscription in _subscriptions) {
       subscription.cancel();
     }
@@ -253,7 +262,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     final order = Order.fromJson(json['order']);
     final preferences = json['preferences'] as Map?;
     if (order != null) {
-      this.order.value = order;
+      Entry.orderBy = order;
     }
     if (preferences != null) {
       _preferences = BuiltMap.from(preferences.map(
@@ -271,7 +280,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   @override
   Map<String, dynamic>? toJson(ApplicationsManagerState state) {
     return {
-      'order': order.value.toJson(),
+      'order': Entry.orderBy.toJson(),
       'preferences': _preferences.map(
         (key, preference) {
           return MapEntry(key, preference.toJson());

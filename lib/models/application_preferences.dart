@@ -34,5 +34,5 @@ class ApplicationPreferences extends Equatable {
   Map<String, dynamic> toJson() => _$ApplicationPreferencesToJson(this);
 
   @override
-  List<Object> get props => [isPinned, isHidden, isNew];
+  List<Object?> get props => [isPinned, isHidden, isNew];
 }
