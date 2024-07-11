@@ -61,6 +61,7 @@ class CreateApplicationsGroupScreenState
             Navigator.pop(context);
             final group = ApplicationsGroup(
               id: const Uuid().v4(),
+              isNew: true,
               label: title,
               description: description,
               packages: packages,

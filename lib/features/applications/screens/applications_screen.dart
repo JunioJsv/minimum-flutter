@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
-import 'package:minimum/features/applications/widgets/applications_group_icon.dart';
+import 'package:minimum/features/applications/widgets/applications_group_avatar.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
 import 'package:minimum/features/applications/widgets/applications_search_bar.dart';
 import 'package:minimum/features/applications/widgets/applications_shortcuts.dart';
@@ -78,6 +78,15 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     );
     if (confirmation == true) {
       await applications.service.openCurrentLauncherSystemSettings();
+    }
+  }
+
+  Future<void> onApplicationsGroupTap(
+    BuildContext context,
+    ApplicationsGroup group,
+  ) async {
+    if (group.isNew) {
+      applications.addOrUpdateGroup(group.copyWith(isNew: false));
     }
   }
 
@@ -229,9 +238,9 @@ class _SliverApplications extends StatelessWidget {
         if (entry is ApplicationsGroup) {
           return EntryWidgetArguments(
             id: entry.id,
-            icon: ApplicationsGroupIcon(packages: entry.packages),
+            icon: ApplicationsGroupAvatar(group: entry),
             label: entry.label,
-            onTap: () {},
+            onTap: () => screen.onApplicationsGroupTap(context, entry),
             onLongTap: () {},
           );
         }
