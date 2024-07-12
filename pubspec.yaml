@@ -26,6 +26,7 @@ dependencies:
   url_launcher: 6.3.0
   uuid: 4.4.0
   fast_immutable_collections: 10.2.4
+  android_intent_plus: 5.0.2
 
 dev_dependencies:
   flutter_test:
