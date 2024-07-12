@@ -1,4 +1,5 @@
 import 'package:collection/collection.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart' hide Entry;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
@@ -218,7 +219,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 }
 
 class SliverEntries extends StatelessWidget {
-  final List<Entry> entries;
+  final IList<Entry> entries;
 
   const SliverEntries({super.key, required this.entries});
 
@@ -273,7 +274,7 @@ class SliverEntries extends StatelessWidget {
                   (index, arguments) {
                     final package = arguments.id!;
                     return GridEntry(
-                      key: GlobalObjectKey(package),
+                      key: ValueKey(package),
                       arguments: arguments,
                     );
                   },
@@ -288,7 +289,7 @@ class SliverEntries extends StatelessWidget {
                 (index, arguments) {
                   final package = arguments.id!;
                   return ListEntry(
-                    key: GlobalObjectKey(package),
+                    key: ValueKey(package),
                     arguments: arguments,
                   );
                 },

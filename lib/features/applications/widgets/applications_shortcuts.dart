@@ -38,7 +38,7 @@ class ApplicationsShortcuts extends StatelessWidget {
           const SizedBox(width: 8),
           ActionChip(
             label: Text(translation.createGroup),
-            avatar: const Icon(Icons.apps),
+            avatar: const Icon(Icons.dashboard_customize_outlined),
             onPressed: () {
               Navigator.pushNamed(
                 context,

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
@@ -44,8 +45,9 @@ class CreateApplicationsGroupScreen extends StatefulWidget {
 class CreateApplicationsGroupScreenState
     extends State<CreateApplicationsGroupScreen> {
   late final arguments = CreateApplicationsGroupScreenArguments.of(context);
-  late final packages =
-      ValueNotifier<Set<String>>(arguments.initial?.packages ?? {});
+  late final packages = ValueNotifier<ISet<String>>(
+    arguments.initial?.packages.toISet() ?? const ISet.empty(),
+  );
 
   @override
   void dispose() {
@@ -54,7 +56,7 @@ class CreateApplicationsGroupScreenState
   }
 
   void _onConfirm(BuildContext context) async {
-    final packages = this.packages.value;
+    final packages = this.packages.value.toSet();
     await showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -66,13 +68,18 @@ class CreateApplicationsGroupScreenState
           packages: packages,
           onConfirm: (title, description) {
             Navigator.pop(context);
-            final group = ApplicationsGroup(
-              id: const Uuid().v4(),
-              isNew: true,
-              label: title,
-              description: description,
-              packages: packages,
-            );
+            final group = arguments.initial?.copyWith(
+                  label: title,
+                  description: description,
+                  packages: packages,
+                ) ??
+                ApplicationsGroup(
+                  id: const Uuid().v4(),
+                  isNew: true,
+                  label: title,
+                  description: description,
+                  packages: packages,
+                );
             arguments.onConfirm(group);
           },
         );
@@ -117,12 +124,12 @@ class CreateApplicationsGroupScreenState
 }
 
 class _GroupManager extends StatefulWidget {
-  final Set<String> initial;
-  final void Function(Set<String> packages) onChange;
+  final ISet<String> initial;
+  final void Function(ISet<String> packages) onChange;
 
   const _GroupManager({
     super.key,
-    this.initial = const {},
+    this.initial = const ISet.empty(),
     required this.onChange,
   });
 
@@ -131,7 +138,7 @@ class _GroupManager extends StatefulWidget {
 }
 
 class _GroupManagerState extends State<_GroupManager> {
-  late final Set<String> group = widget.initial;
+  late ISet<String> group = widget.initial;
 
   // Group scroll controller
   final scroll = ScrollController();
@@ -151,13 +158,15 @@ class _GroupManagerState extends State<_GroupManager> {
   void clearSelected() {
     if (group.isNotEmpty) {
       setState(() {
-        group.clear();
+        group = const ISet.empty();
       });
     }
   }
 
   void addSelected(String package) {
-    group.add(package);
+    if (group.contains(package)) return;
+
+    group = group.add(package);
     debounce(() {
       setState(() {});
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -171,7 +180,9 @@ class _GroupManagerState extends State<_GroupManager> {
   }
 
   void removeSelected(String package) {
-    if (group.remove(package)) {}
+    if (!group.contains(package)) return;
+
+    group = group.remove(package);
     debounce(() {
       setState(() {});
     });
@@ -180,7 +191,7 @@ class _GroupManagerState extends State<_GroupManager> {
   @override
   void setState(VoidCallback fn) {
     super.setState(fn);
-    widget.onChange(Set.from(group));
+    widget.onChange(group);
   }
 
   @override
@@ -201,11 +212,19 @@ class _GroupManagerState extends State<_GroupManager> {
           return const SizedBox.shrink();
         }
 
-        final group = this.group.toList();
+        final group = this.group.toIList();
+        final applications = state.applications.where(
+          (application) {
+            return group.contains(application.package) ||
+                !state.groups.any(
+                  (group) => group.packages.contains(application.package),
+                );
+          },
+        );
         final unselected = <Application>[];
         final selected = <Application>[];
 
-        for (final application in state.entries.whereType<Application>()) {
+        for (final application in applications) {
           if (group.contains(application.package)) {
             selected.add(application);
           } else {

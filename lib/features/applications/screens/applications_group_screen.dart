@@ -1,12 +1,16 @@
 import 'package:collection/collection.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
+import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/applications_group.dart';
 import 'package:minimum/routes.dart';
+import 'package:minimum/widgets/confirmation_dialog.dart';
 
 class ApplicationsGroupArgumentsScreen {
   final String id;
@@ -20,7 +24,7 @@ class ApplicationsGroupArgumentsScreen {
 
 typedef _GroupState = ({
   ApplicationsGroup group,
-  List<Application> applications
+  IList<Application> applications
 });
 
 class ApplicationsGroupScreen extends StatelessWidget {
@@ -32,6 +36,7 @@ class ApplicationsGroupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ApplicationsGroupArgumentsScreen.of(context);
     final applications = dependencies<ApplicationsManagerCubit>();
+    final translation = context.translations;
     final content = BlocSelector<ApplicationsManagerCubit,
         ApplicationsManagerState, _GroupState?>(
       bloc: applications,
@@ -46,16 +51,60 @@ class ApplicationsGroupScreen extends StatelessWidget {
           (application) => group.packages.contains(application.package),
         );
 
-        return (group: group, applications: applications.toList()..sort());
+        return (group: group, applications: IList(applications).sort());
       },
       builder: (context, state) {
-        if (state == null) return const SizedBox.shrink();
+        if (state == null) {
+          WidgetsBinding.instance.addPostFrameCallback(
+            (_) => Navigator.pop(context),
+          );
+          return const SizedBox.shrink();
+        }
         final group = state.group;
-
         return CustomScrollView(
           slivers: [
             SliverAppBar.large(
-              title: Text(group.label),
+              title: Row(
+                children: [
+                  Text(group.label),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () {
+                      Navigator.pushNamed(
+                        context,
+                        CreateApplicationsGroupScreen.route,
+                        arguments: CreateApplicationsGroupScreenArguments(
+                          initial: group,
+                          onConfirm: (group) {
+                            applications.addOrUpdateGroup(group);
+                          },
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.dashboard_customize_outlined),
+                  ),
+                  IconButton(
+                    onPressed: () => showDialog(
+                      context: context,
+                      builder: (context) {
+                        return ConfirmationDialog(
+                          title: translation.wantDeleteGroup,
+                          message: translation.groupDeleteHint(
+                            count: state.applications.length,
+                          ),
+                          confirm: translation.confirm,
+                          decline: translation.cancel,
+                        );
+                      },
+                    ).then((confirmation) {
+                      if (confirmation == true) {
+                        applications.removeGroup(group.id);
+                      }
+                    }),
+                    icon: const Icon(Icons.delete_outline),
+                  ),
+                ],
+              ),
             ),
             SliverEntries(entries: state.applications),
           ],

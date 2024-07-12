@@ -1,3 +1,4 @@
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/services.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_event.dart';
@@ -28,10 +29,10 @@ class ApplicationsManagerService {
   );
   final _icons = MemoryCache<Uint8List>(capacity: 100);
 
-  Future<List<ApplicationBase>> getInstalledApplications() async {
+  Future<IList<ApplicationBase>> getInstalledApplications() async {
     final json = await channel.invokeListMethod<Map>(kGetInstalledApplications);
     final applications =
-        json?.map((json) => ApplicationBase.fromJson(json.cast())).toList();
+        json?.map((json) => ApplicationBase.fromJson(json.cast())).toIList();
 
     return applications!;
   }

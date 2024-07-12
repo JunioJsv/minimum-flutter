@@ -47,5 +47,8 @@
   "title": "Title",
   "type_group_name": "Type the group name",
   "confirm_group": "@:confirm group",
-  "contain_n_thing": "Contains ${count} ${thing}"
+  "contain_n_thing": "Contains ${count} ${thing}",
+  "want_delete_group": "Do you want to delete the group?",
+  "group_delete_hint": "The group containing ${count} applications will be disbanded",
+  "cancel": "Cancel"
 }

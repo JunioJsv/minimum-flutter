@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:built_collection/built_collection.dart';
 import 'package:equatable/equatable.dart';
+import 'package:fast_immutable_collections/fast_immutable_collections.dart'
+    hide Entry;
 import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
@@ -87,7 +88,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   int? _getGroupIndex(String id) {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return null;
-    final index = state.groups.indexWhere(
+    final index = state._groups.indexWhere(
       (group) => group.id == id,
     );
     if (index == -1) return null;
@@ -97,13 +98,8 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   void add(Application application) {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;
-    final applications = BuiltList<Application>(state._applications).rebuild(
-      (applications) {
-        applications.add(application);
-        return applications;
-      },
-    );
-    final newState = state.copyWith(applications: applications.toList());
+    final applications = state._applications.add(application);
+    final newState = state.copyWith(applications: applications);
     addOrUpdateApplicationPreferences(
       application.package,
       (preferences) => preferences.copyWith(isNew: true),
@@ -116,10 +112,8 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     if (state is! ApplicationsManagerFetchSuccess) return;
     final index = _getApplicationIndex(package);
     if (index == null) return;
-    final applications = BuiltList<Application>(state._applications).rebuild(
-      (applications) => applications..removeAt(index),
-    );
-    final newState = state.copyWith(applications: applications.toList());
+    final applications = state._applications.removeAt(index);
+    final newState = state.copyWith(applications: applications);
     emit(newState);
   }
 
@@ -127,18 +121,20 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;
     final index = _getGroupIndex(group.id);
-    final groups = BuiltList<ApplicationsGroup>(state.groups).rebuild(
-      (groups) {
-        if (index != null) {
-          groups[index] = group;
-        } else {
-          groups.add(group);
-        }
+    final groups = index != null
+        ? state._groups.put(index, group)
+        : state._groups.add(group);
+    final newState = state.copyWith(groups: groups);
+    emit(newState);
+  }
 
-        return groups;
-      },
-    );
-    final newState = state.copyWith(groups: groups.toList());
+  void removeGroup(String id) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final index = _getGroupIndex(id);
+    if (index == null) return;
+    final groups = state._groups.removeAt(index);
+    final newState = state.copyWith(groups: groups);
     emit(newState);
   }
 
@@ -150,19 +146,12 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   }) {
     var state = newState ?? this.state;
     if (state is ApplicationsManagerFetchSuccess) {
-      final preferences =
-          BuiltMap<String, ApplicationPreferences>(state._preferences);
-      state = state.copyWith(
-        preferences: preferences.rebuild((preferences) {
-          return preferences
-            ..updateValue(
-              package,
-              callback,
-              ifAbsent: () => callback(const ApplicationPreferences()),
-            );
-        }).toMap(),
+      final preferences = state._preferences.update(
+        package,
+        callback,
+        ifAbsent: () => callback(const ApplicationPreferences()),
       );
-      emit(state);
+      emit(state.copyWith(preferences: preferences));
     }
   }
 

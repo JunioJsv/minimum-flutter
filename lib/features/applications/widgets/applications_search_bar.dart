@@ -1,3 +1,4 @@
+import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
@@ -9,7 +10,7 @@ import 'package:minimum/models/application.dart';
 import 'package:minimum/widgets/warning_container.dart';
 
 class ApplicationsSearchBar extends StatefulWidget {
-  final List<Application> applications;
+  final IList<Application> applications;
 
   const ApplicationsSearchBar({super.key, required this.applications});
 

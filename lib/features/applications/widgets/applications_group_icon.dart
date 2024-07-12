@@ -8,7 +8,7 @@ class ApplicationsGroupIcon extends StatelessWidget {
   const ApplicationsGroupIcon({
     super.key,
     required this.packages,
-  }) : assert(packages.length >= 2);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +39,13 @@ class ApplicationsGroupIcon extends StatelessWidget {
                       child: Align(
                         alignment: Alignment.topLeft,
                         child: ApplicationIcon(
+                          key: ValueKey(package),
                           package: package,
                           shadow: false,
                         ),
                       ),
-                    )
+                    ),
+                  if (row.length == 1) const Spacer(),
                 ],
               ),
             )

@@ -45,5 +45,8 @@
   "title": "Titulo",
   "type_group_name": "Digite o nome do grupo",
   "confirm_group": "@:confirm grupo",
-  "contain_n_thing": "Contém ${count} ${thing}"
+  "contain_n_thing": "Contém ${count} ${thing}",
+  "want_delete_group": "Deseja excluir o grupo?",
+  "group_delete_hint": "O grupo contendo ${count} aplicativos será desfeito",
+  "cancel": "Cancelar"
 }
