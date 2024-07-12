@@ -19,6 +19,8 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
   final List<ApplicationBase> _applications;
   final List<ApplicationsGroup> groups;
 
+  bool get isEmpty => _applications.isEmpty;
+
   List<Application> get applications {
     var applications = _applications.map(
       (raw) {
@@ -110,6 +112,7 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
         groups,
         isShowingHidden,
         _orderBy,
+        isEmpty,
       ];
 }
 

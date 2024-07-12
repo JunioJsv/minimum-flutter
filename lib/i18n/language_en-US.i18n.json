@@ -39,7 +39,7 @@
   "confirm": "Confirm",
   "added": "Added",
   "no_applications_added_on_group": "No applications added to the group",
-  "all_applications_added_on_group": "All applications have been added to the group",
+  "no_applications_available": "No applications available",
   "applications": "Applications",
   "description": "Description",
   "add_description_optional": "Add a description (optional)",

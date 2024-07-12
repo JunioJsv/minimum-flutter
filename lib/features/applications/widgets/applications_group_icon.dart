@@ -20,6 +20,13 @@ class ApplicationsGroupIcon extends StatelessWidget {
       decoration: BoxDecoration(
         color: theme.colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.1),
+            blurRadius: 10,
+            offset: const Offset(0, 0),
+          )
+        ],
       ),
       child: Column(
         children: [
@@ -31,7 +38,10 @@ class ApplicationsGroupIcon extends StatelessWidget {
                     Expanded(
                       child: Align(
                         alignment: Alignment.topLeft,
-                        child: ApplicationIcon(package: package),
+                        child: ApplicationIcon(
+                          package: package,
+                          shadow: false,
+                        ),
                       ),
                     )
                 ],

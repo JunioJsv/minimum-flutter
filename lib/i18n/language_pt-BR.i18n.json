@@ -37,7 +37,7 @@
   "confirm": "Confirmar",
   "added": "Adicionados",
   "no_applications_added_on_group": "Nenhum aplicativo adicionado ao grupo",
-  "all_applications_added_on_group": "Todos os aplicativos foram adicionados ao grupo",
+  "no_applications_available": "Nenhum aplicativo disponível",
   "applications": "Aplicativos",
   "description": "Descrição",
   "add_description_optional": "Adicione uma descrição (opcional)",

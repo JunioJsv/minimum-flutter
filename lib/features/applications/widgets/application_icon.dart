@@ -4,8 +4,13 @@ import 'package:minimum/services/applications_manager_service.dart';
 
 class ApplicationIcon extends StatefulWidget {
   final String package;
+  final bool shadow;
 
-  const ApplicationIcon({super.key, required this.package});
+  const ApplicationIcon({
+    super.key,
+    required this.package,
+    this.shadow = true,
+  });
 
   @override
   ApplicationIconState createState() => ApplicationIconState();
@@ -28,13 +33,15 @@ class ApplicationIconState extends State<ApplicationIcon>
             final bytes = snapshot.data;
             if (bytes == null) return const SizedBox.expand();
             return DecoratedBox(
-              decoration: BoxDecoration(boxShadow: <BoxShadow>[
-                BoxShadow(
-                  color: Colors.black.withOpacity(.1),
-                  blurRadius: 10,
-                  offset: const Offset(0, 0),
-                )
-              ]),
+              decoration: BoxDecoration(
+                boxShadow: widget.shadow ? <BoxShadow>[
+                  BoxShadow(
+                    color: Colors.black.withOpacity(.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 0),
+                  )
+                ] : null,
+              ),
               child: Image.memory(bytes),
             );
           }(),

@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
+import 'package:minimum/features/applications/screens/applications_group_screen.dart';
 import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/applications_group_avatar.dart';
@@ -17,6 +18,7 @@ import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/applications_group.dart';
+import 'package:minimum/models/entry.dart';
 import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/widgets/confirmation_dialog.dart';
 
@@ -88,6 +90,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     if (group.isNew) {
       applications.addOrUpdateGroup(group.copyWith(isNew: false));
     }
+    Navigator.of(context).pushNamed(
+      ApplicationsGroupScreen.route,
+      arguments: ApplicationsGroupArgumentsScreen(id: group.id),
+    );
   }
 
   Future<void> onApplicationTap(
@@ -177,8 +183,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
               return loading();
             }
 
-            final applications = state.applications;
-            if (applications.isEmpty) return loading();
+            if (state.isEmpty) return loading();
 
             return CustomScrollView(
               controller: scroll,
@@ -189,7 +194,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
                             .add(const EdgeInsets.only(top: 8)),
                     child: ApplicationsSearchBar(
-                      applications: applications,
+                      applications: state.applications,
                     ),
                   ),
                 ),
@@ -199,7 +204,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
                     child: ApplicationsShortcuts(),
                   ),
                 ),
-                _SliverApplications(state),
+                SliverEntries(entries: state.entries),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: kToolbarHeight),
                 )
@@ -212,10 +217,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   }
 }
 
-class _SliverApplications extends StatelessWidget {
-  final ApplicationsManagerFetchSuccess state;
+class SliverEntries extends StatelessWidget {
+  final List<Entry> entries;
 
-  const _SliverApplications(this.state);
+  const SliverEntries({super.key, required this.entries});
 
   List<Object> getPreferencesProps(PreferencesManagerState state) {
     return [state.isGridLayoutEnabled, state.gridCrossAxisCount];
@@ -230,9 +235,10 @@ class _SliverApplications extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final screen = context.findAncestorStateOfType<ApplicationsScreenState>()!;
+    final ApplicationsScreenState screen =
+        context.findAncestorStateOfType() ?? dependencies();
     final PreferencesManagerCubit preferences = dependencies();
-    final entries = state.entries.map(
+    final entries = this.entries.map(
       (entry) {
         if (entry is Application) {
           return EntryWidgetArguments(

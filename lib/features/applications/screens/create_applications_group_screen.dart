@@ -18,9 +18,13 @@ import 'package:minimum/widgets/warning_container.dart';
 import 'package:uuid/uuid.dart';
 
 class CreateApplicationsGroupScreenArguments {
+  final ApplicationsGroup? initial;
   final void Function(ApplicationsGroup group) onConfirm;
 
-  CreateApplicationsGroupScreenArguments({required this.onConfirm});
+  CreateApplicationsGroupScreenArguments({
+    this.initial,
+    required this.onConfirm,
+  });
 
   static CreateApplicationsGroupScreenArguments of(BuildContext context) {
     return ModalRoute.of(context)!.arguments();
@@ -40,7 +44,8 @@ class CreateApplicationsGroupScreen extends StatefulWidget {
 class CreateApplicationsGroupScreenState
     extends State<CreateApplicationsGroupScreen> {
   late final arguments = CreateApplicationsGroupScreenArguments.of(context);
-  final packages = ValueNotifier<Set<String>>({});
+  late final packages =
+      ValueNotifier<Set<String>>(arguments.initial?.packages ?? {});
 
   @override
   void dispose() {
@@ -56,6 +61,8 @@ class CreateApplicationsGroupScreenState
       isScrollControlled: true,
       builder: (context) {
         return _ConfirmationBottomSheet(
+          title: arguments.initial?.label,
+          description: arguments.initial?.description,
           packages: packages,
           onConfirm: (title, description) {
             Navigator.pop(context);
@@ -275,7 +282,7 @@ class _GroupManagerState extends State<_GroupManager> {
                   SliverFillRemaining(
                     child: WarningContainer(
                       icon: Icons.apps_outage,
-                      message: translation.allApplicationsAddedOnGroup,
+                      message: translation.noApplicationsAvailable,
                       color: theme.colorScheme.onSurface,
                     ),
                   ),
