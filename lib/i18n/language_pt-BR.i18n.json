@@ -42,7 +42,7 @@
   "description": "Descrição",
   "add_description_optional": "Adicione uma descrição (opcional)",
   "group_name_required": "O nome do grupo é obrigatório",
-  "title": "Titulo",
+  "title": "Título",
   "type_group_name": "Digite o nome do grupo",
   "confirm_group": "@:confirm grupo",
   "contain_n_thing": "Contém ${count} ${thing}",
