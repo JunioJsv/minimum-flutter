@@ -61,13 +61,20 @@ class ApplicationsGroupScreen extends StatelessWidget {
           return const SizedBox.shrink();
         }
         final group = state.group;
+        final description = group.description;
+
         return CustomScrollView(
           slivers: [
             SliverAppBar.large(
               title: Row(
                 children: [
-                  Text(group.label),
-                  const Spacer(),
+                  Expanded(
+                    child: Text(
+                      group.label,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ),
                   IconButton(
                     onPressed: () {
                       Navigator.pushNamed(
@@ -106,7 +113,23 @@ class ApplicationsGroupScreen extends StatelessWidget {
                 ],
               ),
             ),
+            if (description != null && description.isNotEmpty)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8)
+                      .add(const EdgeInsets.only(bottom: 16)),
+                  child: Card.outlined(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(description),
+                    ),
+                  ),
+                ),
+              ),
             SliverEntries(entries: state.applications),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: kToolbarHeight),
+            )
           ],
         );
       },
