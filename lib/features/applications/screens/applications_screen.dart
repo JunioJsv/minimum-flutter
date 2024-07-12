@@ -159,6 +159,10 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    Widget loading() {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) {
@@ -170,8 +174,12 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
           bloc: applications,
           builder: (context, state) {
             if (state is! ApplicationsManagerFetchSuccess) {
-              return const Center(child: CircularProgressIndicator());
+              return loading();
             }
+
+            final applications = state.applications;
+            if (applications.isEmpty) return loading();
+
             return CustomScrollView(
               controller: scroll,
               slivers: [
@@ -181,7 +189,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
                         const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
                             .add(const EdgeInsets.only(top: 8)),
                     child: ApplicationsSearchBar(
-                      applications: state.applications,
+                      applications: applications,
                     ),
                   ),
                 ),

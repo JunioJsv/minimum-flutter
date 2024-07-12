@@ -28,10 +28,10 @@ class ApplicationsManagerService {
   );
   final _icons = MemoryCache<Uint8List>(capacity: 100);
 
-  Future<List<Application>> getInstalledApplications() async {
+  Future<List<ApplicationBase>> getInstalledApplications() async {
     final json = await channel.invokeListMethod<Map>(kGetInstalledApplications);
     final applications =
-        json?.map((json) => Application.fromJson(json.cast())).toList();
+        json?.map((json) => ApplicationBase.fromJson(json.cast())).toList();
 
     return applications!;
   }

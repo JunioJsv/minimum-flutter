@@ -42,9 +42,6 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
 
   final List<StreamSubscription> _subscriptions = [];
 
-  /// Internal applications preferences
-  var _preferences = BuiltMap<String, ApplicationPreferences>();
-
   Future<void> _onApplicationEvent(ApplicationEvent event) async {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;
@@ -106,15 +103,12 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
         return applications;
       },
     );
+    final newState = state.copyWith(applications: applications.toList());
     addOrUpdateApplicationPreferences(
       application.package,
       (preferences) => preferences.copyWith(isNew: true),
-      refresh: false,
+      newState: newState,
     );
-    final newState = state.copyWith(
-      applications: _onSetupApplications(applications.toList()),
-    );
-    emit(newState);
   }
 
   void remove(String package) {
@@ -125,9 +119,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     final applications = BuiltList<Application>(state._applications).rebuild(
       (applications) => applications..removeAt(index),
     );
-    final newState = state.copyWith(
-      applications: _onSetupApplications(applications.toList()),
-    );
+    final newState = state.copyWith(applications: applications.toList());
     emit(newState);
   }
 
@@ -154,51 +146,36 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     String package,
     ApplicationPreferences Function(ApplicationPreferences preferences)
         callback, {
-    bool refresh = true,
+    ApplicationsManagerFetchSuccess? newState,
   }) {
-    final state = this.state;
+    var state = newState ?? this.state;
     if (state is ApplicationsManagerFetchSuccess) {
-      _preferences = _preferences.rebuild((preferences) {
-        return preferences
-          ..updateValue(
-            package,
-            callback,
-            ifAbsent: () => callback(const ApplicationPreferences()),
-          );
-      });
-      if (refresh) {
-        emit(state.copyWith(applications: _getApplications(state)));
-      }
+      final preferences =
+          BuiltMap<String, ApplicationPreferences>(state._preferences);
+      state = state.copyWith(
+        preferences: preferences.rebuild((preferences) {
+          return preferences
+            ..updateValue(
+              package,
+              callback,
+              ifAbsent: () => callback(const ApplicationPreferences()),
+            );
+        }).toMap(),
+      );
+      emit(state);
     }
   }
 
-  List<Application> _onSetupApplications(List<Application> applications) {
-    return applications.map(
-      (application) {
-        final preference = _preferences[application.package];
-        if (preference != null) {
-          return application.copyWith(preferences: preference);
-        }
-
-        return application;
-      },
-    ).toList()
-      ..sort();
-  }
-
-  List<Application> _getApplications(ApplicationsManagerFetchSuccess state) {
-    return _onSetupApplications(state._applications);
-  }
-
   Future<void> getInstalled() async {
+    final state = this.state;
     emit(ApplicationsManagerFetchRunning());
     try {
       final applications = await service.getInstalledApplications();
-      emit(ApplicationsManagerFetchSuccess(
-        applications: _onSetupApplications(applications),
-        groups: [],
-        isShowingHidden: preferences.state.showHidden,
-      ));
+      emit(
+        state is ApplicationsManagerFetchSuccess
+            ? state.copyWith(applications: applications)
+            : ApplicationsManagerFetchSuccess(applications: applications),
+      );
     } catch (_, s) {
       emit(ApplicationsManagerFetchFailure());
       if (kDebugMode) {
@@ -210,7 +187,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   void sort() {
     final state = this.state;
     if (state is ApplicationsManagerFetchSuccess) {
-      emit(state.copyWith(applications: _getApplications(state)));
+      emit(state.copyWith());
     }
   }
 
@@ -237,32 +214,30 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   @override
   ApplicationsManagerState? fromJson(Map<String, dynamic> json) {
     final order = Order.fromJson(json['order']);
-    final preferences = json['preferences'] as Map?;
     if (order != null) {
       Entry.orderBy = order;
     }
-    if (preferences != null) {
-      _preferences = BuiltMap.from(preferences.map(
-        (key, json) {
-          return MapEntry(
-            key,
-            ApplicationPreferences.fromJson((json as Map).cast()),
-          );
-        },
-      ));
+
+    try {
+      return ApplicationsManagerFetchSuccess.fromJson(json).copyWith(
+        isShowingHidden: preferences.state.showHidden,
+      );
+    } catch (_, s) {
+      debugPrintStack(stackTrace: s, label: '$runtimeType');
     }
     return null;
   }
 
   @override
   Map<String, dynamic>? toJson(ApplicationsManagerState state) {
-    return {
-      'order': Entry.orderBy.toJson(),
-      'preferences': _preferences.map(
-        (key, preference) {
-          return MapEntry(key, preference.toJson());
-        },
-      ).toMap()
-    };
+    try {
+      if (state is ApplicationsManagerFetchSuccess) {
+        return state.toJson();
+      }
+    } catch (_, s) {
+      debugPrintStack(stackTrace: s, label: '$runtimeType');
+    }
+
+    return null;
   }
 }

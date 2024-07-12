@@ -12,15 +12,36 @@ final class ApplicationsManagerInitial extends ApplicationsManagerState {}
 final class ApplicationsManagerFetchRunning extends ApplicationsManagerState {}
 
 final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
+  final _orderBy = Entry.orderBy;
   final bool isShowingHidden;
-  final List<Application> _applications;
+
+  final Map<String, ApplicationPreferences> _preferences;
+  final List<ApplicationBase> _applications;
   final List<ApplicationsGroup> groups;
 
-  List<Application> get applications => !isShowingHidden
-      ? _applications
-          .where((application) => !application.preferences.isHidden)
-          .toList()
-      : _applications;
+  List<Application> get applications {
+    var applications = _applications.map(
+      (raw) {
+        final application = Application(
+          label: raw.label,
+          package: raw.package,
+          version: raw.version,
+        );
+        if (_preferences.containsKey(application.package)) {
+          return application.copyWith(
+            preferences: _preferences[application.package],
+          );
+        }
+        return application;
+      },
+    );
+    if (!isShowingHidden) {
+      applications = applications
+          .where((application) => !application.preferences.isHidden);
+    }
+
+    return applications.toList();
+  }
 
   /// Applications and groups
   List<Entry> get entries => [
@@ -32,26 +53,64 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
         ...groups
       ]..sort();
 
-  const ApplicationsManagerFetchSuccess({
-    required List<Application> applications,
-    required this.groups,
-    required this.isShowingHidden,
-  }) : _applications = applications;
+  ApplicationsManagerFetchSuccess({
+    Map<String, ApplicationPreferences> preferences = const {},
+    List<ApplicationBase> applications = const [],
+    this.groups = const [],
+    this.isShowingHidden = false,
+  })  : _preferences = preferences,
+        _applications = applications;
 
   ApplicationsManagerFetchSuccess copyWith({
-    List<Application>? applications,
+    Map<String, ApplicationPreferences>? preferences,
+    List<ApplicationBase>? applications,
     List<ApplicationsGroup>? groups,
     bool? isShowingHidden,
   }) {
     return ApplicationsManagerFetchSuccess(
+      preferences: preferences ?? _preferences,
       applications: applications ?? _applications,
       groups: groups ?? this.groups,
       isShowingHidden: isShowingHidden ?? this.isShowingHidden,
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'order': _orderBy.name,
+      'preferences': _preferences.map(
+        (key, preferences) => MapEntry(key, preferences.toJson()),
+      ),
+      'groups': groups.map((group) => group.toJson()).toList(),
+    };
+  }
+
+  factory ApplicationsManagerFetchSuccess.fromJson(Map<String, dynamic> json) {
+    return ApplicationsManagerFetchSuccess(
+      preferences: (json['preferences'] as Map).map(
+        (key, json) {
+          return MapEntry(
+            key,
+            ApplicationPreferences.fromJson((json as Map).cast()),
+          );
+        },
+      ),
+      groups: (json['groups'] as List)
+          .map((json) => ApplicationsGroup.fromJson(
+                (json as Map).cast(),
+              ))
+          .toList(),
+    );
+  }
+
   @override
-  List<Object> get props => [_applications, groups, isShowingHidden];
+  List<Object> get props => [
+        _preferences,
+        _applications,
+        groups,
+        isShowingHidden,
+        _orderBy,
+      ];
 }
 
 final class ApplicationsManagerFetchFailure extends ApplicationsManagerState {}

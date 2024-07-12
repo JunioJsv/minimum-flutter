@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:minimum/models/application_preferences.dart';
 import 'package:minimum/models/entry.dart';
@@ -5,8 +6,32 @@ import 'package:minimum/models/entry.dart';
 part 'application.g.dart';
 
 @JsonSerializable()
-class Application extends Entry {
+class ApplicationBase extends Equatable {
+  final String label;
   final String package;
+  final String version;
+
+  const ApplicationBase({
+    required this.label,
+    required this.package,
+    required this.version,
+  });
+
+  factory ApplicationBase.fromJson(Map<String, dynamic> json) {
+    return _$ApplicationBaseFromJson(json);
+  }
+
+  Map<String, dynamic> toJson() => _$ApplicationBaseToJson(this);
+
+  @override
+  List<Object?> get props => [label, package, version];
+}
+
+@JsonSerializable()
+class Application extends Entry implements ApplicationBase {
+  @override
+  final String package;
+  @override
   final String version;
 
   final ApplicationPreferences preferences;
@@ -31,6 +56,7 @@ class Application extends Entry {
     return _$ApplicationFromJson(json);
   }
 
+  @override
   Map<String, dynamic> toJson() => _$ApplicationToJson(this);
 
   Application copyWith({
