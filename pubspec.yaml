@@ -2,7 +2,7 @@ name: minimum
 description: "Android app launcher"
 publish_to: 'none'
 
-version: 2.0.0+142
+version: 2.0.0+143
 
 environment:
   sdk: '>=3.4.0 <4.0.0'
@@ -27,6 +27,7 @@ dependencies:
   uuid: 4.4.0
   fast_immutable_collections: 10.2.4
   android_intent_plus: 5.0.2
+  transparent_image: 2.0.1
 
 dev_dependencies:
   flutter_test:

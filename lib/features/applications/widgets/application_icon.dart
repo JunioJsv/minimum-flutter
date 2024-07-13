@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class ApplicationIcon extends StatefulWidget {
   final String package;
@@ -27,24 +28,24 @@ class ApplicationIconState extends State<ApplicationIcon>
     return FutureBuilder(
       future: icon,
       builder: (context, snapshot) {
-        return AnimatedSwitcher(
-          duration: kThemeAnimationDuration,
-          child: () {
-            final bytes = snapshot.data;
-            if (bytes == null) return const SizedBox.expand();
-            return DecoratedBox(
-              decoration: BoxDecoration(
-                boxShadow: widget.shadow ? <BoxShadow>[
-                  BoxShadow(
-                    color: Colors.black.withOpacity(.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 0),
-                  )
-                ] : null,
-              ),
-              child: Image.memory(bytes),
-            );
-          }(),
+        final bytes = snapshot.data;
+        if (bytes == null) return const SizedBox.expand();
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            boxShadow: widget.shadow
+                ? <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.black.withOpacity(.1),
+                      blurRadius: 10,
+                      offset: const Offset(0, 0),
+                    )
+                  ]
+                : null,
+          ),
+          child: FadeInImage(
+            placeholder: MemoryImage(kTransparentImage),
+            image: MemoryImage(bytes),
+          ),
         );
       },
     );
