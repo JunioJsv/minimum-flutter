@@ -42,9 +42,11 @@ class ApplicationIconState extends State<ApplicationIcon>
                   ]
                 : null,
           ),
-          child: FadeInImage(
-            placeholder: MemoryImage(kTransparentImage),
-            image: MemoryImage(bytes),
+          child: SizedBox.expand(
+            child: FadeInImage(
+              placeholder: MemoryImage(kTransparentImage),
+              image: MemoryImage(bytes),
+            ),
           ),
         );
       },

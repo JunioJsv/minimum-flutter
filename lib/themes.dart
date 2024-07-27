@@ -5,7 +5,7 @@ const appBarTheme = AppBarTheme(elevation: 1);
 
 SliderThemeData sliderTheme(ColorScheme colorScheme) {
   return SliderThemeData(
-    overlayShape: SliderComponentShape.noOverlay,
+    // overlayShape: SliderComponentShape.noOverlay,
     inactiveTrackColor: colorScheme.primary.withOpacity(.2),
   );
 }

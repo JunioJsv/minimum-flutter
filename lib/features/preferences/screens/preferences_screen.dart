@@ -42,7 +42,6 @@ class PreferencesScreen extends StatelessWidget {
             builder: (context, value) {
               return SwitchListTile(
                 title: Text(translation.gridView),
-                subtitle: Text(translation.enableGridView),
                 value: value,
                 onChanged: (value) => preferences.update((preferences) {
                   return preferences.copyWith(isGridLayoutEnabled: value);
@@ -63,6 +62,8 @@ class PreferencesScreen extends StatelessWidget {
               return SliderListTile(
                 min: 3,
                 max: 5,
+                title: translation.gridCrossAxisCount,
+                subtitle: translation.defineApplicationsPerLine,
                 isEnabled: preference.isEnabled,
                 value: preference.count,
                 onChange: (int value) => preferences.update((preferences) {
@@ -71,7 +72,7 @@ class PreferencesScreen extends StatelessWidget {
               );
             },
           ),
-          const Divider(height: 48),
+          const Divider(height: 32),
           CategoryText(text: translation.general),
           BlocSelector<PreferencesManagerCubit, PreferencesManagerState, bool>(
             bloc: preferences,
@@ -117,7 +118,7 @@ class PreferencesScreen extends StatelessWidget {
               );
             },
           ),
-          const Divider(height: 48),
+          const Divider(height: 32),
           CategoryText(text: translation.about),
           FutureBuilder<Application>(
               future: service.getApplication('juniojsv.minimum'),
@@ -154,6 +155,7 @@ class PreferencesScreen extends StatelessWidget {
               );
             },
           ),
+          const SizedBox(height: kToolbarHeight),
         ],
       ),
     );
