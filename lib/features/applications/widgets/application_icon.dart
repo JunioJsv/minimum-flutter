@@ -29,7 +29,6 @@ class ApplicationIconState extends State<ApplicationIcon>
       future: icon,
       builder: (context, snapshot) {
         final bytes = snapshot.data;
-        if (bytes == null) return const SizedBox.expand();
         return DecoratedBox(
           decoration: BoxDecoration(
             boxShadow: widget.shadow
@@ -43,10 +42,12 @@ class ApplicationIconState extends State<ApplicationIcon>
                 : null,
           ),
           child: SizedBox.expand(
-            child: FadeInImage(
-              placeholder: MemoryImage(kTransparentImage),
-              image: MemoryImage(bytes),
-            ),
+            child: bytes != null
+                ? FadeInImage(
+                    placeholder: MemoryImage(kTransparentImage),
+                    image: MemoryImage(bytes),
+                  )
+                : Container(),
           ),
         );
       },

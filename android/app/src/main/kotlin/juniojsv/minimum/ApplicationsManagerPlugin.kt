@@ -3,26 +3,31 @@ package juniojsv.minimum
 import android.app.Activity
 import android.content.Intent
 import android.content.Intent.ACTION_DELETE
-import android.content.IntentFilter
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
-import android.graphics.Bitmap
-import android.graphics.Canvas
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
-import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import java.io.ByteArrayOutputStream
+import juniojsv.minimum.utils.toByteArray
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 
-class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
+class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     private lateinit var channel: MethodChannel
     private lateinit var pm: PackageManager
     private lateinit var activity: Activity
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Default + Job()
 
     companion object {
         const val CHANNEL_NAME = "juniojsv.minimum/applications_manager_plugin"
@@ -78,26 +83,27 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         }
     }
 
-    private fun getInstalledApplications(result: MethodChannel.Result) {
+    private fun getInstalledApplications(result: MethodChannel.Result) = launch {
         val flags = PackageManager.GET_META_DATA
-        val apps = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val infos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(flags.toLong()))
         } else {
             pm.getInstalledApplications(flags)
         }
 
-        val json = mutableListOf<Map<String, Any>>()
-
-        for (app in apps) {
-            val packageName = app.packageName
-            val isMinimumAppPackage = packageName == BuildConfig.APPLICATION_ID
-            val isLaunchable = pm.getLaunchIntentForPackage(packageName) != null
-            if (!isMinimumAppPackage && isLaunchable) {
-                json.add(getApplicationJson(app, flags))
+        val applications = infos.map { app ->
+            async {
+                val packageName = app.packageName
+                val isMinimumAppPackage = packageName == BuildConfig.APPLICATION_ID
+                val isLaunchable = pm.getLaunchIntentForPackage(packageName) != null
+                if (!isMinimumAppPackage && isLaunchable) {
+                    return@async getApplicationJson(app, flags)
+                }
+                return@async null
             }
-        }
+        }.awaitAll().filterNotNull()
 
-        result.success(json)
+        result.success(applications)
     }
 
     private fun getApplicationJson(app: ApplicationInfo, flags: Int): Map<String, Any> {
@@ -123,8 +129,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         result: MethodChannel.Result
     ) {
         val flags = PackageManager.GET_META_DATA
-        val packageName = getPackageNameFromMethodCall(call, result) ?: return
         try {
+            val packageName = call.argument<String>("package_name")!!
             val app = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 pm.getApplicationInfo(
                     packageName,
@@ -139,21 +145,9 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         }
     }
 
-    private fun getPackageNameFromMethodCall(
-        call: MethodCall,
-        result: MethodChannel.Result
-    ): String? {
-        val packageName = call.argument<String>("package_name")
-        if (packageName == null) {
-            result.error("package_name_is_null", null, null)
-        }
-
-        return packageName;
-    }
-
     private fun launchApplication(call: MethodCall, result: MethodChannel.Result) {
-        val packageName = getPackageNameFromMethodCall(call, result) ?: return
         try {
+            val packageName = call.argument<String>("package_name")!!
             val intent = pm.getLaunchIntentForPackage(packageName)
             if (intent == null) {
                 result.error("cant_launch_$packageName", null, null)
@@ -165,31 +159,22 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
         }
     }
 
-    private fun getApplicationIcon(call: MethodCall, result: MethodChannel.Result) {
-        val packageName = getPackageNameFromMethodCall(call, result) ?: return
+    private fun getApplicationIcon(call: MethodCall, result: MethodChannel.Result) = launch {
         try {
-            val icon = pm.getApplicationIcon(packageName)
-            val bitmap = Bitmap.createBitmap(
-                icon.intrinsicWidth,
-                icon.intrinsicHeight,
-                Bitmap.Config.ARGB_8888
-            )
-            val canvas = Canvas(bitmap)
-            icon.setBounds(0, 0, canvas.width, canvas.height)
-            icon.draw(canvas)
-            val bytes = ByteArrayOutputStream().use {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
-                it.toByteArray()
-            }
-            result.success(bytes)
+            val packageName = call.argument<String>("package_name")
+            val size = call.argument<Int>("size")
+            val icon = if (packageName != null)
+                pm.getApplicationIcon(packageName)
+            else activity.getDrawable(android.R.drawable.sym_def_app_icon)!!
+            result.success(icon.toByteArray(size, size))
         } catch (e: Exception) {
             result.error(GET_APPLICATION_ICON, e.message, null)
         }
     }
 
     private fun openApplicationDetails(call: MethodCall, result: MethodChannel.Result) {
-        val packageName = getPackageNameFromMethodCall(call, result) ?: return
         try {
+            val packageName = call.argument<String>("package_name")!!
             activity.startActivity(
                 Intent(
                     Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
@@ -203,8 +188,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware {
     }
 
     private fun uninstallApplication(call: MethodCall, result: MethodChannel.Result) {
-        val packageName = getPackageNameFromMethodCall(call, result) ?: return
         try {
+            val packageName = call.argument<String>("package_name")!!
             activity.startActivity(
                 Intent(
                     ACTION_DELETE,

@@ -44,13 +44,19 @@ class ApplicationsManagerService {
     );
   }
 
-  Future<Uint8List> getApplicationIcon(String package) async {
+  Future<Uint8List> getApplicationIcon([
+    String? package,
+    int size = 96,
+  ]) async {
     final bytes = await _icons.get(
-      package,
+      package ?? 'default',
       () async {
         final bytes = await channel.invokeMethod<Uint8List>(
           kGetApplicationIcon,
-          {'package_name': package},
+          {
+            if (package != null) 'package_name': package,
+            'size': size,
+          },
         );
 
         return bytes!;
