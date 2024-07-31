@@ -3,6 +3,10 @@ allprojects {
         google()
         mavenCentral()
     }
+
+    ext {
+        keystorePropertiesFile = findProperty('KEYSTORE_PROPERTIES_FILE') ?: 'key.properties'
+    }
 }
 
 rootProject.buildDir = "../build"
