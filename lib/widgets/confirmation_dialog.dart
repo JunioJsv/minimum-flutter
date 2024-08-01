@@ -5,6 +5,7 @@ class ConfirmationDialog extends StatelessWidget {
   final String? _message;
   final String? _confirm;
   final String? _decline;
+  final Widget? icon;
 
   const ConfirmationDialog({
     super.key,
@@ -12,6 +13,7 @@ class ConfirmationDialog extends StatelessWidget {
     String? message,
     String? confirm,
     String? decline,
+    this.icon,
   })  : _confirm = confirm,
         _decline = decline,
         _message = message;
@@ -20,6 +22,7 @@ class ConfirmationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: Text(title),
+      icon: icon,
       content: _message != null ? Text(_message) : null,
       actions: [
         if (_decline != null)

@@ -86,11 +86,12 @@ class PreferencesScreen extends StatelessWidget {
                 value: isShowingHidden,
                 onChanged: (value) async {
                   final isDeviceSecure = await auth.isDeviceSecure();
-                  if (!isDeviceSecure) {
+                  if (!isDeviceSecure && value) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       showDialog(
                         context: context,
                         builder: (context) => ConfirmationDialog(
+                          icon: const Icon(Icons.visibility_outlined),
                           title: translation.lockscreenRequired,
                           message: translation.setupLockscreen(
                             to: translation.showHiddenApplications

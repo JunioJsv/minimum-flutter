@@ -27,7 +27,7 @@
   "show_hidden": "Ver ocultos",
   "show_hidden_applications": "Exibir aplicativos ocultados",
   "lockscreen_required": "Bloqueio de tela necessário",
-  "setup_lockscreen": "Configure o bloqueio de tela para ${to}",
+  "setup_lockscreen": "Para garantir sua privacidade, a autenticação através do bloqueio de tela é obrigatória para ${to}. Portanto, certifique-se de que o bloqueio de tela esteja configurado.",
   "understood": "Entendi",
   "authentication_required": "Autenticação necessária",
   "use_authentication": "Use suas credenciais para ${to}",
@@ -47,7 +47,7 @@
   "confirm_group": "@:confirm grupo",
   "contain_n_thing": "Contém ${count} ${thing}",
   "want_delete_group": "Deseja excluir o grupo?",
-  "group_delete_hint": "O grupo contendo ${count} aplicativos será desfeito",
+  "group_delete_hint": "O grupo contendo ${count} aplicativos será desfeito.",
   "cancel": "Cancelar",
   "take_pictures_with": "Tire fotos com"
 }

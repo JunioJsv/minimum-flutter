@@ -29,7 +29,7 @@
   "show_hidden": "View hidden",
   "show_hidden_applications": "Show hidden applications",
   "lockscreen_required": "Lockscreen required",
-  "setup_lockscreen": "Set up the lockscreen to ${to}",
+  "setup_lockscreen": "To ensure privacy, authentication via the lock screen is required for ${to}. Therefore, make sure the lock screen is configured.",
   "understood": "Understood",
   "authentication_required": "Authentication required",
   "use_authentication": "Use your credentials to ${to}",
@@ -49,7 +49,7 @@
   "confirm_group": "@:confirm group",
   "contain_n_thing": "Contains ${count} ${thing}",
   "want_delete_group": "Do you want to delete the group?",
-  "group_delete_hint": "The group containing ${count} applications will be disbanded",
+  "group_delete_hint": "The group containing ${count} applications will be disbanded.",
   "cancel": "Cancel",
   "take_pictures_with": "Take pictures with"
 }
