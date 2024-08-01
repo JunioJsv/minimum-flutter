@@ -49,5 +49,8 @@
   "want_delete_group": "Deseja excluir o grupo?",
   "group_delete_hint": "O grupo contendo ${count} aplicativos será desfeito.",
   "cancel": "Cancelar",
-  "take_pictures_with": "Tire fotos com"
+  "take_pictures_with": "Tire fotos com",
+  "iconPack": "Pacote de ícones",
+  "iconPacks": "Pacotes de ícones",
+  "standard": "Padrão"
 }

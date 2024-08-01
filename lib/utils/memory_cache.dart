@@ -22,4 +22,9 @@ class MemoryCache<T> {
 
     return entry;
   }
+
+  void clear() {
+    _cache.clear();
+    _keys.clear();
+  }
 }

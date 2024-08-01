@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/screens/applications_group_screen.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
+import 'package:minimum/features/icon_packs/screens/icon_pack_selector_screen.dart';
 import 'package:minimum/features/preferences/screens/preferences_screen.dart';
 
 extension RouteExtension on Route<dynamic> {
@@ -24,4 +25,5 @@ final Map<String, WidgetBuilder> routes = {
   CreateApplicationsGroupScreen.route: (context) =>
       const CreateApplicationsGroupScreen(),
   ApplicationsGroupScreen.route: (context) => const ApplicationsGroupScreen(),
+  IconPackSelectorScreen.route: (context) => const IconPackSelectorScreen(),
 };

@@ -2,6 +2,7 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/services.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_event.dart';
+import 'package:minimum/models/icon_pack.dart';
 import 'package:minimum/utils/memory_cache.dart';
 
 class ApplicationsManagerService {
@@ -18,6 +19,9 @@ class ApplicationsManagerService {
   static const kUninstallApplication = 'uninstall_application';
 
   static const kGetApplication = 'get_application';
+  static const kGetIconPacks = 'get_icon_packs';
+
+  static const kSetIconPack = 'set_icon_pack';
 
   final channel = const MethodChannel(kChannelName);
   final eventsChannel = const EventChannel(kEventsChannelName);
@@ -98,5 +102,29 @@ class ApplicationsManagerService {
     );
 
     return Application.fromJson((json as Map).cast());
+  }
+
+  Future<IList<IconPack>> getIconPacks() async {
+    final json = await channel.invokeListMethod<Map>(kGetIconPacks);
+    final iconPacks = json?.map((json) {
+      return IconPack.fromJson(json.cast());
+    }).toIList();
+
+    return iconPacks!;
+  }
+
+  Future<bool> setIconPack(String? package) async {
+    final isIconPackApplied = await channel.invokeMethod<bool>(
+      kSetIconPack,
+      {
+        if (package != null) 'package_name': package,
+      },
+    ).then((value) => value ?? false);
+
+    if (isIconPackApplied) {
+      _icons.clear();
+    }
+
+    return isIconPackApplied;
   }
 }

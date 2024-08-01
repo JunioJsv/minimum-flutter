@@ -25,3 +25,4 @@ targets:
             - "lib/models/application_event.dart"
             - "lib/models/applications_group.dart"
             - "lib/features/applications/blocs/applications_manager/applications_manager_cubit.dart"
+            - "lib/models/icon_pack.dart"

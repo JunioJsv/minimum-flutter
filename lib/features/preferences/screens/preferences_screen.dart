@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/environment.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/widgets/application_icon.dart';
+import 'package:minimum/features/icon_packs/screens/icon_pack_selector_screen.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/features/preferences/widgets/category_text.dart';
 import 'package:minimum/features/preferences/widgets/slider_list_tile.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/models/icon_pack.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/widgets/confirmation_dialog.dart';
@@ -69,6 +72,41 @@ class PreferencesScreen extends StatelessWidget {
                 onChange: (int value) => preferences.update((preferences) {
                   return preferences.copyWith(gridCrossAxisCount: value);
                 }),
+              );
+            },
+          ),
+          BlocSelector<PreferencesManagerCubit, PreferencesManagerState,
+              IconPack?>(
+            bloc: preferences,
+            selector: (state) {
+              return state.iconPack;
+            },
+            builder: (context, iconPack) {
+              final subtitle = iconPack?.label ?? translation.standard;
+              final package = iconPack?.package;
+              return ListTile(
+                key: ValueKey(package ?? 'system'),
+                title: Text(translation.iconPack),
+                subtitle: Text(subtitle),
+                leading: package != null
+                    ? SizedBox.square(
+                        dimension: 48,
+                        child: ApplicationIcon(package: package),
+                      )
+                    : null,
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    IconPackSelectorScreen.route,
+                    arguments: IconPackSelectorScreenArguments(
+                      onSelect: (value) {
+                        preferences.update((preferences) {
+                          return preferences.copyWith(iconPack: () => value);
+                        });
+                      },
+                    ),
+                  );
+                },
               );
             },
           ),

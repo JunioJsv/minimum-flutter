@@ -7,21 +7,27 @@ class PreferencesManagerState extends Equatable {
   @JsonKey(includeToJson: false)
   final bool showHidden;
 
+  final IconPack? iconPack;
+
   const PreferencesManagerState({
     this.isGridLayoutEnabled = false,
     this.gridCrossAxisCount = 4,
     this.showHidden = false,
+    this.iconPack,
   });
 
   PreferencesManagerState copyWith({
     bool? isGridLayoutEnabled,
     int? gridCrossAxisCount,
     bool? showHidden,
+    ValueGetter<IconPack?>? iconPack,
   }) {
     return PreferencesManagerState(
-        isGridLayoutEnabled: isGridLayoutEnabled ?? this.isGridLayoutEnabled,
-        gridCrossAxisCount: gridCrossAxisCount ?? this.gridCrossAxisCount,
-        showHidden: showHidden ?? this.showHidden);
+      isGridLayoutEnabled: isGridLayoutEnabled ?? this.isGridLayoutEnabled,
+      gridCrossAxisCount: gridCrossAxisCount ?? this.gridCrossAxisCount,
+      showHidden: showHidden ?? this.showHidden,
+      iconPack: iconPack != null ? iconPack() : this.iconPack,
+    );
   }
 
   factory PreferencesManagerState.fromJson(Map<String, dynamic> json) {
@@ -31,9 +37,10 @@ class PreferencesManagerState extends Equatable {
   Map<String, dynamic> toJson() => _$PreferencesManagerStateToJson(this);
 
   @override
-  List<Object> get props => [
+  List<Object?> get props => [
         isGridLayoutEnabled,
         gridCrossAxisCount,
         showHidden,
+        iconPack,
       ];
 }

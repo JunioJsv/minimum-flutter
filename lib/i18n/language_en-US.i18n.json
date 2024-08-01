@@ -51,5 +51,8 @@
   "want_delete_group": "Do you want to delete the group?",
   "group_delete_hint": "The group containing ${count} applications will be disbanded.",
   "cancel": "Cancel",
-  "take_pictures_with": "Take pictures with"
+  "take_pictures_with": "Take pictures with",
+  "iconPack": "Icons pack",
+  "iconPacks": "Icons packs",
+  "standard": "Default"
 }

@@ -1,15 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/main.dart';
+import 'package:minimum/models/icon_pack.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ApplicationIcon extends StatefulWidget {
-  final String package;
+  final String? package;
   final bool shadow;
 
   const ApplicationIcon({
     super.key,
-    required this.package,
+    this.package,
     this.shadow = true,
   });
 
@@ -19,8 +23,34 @@ class ApplicationIcon extends StatefulWidget {
 
 class ApplicationIconState extends State<ApplicationIcon>
     with AutomaticKeepAliveClientMixin {
-  final ApplicationsManagerService service = dependencies();
-  late final icon = service.getApplicationIcon(widget.package);
+  final service = dependencies<ApplicationsManagerService>();
+  final preferences = dependencies<PreferencesManagerCubit>();
+  late IconPack? iconPack;
+  late var icon = service.getApplicationIcon(widget.package);
+
+  final List<StreamSubscription<dynamic>> subscriptions = [];
+
+  @override
+  void initState() {
+    iconPack = preferences.state.iconPack;
+    subscriptions.add(preferences.stream.listen((preferences) {
+      if (preferences.iconPack != iconPack) {
+        iconPack = preferences.iconPack;
+        setState(() {
+          icon = service.getApplicationIcon(widget.package);
+        });
+      }
+    }));
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in subscriptions) {
+      subscription.cancel();
+    }
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {

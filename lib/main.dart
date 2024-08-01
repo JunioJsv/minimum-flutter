@@ -42,7 +42,7 @@ class _MinimumAppState extends State<MinimumApp> {
     dependencies.registerSingleton(ApplicationsManagerService());
     dependencies.registerSingleton(LocalAuthenticationService());
     dependencies.registerSingleton(
-      PreferencesManagerCubit(),
+      PreferencesManagerCubit(dependencies()),
       dispose: (cubit) async => cubit.close(),
     );
     dependencies.registerLazySingleton(
