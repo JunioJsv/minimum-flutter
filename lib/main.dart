@@ -54,11 +54,17 @@ class _MinimumAppState extends State<MinimumApp> {
       },
       dispose: (cubit) async => cubit.close(),
     );
+    WidgetsBinding.instance.addObserver(
+      dependencies<ApplicationsManagerService>(),
+    );
     super.initState();
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(
+      dependencies<ApplicationsManagerService>(),
+    );
     dependencies.unregister<PreferencesManagerCubit>();
     dependencies.unregister<ApplicationsManagerCubit>();
     dependencies.unregister<ApplicationsManagerService>();

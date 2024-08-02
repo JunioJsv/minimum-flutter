@@ -1,11 +1,16 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_event.dart';
 import 'package:minimum/models/icon_pack.dart';
 import 'package:minimum/utils/memory_cache.dart';
 
-class ApplicationsManagerService {
+mixin ApplicationsManagerServiceListener {
+  void didChangeApplicationsIcons() {}
+}
+
+class ApplicationsManagerService with WidgetsBindingObserver {
   static const kChannelName = 'juniojsv.minimum/applications_manager_plugin';
   static const kEventsChannelName = 'juniojsv.minimum/applications_events';
   static const kGetInstalledApplications = 'get_installed_applications';
@@ -23,6 +28,8 @@ class ApplicationsManagerService {
 
   static const kSetIconPack = 'set_icon_pack';
 
+  final _listeners = <ApplicationsManagerServiceListener>[];
+
   final channel = const MethodChannel(kChannelName);
   final eventsChannel = const EventChannel(kEventsChannelName);
   late final eventsStream = eventsChannel.receiveBroadcastStream().map(
@@ -39,6 +46,14 @@ class ApplicationsManagerService {
         json?.map((json) => ApplicationBase.fromJson(json.cast())).toIList();
 
     return applications!;
+  }
+
+  void addListener(ApplicationsManagerServiceListener listener) {
+    _listeners.add(listener);
+  }
+
+  void removeListener(ApplicationsManagerServiceListener listener) {
+    _listeners.remove(listener);
   }
 
   Future<void> launchApplication(String package) async {
@@ -113,6 +128,14 @@ class ApplicationsManagerService {
     return iconPacks!;
   }
 
+  @override
+  void didChangePlatformBrightness() {
+    _icons.clear();
+    for (final listener in _listeners) {
+      listener.didChangeApplicationsIcons();
+    }
+  }
+
   Future<bool> setIconPack(String? package) async {
     final isIconPackApplied = await channel.invokeMethod<bool>(
       kSetIconPack,
@@ -123,6 +146,9 @@ class ApplicationsManagerService {
 
     if (isIconPackApplied) {
       _icons.clear();
+      for (final listener in _listeners) {
+        listener.didChangeApplicationsIcons();
+      }
     }
 
     return isIconPackApplied;
