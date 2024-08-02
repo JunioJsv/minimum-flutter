@@ -107,7 +107,9 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             async {
                 val packageName = app.packageName
                 val isMinimumAppPackage = packageName == BuildConfig.APPLICATION_ID
-                val isLaunchable = pm.getLaunchIntentForPackage(packageName) != null
+                val launchIntent = pm.getLaunchIntentForPackage(packageName)
+                val isLaunchable =
+                    launchIntent != null && launchIntent.hasCategory(Intent.CATEGORY_LAUNCHER)
                 if (!isMinimumAppPackage && isLaunchable) {
                     return@async getApplicationJson(app, flags)
                 }
