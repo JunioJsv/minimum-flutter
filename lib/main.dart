@@ -6,6 +6,8 @@ import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/utils/applications_actions.dart';
+import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/routes.dart';
@@ -42,17 +44,25 @@ class _MinimumAppState extends State<MinimumApp> {
     dependencies.registerSingleton(ApplicationsManagerService());
     dependencies.registerSingleton(LocalAuthenticationService());
     dependencies.registerSingleton(
+      ApplicationsActions(),
+      dispose: (actions) => actions.dispose(),
+    );
+    dependencies.registerSingleton(
+      ApplicationsGroupsActions(),
+      dispose: (actions) => actions.dispose(),
+    );
+    dependencies.registerSingleton(
       PreferencesManagerCubit(dependencies()),
       dispose: (cubit) async => cubit.close(),
     );
     dependencies.registerLazySingleton(
-      () {
-        return ApplicationsManagerCubit(
-          dependencies(),
-          dependencies(),
-        )..getInstalled();
-      },
-      dispose: (cubit) async => cubit.close(),
+      () => ApplicationsManagerCubit(
+        dependencies(),
+        dependencies(),
+        dependencies(),
+        dependencies(),
+      )..getInstalledApplications(),
+      dispose: (cubit) => cubit.close(),
     );
     WidgetsBinding.instance.addObserver(
       dependencies<ApplicationsManagerService>(),
@@ -69,6 +79,8 @@ class _MinimumAppState extends State<MinimumApp> {
     dependencies.unregister<ApplicationsManagerCubit>();
     dependencies.unregister<ApplicationsManagerService>();
     dependencies.unregister<LocalAuthenticationService>();
+    dependencies.unregister<ApplicationsActions>();
+    dependencies.unregister<ApplicationsGroupsActions>();
     super.dispose();
   }
 

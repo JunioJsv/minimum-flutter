@@ -5,6 +5,8 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart'
     hide Entry;
 import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:minimum/features/applications/utils/applications_actions.dart';
+import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/application_event.dart';
@@ -16,12 +18,19 @@ import 'package:minimum/services/applications_manager_service.dart';
 
 part 'applications_manager_state.dart';
 
-class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
+class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
+    with ApplicationsActionsListener, ApplicationsGroupsActionsListener {
   final ApplicationsManagerService service;
   final PreferencesManagerCubit preferences;
+  final ApplicationsActions applicationsActions;
+  final ApplicationsGroupsActions applicationsGroupsActions;
 
-  ApplicationsManagerCubit(this.service, this.preferences)
-      : super(ApplicationsManagerInitial()) {
+  ApplicationsManagerCubit(
+    this.service,
+    this.preferences,
+    this.applicationsActions,
+    this.applicationsGroupsActions,
+  ) : super(ApplicationsManagerInitial()) {
     _subscriptions.add(
       preferences.stream.listen((preferences) {
         final state = this.state;
@@ -34,6 +43,8 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
         }
       }),
     );
+    applicationsActions.addListener(this);
+    applicationsGroupsActions.addListener(this);
     Future.microtask(() async {
       await for (final event in service.eventsStream) {
         await _onApplicationEvent(event);
@@ -46,116 +57,112 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
   Future<void> _onApplicationEvent(ApplicationEvent event) async {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;
-    final isAlreadyAdded = _getApplicationIndex(event.package) != null;
-    switch (event.action) {
-      case ApplicationIntentAction.packageAdded:
-        final application = await service.getApplication(event.package);
-        if (event.isReplacing) {
-          addOrUpdateApplicationPreferences(
-            application.package,
-            (preferences) => preferences.copyWith(isNew: true),
-          );
-        } else if (!isAlreadyAdded) {
-          add(application);
-        }
+    final type = event.type;
+    final packages = event.packages;
+    switch (type) {
+      case ApplicationEventType.onPackageAdded:
+        final package = packages.first;
+        final application = await service.getApplication(package);
+        emit(state.builder.addApplication(application).build());
         break;
-      case ApplicationIntentAction.packageRemoved:
-        if (!event.isReplacing) {
-          remove(event.package);
-        }
+      case ApplicationEventType.onPackageRemoved:
+        final package = packages.first;
+        emit(state.builder.removeApplication(package).build());
         break;
-      case ApplicationIntentAction.packageChanged:
-        if (!event.canLaunch) {
-          remove(event.package);
-        } else if (!isAlreadyAdded) {
-          final application = await service.getApplication(event.package);
-          add(application);
-        }
+      case ApplicationEventType.onPackageChanged:
+        final package = packages.first;
+        final isEnabled = await service.isApplicationEnabled(package);
+        _onApplicationEvent(
+          event.copyWith(
+            type: isEnabled
+                ? ApplicationEventType.onPackageAdded
+                : ApplicationEventType.onPackageRemoved,
+          ),
+        );
         break;
+      case ApplicationEventType.onPackagesAvailable:
+      // Todo implements onPackagesAvailable event
+      case ApplicationEventType.onPackagesUnavailable:
+      // Todo implements onPackagesUnavailable event
     }
   }
 
-  int? _getApplicationIndex(String package) {
-    final state = this.state;
-    if (state is! ApplicationsManagerFetchSuccess) return null;
-    final index = state._applications.indexWhere(
-      (application) => application.package == package,
-    );
-    if (index == -1) return null;
-    return index;
-  }
-
-  int? _getGroupIndex(String id) {
-    final state = this.state;
-    if (state is! ApplicationsManagerFetchSuccess) return null;
-    final index = state._groups.indexWhere(
-      (group) => group.id == id,
-    );
-    if (index == -1) return null;
-    return index;
-  }
-
-  void add(Application application) {
+  @override
+  void didTapApplication(Application application) {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;
-    final applications = state._applications.add(application);
-    final newState = state.copyWith(applications: applications);
-    addOrUpdateApplicationPreferences(
-      application.package,
-      (preferences) => preferences.copyWith(isNew: true),
-      newState: newState,
-    );
-  }
-
-  void remove(String package) {
-    final state = this.state;
-    if (state is! ApplicationsManagerFetchSuccess) return;
-    final index = _getApplicationIndex(package);
-    if (index == null) return;
-    final applications = state._applications.removeAt(index);
-    final newState = state.copyWith(applications: applications);
-    emit(newState);
-  }
-
-  void addOrUpdateGroup(ApplicationsGroup group) {
-    final state = this.state;
-    if (state is! ApplicationsManagerFetchSuccess) return;
-    final index = _getGroupIndex(group.id);
-    final groups = index != null
-        ? state._groups.put(index, group)
-        : state._groups.add(group);
-    final newState = state.copyWith(groups: groups);
-    emit(newState);
-  }
-
-  void removeGroup(String id) {
-    final state = this.state;
-    if (state is! ApplicationsManagerFetchSuccess) return;
-    final index = _getGroupIndex(id);
-    if (index == null) return;
-    final groups = state._groups.removeAt(index);
-    final newState = state.copyWith(groups: groups);
-    emit(newState);
-  }
-
-  void addOrUpdateApplicationPreferences(
-    String package,
-    ApplicationPreferences Function(ApplicationPreferences preferences)
-        callback, {
-    ApplicationsManagerFetchSuccess? newState,
-  }) {
-    var state = newState ?? this.state;
-    if (state is ApplicationsManagerFetchSuccess) {
-      final preferences = state._preferences.update(
-        package,
-        callback,
-        ifAbsent: () => callback(const ApplicationPreferences()),
+    if (application.preferences.isNew) {
+      emit(
+        state.builder
+            .addOrUpdateApplicationPreferences(
+              application.package,
+              (preferences) => preferences.copyWith(isNew: false),
+            )
+            .build(),
       );
-      emit(state.copyWith(preferences: preferences));
     }
   }
 
-  Future<void> getInstalled() async {
+  @override
+  void didToggleApplicationHide(Application application) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final isHidden = application.preferences.isHidden;
+    emit(
+      state.builder
+          .addOrUpdateApplicationPreferences(
+            application.package,
+            (preferences) => preferences.copyWith(isHidden: isHidden),
+          )
+          .build(),
+    );
+  }
+
+  @override
+  void didToggleApplicationPin(Application application) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final isPinned = application.preferences.isPinned;
+    emit(
+      state.builder
+          .addOrUpdateApplicationPreferences(
+            application.package,
+            (preferences) => preferences.copyWith(isPinned: isPinned),
+          )
+          .build(),
+    );
+  }
+
+  @override
+  void didTapApplicationsGroup(ApplicationsGroup group) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    if (group.isNew) {
+      emit(
+        state.builder
+            .addOrUpdateGroup(
+              group.copyWith(isNew: false),
+            )
+            .build(),
+      );
+    }
+  }
+
+  @override
+  void didAddOrUpdateGroup(ApplicationsGroup group) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    emit(state.builder.addOrUpdateGroup(group).build());
+  }
+
+  @override
+  void didRemoveGroup(ApplicationsGroup group) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    emit(state.builder.removeGroup(group.id).build());
+  }
+
+  Future<void> getInstalledApplications() async {
     final state = this.state;
     emit(ApplicationsManagerFetchRunning());
     try {
@@ -180,23 +187,13 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState> {
     }
   }
 
-  Future<void> uninstall(Application application) async {
-    await service.uninstallApplication(application.package);
-  }
-
-  Future<void> details(Application application) async {
-    await service.openApplicationDetails(application.package);
-  }
-
-  Future<void> launch(Application application) async {
-    await service.launchApplication(application.package);
-  }
-
   @override
   Future<void> close() {
     for (final subscription in _subscriptions) {
       subscription.cancel();
     }
+    applicationsActions.removeListener(this);
+    applicationsGroupsActions.removeListener(this);
     return super.close();
   }
 

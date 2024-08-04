@@ -1,6 +1,6 @@
 import 'package:fast_immutable_collections/fast_immutable_collections.dart';
 import 'package:flutter/material.dart';
-import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/utils/applications_actions.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
@@ -22,13 +22,14 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
     implements RouteAware {
   final focusNode = FocusNode();
   final controller = SearchController();
-
-  late final ApplicationsScreenState screen = dependencies();
+  late final applicationsActions = dependencies<ApplicationsActions>();
 
   @override
   void initState() {
-    screen.scroll.addListener(_onApplicationsScrollControllerListener);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      Scrollable.maybeOf(context)
+          ?.position
+          .addListener(_didChangeAncestralScrollablePosition);
       observer.subscribe(this, ModalRoute.of(context)!);
     });
     super.initState();
@@ -38,7 +39,9 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   void dispose() {
     focusNode.dispose();
     controller.dispose();
-    screen.scroll.removeListener(_onApplicationsScrollControllerListener);
+    Scrollable.maybeOf(context)
+        ?.position
+        .removeListener(_didChangeAncestralScrollablePosition);
     observer.unsubscribe(this);
     super.dispose();
   }
@@ -59,7 +62,7 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
     }
   }
 
-  void _onApplicationsScrollControllerListener() {
+  void _didChangeAncestralScrollablePosition() {
     if (focusNode.hasFocus) {
       focusNode.unfocus();
     }
@@ -151,13 +154,13 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
               arguments: EntryWidgetArguments(
                 icon: ApplicationAvatar(application: application),
                 label: application.label,
-                onTap: () async {
-                  await screen.onApplicationTap(context, application);
+                onTap: () {
+                  applicationsActions.tap(application);
                   controller.closeView('');
                   focusNode.unfocus();
                 },
-                onLongTap: () async {
-                  await screen.onApplicationLongTap(context, application);
+                onLongTap: () {
+                  applicationsActions.longTap(context, application);
                 },
               ),
             );

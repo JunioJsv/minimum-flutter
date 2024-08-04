@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
+import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/entry.dart';
@@ -11,8 +12,8 @@ class ApplicationsShortcuts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ApplicationsScreenState screen = dependencies();
-    final applications = screen.applications;
+    final applications = dependencies<ApplicationsManagerCubit>();
+    final applicationsGroupsActions = dependencies<ApplicationsGroupsActions>();
     final translation = context.translations;
     return SingleChildScrollView(
       child: Row(
@@ -44,7 +45,7 @@ class ApplicationsShortcuts extends StatelessWidget {
                 context,
                 CreateApplicationsGroupScreen.route,
                 arguments: CreateApplicationsGroupScreenArguments(
-                  onConfirm: applications.addOrUpdateGroup,
+                  onConfirm: applicationsGroupsActions.addOrUpdate,
                 ),
               );
             },

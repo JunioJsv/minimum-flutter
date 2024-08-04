@@ -128,7 +128,6 @@ class _GroupManager extends StatefulWidget {
   final void Function(ISet<String> packages) onChange;
 
   const _GroupManager({
-    super.key,
     this.initial = const ISet.empty(),
     required this.onChange,
   });
@@ -416,7 +415,6 @@ class _ConfirmationBottomSheet extends StatefulWidget {
   final void Function(String title, String? description) onConfirm;
 
   const _ConfirmationBottomSheet({
-    super.key,
     this.title,
     this.description,
     required this.packages,

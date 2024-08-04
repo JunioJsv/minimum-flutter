@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
+import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
@@ -36,6 +37,7 @@ class ApplicationsGroupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final arguments = ApplicationsGroupArgumentsScreen.of(context);
     final applications = dependencies<ApplicationsManagerCubit>();
+    final applicationsGroupsActions = dependencies<ApplicationsGroupsActions>();
     final translation = context.translations;
     final content = BlocSelector<ApplicationsManagerCubit,
         ApplicationsManagerState, _GroupState?>(
@@ -83,7 +85,7 @@ class ApplicationsGroupScreen extends StatelessWidget {
                         arguments: CreateApplicationsGroupScreenArguments(
                           initial: group,
                           onConfirm: (group) {
-                            applications.addOrUpdateGroup(group);
+                            applicationsGroupsActions.addOrUpdate(group);
                           },
                         ),
                       );
@@ -105,7 +107,7 @@ class ApplicationsGroupScreen extends StatelessWidget {
                       },
                     ).then((confirmation) {
                       if (confirmation == true) {
-                        applications.removeGroup(group.id);
+                        applicationsGroupsActions.remove(group);
                       }
                     }),
                     icon: const Icon(Icons.delete_outline),

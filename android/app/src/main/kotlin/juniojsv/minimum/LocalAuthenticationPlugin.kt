@@ -2,22 +2,17 @@ package juniojsv.minimum
 
 import android.app.Activity
 import android.app.KeyguardManager
-import android.content.Context
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.PluginRegistry
 
 
 class LocalAuthenticationPlugin : FlutterPlugin, ActivityAware {
@@ -36,6 +31,7 @@ class LocalAuthenticationPlugin : FlutterPlugin, ActivityAware {
             MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {
                 setMethodCallHandler(::onMethodCall)
             }
+        kgm = binding.applicationContext.getSystemService<KeyguardManager>()!!
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -43,7 +39,6 @@ class LocalAuthenticationPlugin : FlutterPlugin, ActivityAware {
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        kgm = activity.getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
     }
 
     override fun onDetachedFromActivityForConfigChanges() {

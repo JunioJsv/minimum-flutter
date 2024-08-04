@@ -27,6 +27,7 @@ class ApplicationsManagerService with WidgetsBindingObserver {
   static const kGetIconPacks = 'get_icon_packs';
 
   static const kSetIconPack = 'set_icon_pack';
+  static const kIsApplicationEnabled = "is_application_enabled";
 
   final _listeners = <ApplicationsManagerServiceListener>[];
 
@@ -152,5 +153,16 @@ class ApplicationsManagerService with WidgetsBindingObserver {
     }
 
     return isIconPackApplied;
+  }
+
+  Future<bool> isApplicationEnabled(String package) async {
+    final isApplicationEnabled = await channel.invokeMethod<bool>(
+      kIsApplicationEnabled,
+      {
+        'package_name': package,
+      },
+    ).then((value) => value ?? false);
+
+    return isApplicationEnabled;
   }
 }

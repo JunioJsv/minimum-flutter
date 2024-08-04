@@ -3,29 +3,23 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'application_event.g.dart';
 
-@JsonEnum(valueField: 'value')
-enum ApplicationIntentAction {
-  packageRemoved('android.intent.action.PACKAGE_REMOVED'),
-  packageAdded('android.intent.action.PACKAGE_ADDED'),
-  packageChanged('android.intent.action.PACKAGE_CHANGED');
-
-  final String value;
-
-  const ApplicationIntentAction(this.value);
+@JsonEnum(fieldRename: FieldRename.screamingSnake)
+enum ApplicationEventType {
+  onPackageRemoved,
+  onPackageAdded,
+  onPackageChanged,
+  onPackagesAvailable,
+  onPackagesUnavailable
 }
 
 @JsonSerializable()
 class ApplicationEvent extends Equatable {
-  final ApplicationIntentAction action;
-  final String package;
-  final bool canLaunch;
-  final bool isReplacing;
+  final ApplicationEventType type;
+  final List<String> packages;
 
   const ApplicationEvent({
-    required this.action,
-    required this.package,
-    required this.canLaunch,
-    required this.isReplacing,
+    required this.type,
+    required this.packages,
   });
 
   factory ApplicationEvent.fromJson(Map<String, dynamic> json) {
@@ -34,6 +28,16 @@ class ApplicationEvent extends Equatable {
 
   Map<String, dynamic> toJson() => _$ApplicationEventToJson(this);
 
+  ApplicationEvent copyWith({
+    ApplicationEventType? type,
+    List<String>? packages,
+  }) {
+    return ApplicationEvent(
+      type: type ?? this.type,
+      packages: packages ?? this.packages,
+    );
+  }
+
   @override
-  List<Object> get props => [action, package, canLaunch, isReplacing];
+  List<Object> get props => [type, packages];
 }

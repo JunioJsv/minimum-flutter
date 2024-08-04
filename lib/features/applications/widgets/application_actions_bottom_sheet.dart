@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:minimum/features/applications/screens/applications_screen.dart';
+import 'package:minimum/features/applications/utils/applications_actions.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/services/local_authentication_service.dart';
+import 'package:minimum/widgets/confirmation_dialog.dart';
 
 class ApplicationActionsBottomSheet extends StatelessWidget {
   final Application application;
@@ -17,8 +19,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
-    final ApplicationsScreenState screen = dependencies();
-    final applications = screen.applications;
+    final applicationsActions = dependencies<ApplicationsActions>();
     final isApplicationPinned = application.preferences.isPinned;
     final isApplicationHidden = application.preferences.isHidden;
     final Application(:label, :package, :version) = application;
@@ -56,7 +57,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
           ),
           onTap: () {
             Navigator.pop(context);
-            screen.onToggleApplicationPin(context, application);
+            applicationsActions.togglePin(application);
           },
         ),
         ListTile(
@@ -68,16 +69,36 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
           title: Text(
             isApplicationHidden ? translation.unhide : translation.hide,
           ),
-          onTap: () {
-            Navigator.pop(context);
-            screen.onToggleApplicationHide(context, application);
+          onTap: () async {
+            final isHidden = !application.preferences.isHidden;
+            final isDeviceSecure =
+                await dependencies<LocalAuthenticationService>()
+                    .isDeviceSecure();
+            if (!isDeviceSecure && isHidden) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                showDialog(
+                  context: context,
+                  builder: (context) => ConfirmationDialog(
+                    icon: const Icon(Icons.visibility_off_outlined),
+                    title: translation.lockscreenRequired,
+                    message: translation.setupLockscreen(
+                      to: translation.hideApplications.toLowerCase(),
+                    ),
+                    confirm: translation.understood,
+                  ),
+                );
+              });
+              return;
+            }
+            if (context.mounted) Navigator.pop(context);
+            applicationsActions.toggleHide(application);
           },
         ),
         ListTile(
           leading: const Icon(Icons.info_outline),
           title: Text(translation.info),
           onTap: () {
-            applications.details(application);
+            applicationsActions.openDetails(application);
             Navigator.pop(context);
           },
         ),
@@ -85,7 +106,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
           leading: const Icon(Icons.delete_outline),
           title: Text(translation.uninstall),
           onTap: () {
-            applications.uninstall(application);
+            applicationsActions.uninstall(application);
             Navigator.pop(context);
           },
         ),

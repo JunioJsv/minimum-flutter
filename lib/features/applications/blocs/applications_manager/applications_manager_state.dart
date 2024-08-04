@@ -96,6 +96,27 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
     );
   }
 
+  int? getApplicationIndex(String package) {
+    final index = _applications.indexWhere(
+      (application) => application.package == package,
+    );
+    if (index == -1) return null;
+    return index;
+  }
+
+  bool hasApplication(String package) => getApplicationIndex(package) != null;
+
+  int? getGroupIndex(String id) {
+    final index = _groups.indexWhere(
+      (group) => group.id == id,
+    );
+    if (index == -1) return null;
+    return index;
+  }
+
+  ApplicationsManagerFetchSuccessBuilder get builder =>
+      ApplicationsManagerFetchSuccessBuilder(this);
+
   Map<String, dynamic> toJson() {
     return {
       'order': Entry.orderBy.toJson(),
@@ -133,6 +154,74 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
         entries,
         packages,
       ];
+}
+
+class ApplicationsManagerFetchSuccessBuilder {
+  ApplicationsManagerFetchSuccess _state;
+
+  ApplicationsManagerFetchSuccessBuilder([
+    ApplicationsManagerFetchSuccess? state,
+  ]) : _state = state ?? ApplicationsManagerFetchSuccess();
+
+  ApplicationsManagerFetchSuccess build() => _state;
+
+  ApplicationsManagerFetchSuccessBuilder addApplication(
+    Application application,
+  ) {
+    if (!_state.hasApplication(application.package)) {
+      final applications = _state._applications.add(application);
+      _state = _state.copyWith(applications: applications);
+      addOrUpdateApplicationPreferences(
+        application.package,
+        (preferences) => preferences.copyWith(isNew: true),
+      );
+    }
+    return this;
+  }
+
+  ApplicationsManagerFetchSuccessBuilder addOrUpdateApplicationPreferences(
+    String package,
+    ApplicationPreferences Function(
+      ApplicationPreferences preferences,
+    ) callback,
+  ) {
+    final preferences = _state._preferences.update(
+      package,
+      callback,
+      ifAbsent: () => callback(const ApplicationPreferences()),
+    );
+    _state = _state.copyWith(preferences: preferences);
+    return this;
+  }
+
+  ApplicationsManagerFetchSuccessBuilder removeApplication(String package) {
+    final index = _state.getApplicationIndex(package);
+    if (index != null) {
+      final applications = _state._applications.removeAt(index);
+      _state = _state.copyWith(applications: applications);
+    }
+    return this;
+  }
+
+  ApplicationsManagerFetchSuccessBuilder addOrUpdateGroup(
+    ApplicationsGroup group,
+  ) {
+    final index = _state.getGroupIndex(group.id);
+    final groups = index != null
+        ? _state._groups.put(index, group)
+        : _state._groups.add(group);
+    _state = _state.copyWith(groups: groups);
+    return this;
+  }
+
+  ApplicationsManagerFetchSuccessBuilder removeGroup(String id) {
+    final index = _state.getGroupIndex(id);
+    if (index != null) {
+      final groups = _state._groups.removeAt(index);
+      _state = _state.copyWith(groups: groups);
+    }
+    return this;
+  }
 }
 
 final class ApplicationsManagerFetchFailure extends ApplicationsManagerState {}

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/environment.dart';
-import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
 import 'package:minimum/features/icon_packs/screens/icon_pack_selector_screen.dart';
 import 'package:minimum/features/preferences/blocs/preferences_manager/preferences_manager_cubit.dart';
@@ -24,7 +23,6 @@ class PreferencesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
-    final ApplicationsScreenState screen = dependencies();
     final PreferencesManagerCubit preferences = dependencies();
     final ApplicationsManagerService service = dependencies();
     final LocalAuthenticationService auth = dependencies();
@@ -149,7 +147,6 @@ class PreferencesScreen extends StatelessWidget {
                       ),
                     );
                   }
-                  if (value) screen.onScrollTo(0);
                   preferences.update((preferences) {
                     return preferences.copyWith(showHidden: value);
                   });

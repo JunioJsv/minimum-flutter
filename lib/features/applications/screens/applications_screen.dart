@@ -4,8 +4,8 @@ import 'package:fast_immutable_collections/fast_immutable_collections.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
-import 'package:minimum/features/applications/screens/applications_group_screen.dart';
-import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
+import 'package:minimum/features/applications/utils/applications_actions.dart';
+import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
 import 'package:minimum/features/applications/widgets/application_avatar.dart';
 import 'package:minimum/features/applications/widgets/applications_group_avatar.dart';
 import 'package:minimum/features/applications/widgets/applications_header.dart';
@@ -21,7 +21,6 @@ import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/applications_group.dart';
 import 'package:minimum/models/entry.dart';
-import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/widgets/confirmation_dialog.dart';
 
 class ApplicationsScreen extends StatefulWidget {
@@ -30,19 +29,17 @@ class ApplicationsScreen extends StatefulWidget {
   const ApplicationsScreen({super.key});
 
   @override
-  State<ApplicationsScreen> createState() => ApplicationsScreenState();
+  State<ApplicationsScreen> createState() => _ApplicationsScreenState();
 }
 
-class ApplicationsScreenState extends State<ApplicationsScreen> {
-  final scroll = ScrollController();
+class _ApplicationsScreenState extends State<ApplicationsScreen> {
+  final _controller = ScrollController();
   final ApplicationsManagerCubit applications = dependencies();
-  final LocalAuthenticationService auth = dependencies();
   late final translation = context.translations;
 
   @override
   void initState() {
     super.initState();
-    dependencies.registerSingleton<ApplicationsScreenState>(this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final isAlreadyCurrentLauncher =
           await applications.service.isAlreadyCurrentLauncher();
@@ -58,16 +55,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   @override
   void dispose() {
     super.dispose();
-    dependencies.unregister<ApplicationsScreenState>();
-    scroll.dispose();
-  }
-
-  Future<void> onScrollTo(double offset) {
-    return scroll.animateTo(
-      offset,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.fastOutSlowIn,
-    );
+    _controller.dispose();
   }
 
   Future<void> _showSetAsCurrentLauncherDialog(BuildContext context) async {
@@ -85,87 +73,6 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
     }
   }
 
-  Future<void> onApplicationsGroupTap(
-    BuildContext context,
-    ApplicationsGroup group,
-  ) async {
-    if (group.isNew) {
-      applications.addOrUpdateGroup(group.copyWith(isNew: false));
-    }
-    Navigator.of(context).pushNamed(
-      ApplicationsGroupScreen.route,
-      arguments: ApplicationsGroupArgumentsScreen(id: group.id),
-    );
-  }
-
-  Future<void> onApplicationTap(
-    BuildContext context,
-    Application application,
-  ) async {
-    await applications.launch(application);
-    if (application.preferences.isNew) {
-      applications.addOrUpdateApplicationPreferences(
-        application.package,
-        (preferences) => preferences.copyWith(isNew: false),
-      );
-    }
-  }
-
-  Future<void> onApplicationLongTap(
-    BuildContext context,
-    Application application,
-  ) async {
-    await showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        return ApplicationActionsBottomSheet(application: application);
-      },
-    );
-  }
-
-  void onToggleApplicationPin(BuildContext context, Application application) {
-    final isPinned = !application.preferences.isPinned;
-    applications.addOrUpdateApplicationPreferences(
-      application.package,
-      (preferences) => preferences.copyWith(isPinned: isPinned),
-    );
-    if (isPinned) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        onScrollTo(0);
-      });
-    }
-  }
-
-  Future<void> onToggleApplicationHide(
-    BuildContext context,
-    Application application,
-  ) async {
-    final isHidden = !application.preferences.isHidden;
-    final isDeviceSecure = await auth.isDeviceSecure();
-    if (!isDeviceSecure && isHidden) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showDialog(
-          context: context,
-          builder: (context) => ConfirmationDialog(
-            icon: const Icon(Icons.visibility_off_outlined),
-            title: translation.lockscreenRequired,
-            message: translation.setupLockscreen(
-              to: translation.hideApplications.toLowerCase(),
-            ),
-            confirm: translation.understood,
-          ),
-        );
-      });
-      return;
-    }
-
-    applications.addOrUpdateApplicationPreferences(
-      application.package,
-      (preferences) => preferences.copyWith(isHidden: isHidden),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     Widget loading() {
@@ -174,8 +81,12 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
 
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) {
-        onScrollTo(0);
+      onPopInvokedWithResult: (didPop, result) {
+        _controller.animateTo(
+          0,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.fastOutSlowIn,
+        );
       },
       child: Scaffold(
         appBar: const ApplicationsHeader(),
@@ -189,7 +100,7 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
             if (state.isEmpty) return loading();
 
             return CustomScrollView(
-              controller: scroll,
+              controller: _controller,
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
@@ -220,10 +131,62 @@ class ApplicationsScreenState extends State<ApplicationsScreen> {
   }
 }
 
-class SliverEntries extends StatelessWidget {
+class SliverEntries extends StatefulWidget {
   final IList<Entry> entries;
 
   const SliverEntries({super.key, required this.entries});
+
+  @override
+  State<SliverEntries> createState() => _SliverEntriesState();
+}
+
+class _SliverEntriesState extends State<SliverEntries>
+    with ApplicationsActionsListener {
+  final applicationsActions = dependencies<ApplicationsActions>();
+  final applicationsGroupsActions = dependencies<ApplicationsGroupsActions>();
+  final preferences = dependencies<PreferencesManagerCubit>();
+  late var packages = getPackages();
+
+  @override
+  void initState() {
+    super.initState();
+    applicationsActions.addListener(this);
+  }
+
+  @override
+  void dispose() {
+    applicationsActions.removeListener(this);
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(SliverEntries oldWidget) {
+    packages = getPackages();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  IList<String> getPackages() {
+    return widget.entries
+        .whereType<Application>()
+        .map((application) => application.package)
+        .toIList();
+  }
+
+  Future<void> onScrollTo(double offset) {
+    return Scrollable.of(context).position.animateTo(
+          offset,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.fastOutSlowIn,
+        );
+  }
+
+  @override
+  void didToggleApplicationPin(Application application) {
+    final isPinned = application.preferences.isPinned;
+    if (isPinned && packages.anyIs(application.package)) {
+      onScrollTo(0);
+    }
+  }
 
   List<Object> getPreferencesProps(PreferencesManagerState state) {
     return [state.isGridLayoutEnabled, state.gridCrossAxisCount];
@@ -238,18 +201,15 @@ class SliverEntries extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ApplicationsScreenState screen =
-        context.findAncestorStateOfType() ?? dependencies();
-    final PreferencesManagerCubit preferences = dependencies();
-    final entries = this.entries.map(
+    final entries = widget.entries.map(
       (entry) {
         if (entry is Application) {
           return EntryWidgetArguments(
             id: entry.package,
             icon: ApplicationAvatar(application: entry),
             label: entry.label,
-            onTap: () => screen.onApplicationTap(context, entry),
-            onLongTap: () => screen.onApplicationLongTap(context, entry),
+            onTap: () => applicationsActions.tap(entry),
+            onLongTap: () => applicationsActions.longTap(context, entry),
           );
         }
         if (entry is ApplicationsGroup) {
@@ -257,7 +217,7 @@ class SliverEntries extends StatelessWidget {
             id: entry.id,
             icon: ApplicationsGroupAvatar(group: entry),
             label: entry.label,
-            onTap: () => screen.onApplicationsGroupTap(context, entry),
+            onTap: () => applicationsGroupsActions.tap(context, entry),
             onLongTap: () {},
           );
         }
@@ -266,8 +226,15 @@ class SliverEntries extends StatelessWidget {
       },
     ).toList();
 
-    return BlocBuilder<PreferencesManagerCubit, PreferencesManagerState>(
+    return BlocConsumer<PreferencesManagerCubit, PreferencesManagerState>(
       bloc: preferences,
+      listener: (context, preferences) {
+        if (preferences.showHidden) {
+          onScrollTo(0);
+        }
+      },
+      listenWhen: (previous, current) =>
+          previous.showHidden != current.showHidden,
       buildWhen: hasPreferencesChanges,
       builder: (context, preferences) {
         final layout = preferences.isGridLayoutEnabled

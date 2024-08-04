@@ -3,32 +3,38 @@ package juniojsv.minimum
 import android.app.Activity
 import android.content.Intent
 import android.content.Intent.ACTION_DELETE
-import android.content.pm.ApplicationInfo
+import android.content.pm.LauncherApps
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
+import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
+import androidx.core.content.getSystemService
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
+import juniojsv.minimum.models.Application
+import juniojsv.minimum.models.IconPack
 import juniojsv.minimum.utils.IconPackManager
 import juniojsv.minimum.utils.toByteArray
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     private lateinit var channel: MethodChannel
-    private lateinit var pm: PackageManager
     private lateinit var activity: Activity
+    private lateinit var user: UserHandle
+    private lateinit var packageManager: PackageManager
+    private lateinit var launcherManager: LauncherApps
+    private lateinit var launcherManagerListener: ApplicationsEvents
     private lateinit var iconPackManager: IconPackManager
     private var iconPackPackageName: String? = null
     override val coroutineContext: CoroutineContext
@@ -46,23 +52,32 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
         const val GET_APPLICATION = "get_application"
         const val GET_ICON_PACKS = "get_icon_packs"
         const val SET_ICON_PACK = "set_icon_pack"
+        const val IS_APPLICATION_ENABLED = "is_application_enabled"
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
         channel = MethodChannel(binding.binaryMessenger, CHANNEL_NAME).apply {
             setMethodCallHandler(::onMethodCall)
         }
-        pm = binding.applicationContext.packageManager
+        user = android.os.Process.myUserHandle()
+        packageManager = binding.applicationContext.packageManager
+        launcherManagerListener = ApplicationsEvents(binding)
+        launcherManager = binding
+            .applicationContext
+            .getSystemService<LauncherApps>()!!.apply {
+                registerCallback(launcherManagerListener)
+            }
+        iconPackManager = IconPackManager().apply {
+            setContext(binding.applicationContext)
+        }
     }
 
     override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+        launcherManager.unregisterCallback(launcherManagerListener.apply { dispose() })
     }
 
     override fun onAttachedToActivity(binding: ActivityPluginBinding) {
         activity = binding.activity
-        iconPackManager = IconPackManager().apply {
-            setContext(activity)
-        }
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
@@ -89,71 +104,63 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             OPEN_APPLICATION_DETAILS -> openApplicationDetails(call, result)
             UNINSTALL_APPLICATION -> uninstallApplication(call, result)
             GET_APPLICATION -> getApplication(call, result)
-            GET_ICON_PACKS -> getIconPacks(call, result)
+            GET_ICON_PACKS -> getIconPacks(result)
             SET_ICON_PACK -> setIconPack(call, result)
+            IS_APPLICATION_ENABLED -> isApplicationEnabled(call, result)
             else -> result.notImplemented()
         }
     }
 
-    private fun getInstalledApplications(result: MethodChannel.Result) = launch {
+    private fun getPackageInfo(packageName: String): PackageInfo {
         val flags = PackageManager.GET_META_DATA
-        val infos = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getInstalledApplications(PackageManager.ApplicationInfoFlags.of(flags.toLong()))
-        } else {
-            pm.getInstalledApplications(flags)
-        }
-
-        val applications = infos.map { app ->
-            async {
-                val packageName = app.packageName
-                val isMinimumAppPackage = packageName == BuildConfig.APPLICATION_ID
-                val launchIntent = pm.getLaunchIntentForPackage(packageName)
-                val isLaunchable =
-                    launchIntent != null && launchIntent.hasCategory(Intent.CATEGORY_LAUNCHER)
-                if (!isMinimumAppPackage && isLaunchable) {
-                    return@async getApplicationJson(app, flags)
-                }
-                return@async null
-            }
-        }.awaitAll().filterNotNull()
-
-        result.success(applications)
-    }
-
-    private fun getApplicationJson(app: ApplicationInfo, flags: Int): Map<String, Any> {
-        val packageName = app.packageName
-        val packageInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            pm.getPackageInfo(
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            packageManager.getPackageInfo(
                 packageName,
                 PackageManager.PackageInfoFlags.of(flags.toLong())
             )
         } else {
-            pm.getPackageInfo(packageName, flags)
+            packageManager.getPackageInfo(packageName, flags)
         }
+    }
 
-        return mapOf(
-            "label" to app.loadLabel(pm) as String,
-            "package" to packageName,
-            "version" to packageInfo.versionName
-        );
+    private fun isApplicationEnabled(call: MethodCall, result: MethodChannel.Result) {
+        try {
+            val packageName = call.argument<String>("package_name")!!
+            result.success(getPackageInfo(packageName).applicationInfo.enabled)
+        } catch (e: Exception) {
+            result.error(IS_APPLICATION_ENABLED, e.message, null)
+        }
+    }
+
+
+    private fun getInstalledApplications(result: MethodChannel.Result) = launch {
+        try {
+            val activities = launcherManager.getActivityList(null, user)
+            val applications = activities.mapNotNull {
+                val label = it.label as String
+                val packageName = it.applicationInfo.packageName
+                val versionName = getPackageInfo(packageName).versionName
+                if (packageName == BuildConfig.APPLICATION_ID) return@mapNotNull null
+                Application(label, packageName, versionName).serialize()
+            }
+            result.success(applications)
+        } catch (e: Exception) {
+            result.error(GET_INSTALLED_APPLICATIONS, e.message, null)
+        }
     }
 
     private fun getApplication(
         call: MethodCall,
         result: MethodChannel.Result
     ) {
-        val flags = PackageManager.GET_META_DATA
         try {
             val packageName = call.argument<String>("package_name")!!
-            val app = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                pm.getApplicationInfo(
-                    packageName,
-                    PackageManager.ApplicationInfoFlags.of(flags.toLong())
-                )
-            } else {
-                pm.getApplicationInfo(packageName, flags)
+            val application = launcherManager.getActivityList(packageName, user).first().let {
+                val label = it.label as String
+                val versionName = getPackageInfo(packageName).versionName
+                Application(label, packageName, versionName).serialize()
             }
-            result.success(getApplicationJson(app, flags))
+            result.success(application)
         } catch (e: Exception) {
             result.error(GET_APPLICATION, e.message, null)
         }
@@ -163,7 +170,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
         try {
             val packageName = call.argument<String>("package_name")
             if (packageName == null) {
-                iconPackPackageName = null;
+                iconPackPackageName = null
                 result.success(true)
             } else {
                 val iconPacks = iconPackManager.getAvailableIconPacks(false)
@@ -181,15 +188,12 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
         }
     }
 
-    private fun getIconPacks(call: MethodCall, result: MethodChannel.Result) {
+    private fun getIconPacks(result: MethodChannel.Result) {
         try {
             val iconPacks = iconPackManager.getAvailableIconPacks(true).values
 
             result.success(iconPacks.map {
-                mapOf(
-                    "label" to it.name,
-                    "package" to it.packageName
-                )
+                IconPack(it.name, it.packageName).serialize()
             })
         } catch (e: Exception) {
             result.error(GET_ICON_PACKS, e.message, null)
@@ -199,11 +203,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     private fun launchApplication(call: MethodCall, result: MethodChannel.Result) {
         try {
             val packageName = call.argument<String>("package_name")!!
-            val intent = pm.getLaunchIntentForPackage(packageName)
-            if (intent == null) {
-                result.error("cant_launch_$packageName", null, null)
-            }
-            activity.startActivity(intent)
+            val info = launcherManager.getActivityList(packageName, user).first()
+            launcherManager.startMainActivity(info.componentName, user, null, null)
             result.success(null)
         } catch (e: Exception) {
             result.error(LAUNCH_APPLICATION, e.message, null)
@@ -228,7 +229,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
 
             if (icon == null) {
                 icon = if (packageName != null)
-                    pm.getApplicationIcon(packageName)
+                    packageManager.getApplicationIcon(packageName)
                 else activity.getDrawable(android.R.drawable.sym_def_app_icon)!!
             }
             result.success(icon.toByteArray(size, size))
@@ -240,12 +241,9 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     private fun openApplicationDetails(call: MethodCall, result: MethodChannel.Result) {
         try {
             val packageName = call.argument<String>("package_name")!!
-            activity.startActivity(
-                Intent(
-                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.parse("package:${packageName}")
-                )
-            )
+            val info = launcherManager.getActivityList(packageName, user).first()
+            launcherManager
+                .startAppDetailsActivity(info.componentName, user, null, null)
             result.success(null)
         } catch (e: Exception) {
             result.error(OPEN_APPLICATION_DETAILS, e.message, null)
@@ -272,7 +270,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     }
 
     private fun getCurrentLauncherClassName(): String? {
-        return pm.resolveActivity(Intent(Intent.ACTION_MAIN).apply {
+        return packageManager.resolveActivity(Intent(Intent.ACTION_MAIN).apply {
             addCategory(Intent.CATEGORY_HOME)
             addCategory(Intent.CATEGORY_DEFAULT)
         }, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.name
