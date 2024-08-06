@@ -1,16 +1,36 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
+import 'package:minimum/features/applications/utils/applications_actions.dart';
 import 'package:minimum/main.dart';
+import 'package:minimum/models/application.dart';
+import 'package:minimum/models/icon_pack_drawable.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ApplicationIcon extends StatefulWidget {
   final String? package;
   final bool shadow;
+  final IconPackDrawable? drawable;
+  final bool keepAlive;
+  final bool ignorePreferences;
 
   const ApplicationIcon({
     super.key,
     this.package,
     this.shadow = true,
+    this.keepAlive = true,
+    this.ignorePreferences = false,
+  }) : drawable = null;
+
+  const ApplicationIcon.fromIconPack({
+    super.key,
+    this.package,
+    required IconPackDrawable this.drawable,
+    this.shadow = true,
+    this.keepAlive = true,
+    this.ignorePreferences = false,
   });
 
   @override
@@ -18,26 +38,65 @@ class ApplicationIcon extends StatefulWidget {
 }
 
 class ApplicationIconState extends State<ApplicationIcon>
-    with AutomaticKeepAliveClientMixin, ApplicationsManagerServiceListener {
+    with
+        AutomaticKeepAliveClientMixin,
+        ApplicationsManagerServiceListener,
+        ApplicationsActionsListener {
+  final applications = dependencies<ApplicationsManagerCubit>();
   final service = dependencies<ApplicationsManagerService>();
-  late var icon = service.getApplicationIcon(widget.package);
+  final applicationActions = dependencies<ApplicationsActions>();
+  late var icon = getIcon();
+
+  Future<Uint8List> getIcon() async {
+    final state = applications.state;
+    final package = widget.package;
+    final preferences = !widget.ignorePreferences &&
+            package != null &&
+            state is ApplicationsManagerFetchSuccess
+        ? state.getApplicationPreferences(package)
+        : null;
+    final drawable = widget.drawable ?? preferences?.icon;
+    if (drawable != null) {
+      try {
+        return await service.getIconPackIcon(
+          drawable.package,
+          drawable.name,
+        );
+      } catch (e) {
+        debugPrint(e.toString());
+      }
+    }
+
+    return service.getApplicationIcon(package);
+  }
 
   @override
   void didChangeApplicationsIcons() {
     setState(() {
-      icon = service.getApplicationIcon(widget.package);
+      icon = getIcon();
     });
+  }
+
+  @override
+  void didChangeApplicationIcon(Application application) {
+    if (application.package == widget.package) {
+      setState(() {
+        icon = getIcon();
+      });
+    }
   }
 
   @override
   void initState() {
     service.addListener(this);
+    applicationActions.addListener(this);
     super.initState();
   }
 
   @override
   void dispose() {
     service.removeListener(this);
+    applicationActions.removeListener(this);
     super.dispose();
   }
 
@@ -74,5 +133,5 @@ class ApplicationIconState extends State<ApplicationIcon>
   }
 
   @override
-  bool get wantKeepAlive => true;
+  bool get wantKeepAlive => widget.keepAlive;
 }

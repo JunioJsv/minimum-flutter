@@ -134,6 +134,21 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
   }
 
   @override
+  void didChangeApplicationIcon(Application application) {
+    final state = this.state;
+    if (state is! ApplicationsManagerFetchSuccess) return;
+    final icon = application.preferences.icon;
+    emit(
+      state.builder
+          .addOrUpdateApplicationPreferences(
+            application.package,
+            (preferences) => preferences.copyWith(icon: () => icon),
+          )
+          .build(),
+    );
+  }
+
+  @override
   void didTapApplicationsGroup(ApplicationsGroup group) {
     final state = this.state;
     if (state is! ApplicationsManagerFetchSuccess) return;

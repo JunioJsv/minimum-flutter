@@ -53,6 +53,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
         const val GET_ICON_PACKS = "get_icon_packs"
         const val SET_ICON_PACK = "set_icon_pack"
         const val IS_APPLICATION_ENABLED = "is_application_enabled"
+        const val GET_ICON_PACK_DRAWABLES = "get_icon_pack_drawables"
+        const val GET_ICON_PACK_ICON = "get_icon_pack_icon"
     }
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
@@ -107,6 +109,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             GET_ICON_PACKS -> getIconPacks(result)
             SET_ICON_PACK -> setIconPack(call, result)
             IS_APPLICATION_ENABLED -> isApplicationEnabled(call, result)
+            GET_ICON_PACK_DRAWABLES -> getIconPackDrawables(call, result)
+            GET_ICON_PACK_ICON -> getIconPackIcon(call, result)
             else -> result.notImplemented()
         }
     }
@@ -208,6 +212,33 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             result.success(null)
         } catch (e: Exception) {
             result.error(LAUNCH_APPLICATION, e.message, null)
+        }
+    }
+
+    private fun getIconPackDrawables(call: MethodCall, result: MethodChannel.Result) {
+        try {
+            val packageName = call.argument<String>("package_name")!!
+            val iconPacks = iconPackManager.getAvailableIconPacks(false);
+            val iconPack = iconPacks[packageName]!!
+            result.success(iconPack.packagesDrawables)
+        } catch (e: Exception) {
+            result.error(GET_ICON_PACK_DRAWABLES, e.message, null)
+        }
+    }
+
+    private fun getIconPackIcon(call: MethodCall, result: MethodChannel.Result) {
+        try {
+            val packageName = call.argument<String>("package_name")!!
+            val drawableName = call.argument<String>("drawable_name")!!
+            val size = call.argument<Int>("size")
+            val iconPacks = iconPackManager.getAvailableIconPacks(false);
+            val iconPack = iconPacks[packageName]!!.apply {
+                if (!isLoaded) load()
+            }
+            val icon = iconPack.loadDrawable(drawableName)
+            result.success(icon.toByteArray(size, size))
+        } catch (e: Exception) {
+            result.error(GET_ICON_PACK_ICON, e.message, null)
         }
     }
 

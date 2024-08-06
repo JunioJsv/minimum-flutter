@@ -29,6 +29,10 @@ class ApplicationsManagerService with WidgetsBindingObserver {
   static const kSetIconPack = 'set_icon_pack';
   static const kIsApplicationEnabled = "is_application_enabled";
 
+  static const kGetIconPackDrawables = "get_icon_pack_drawables";
+
+  static const kGetIconPackIcon = "get_icon_pack_icon";
+
   final _listeners = <ApplicationsManagerServiceListener>[];
 
   final channel = const MethodChannel(kChannelName);
@@ -62,6 +66,29 @@ class ApplicationsManagerService with WidgetsBindingObserver {
       kLaunchApplication,
       {'package_name': package},
     );
+  }
+
+  Future<Uint8List> getIconPackIcon(
+    String package,
+    String drawable, [
+    int size = 96,
+  ]) async {
+    final bytes = await _icons.get(
+      [package, drawable].join(','),
+      () async {
+        final bytes = await channel.invokeMethod<Uint8List>(
+          kGetIconPackIcon,
+          {
+            'package_name': package,
+            'drawable_name': drawable,
+            'size': size,
+          },
+        );
+
+        return bytes!;
+      },
+    );
+    return bytes;
   }
 
   Future<Uint8List> getApplicationIcon([
@@ -164,5 +191,16 @@ class ApplicationsManagerService with WidgetsBindingObserver {
     ).then((value) => value ?? false);
 
     return isApplicationEnabled;
+  }
+
+  Future<Map<String, String>> getIconPackDrawables(String package) async {
+    final drawables = await channel.invokeMethod<Map>(
+      kGetIconPackDrawables,
+      {
+        'package_name': package,
+      },
+    );
+
+    return drawables!.cast();
   }
 }

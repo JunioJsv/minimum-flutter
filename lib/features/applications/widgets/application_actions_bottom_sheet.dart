@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:minimum/features/applications/utils/applications_actions.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
+import 'package:minimum/features/icon_packs/screens/icon_pack_drawable_selector_screen.dart';
+import 'package:minimum/features/icon_packs/screens/icon_pack_selector_screen.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
@@ -93,6 +95,34 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
             if (context.mounted) Navigator.pop(context);
             applicationsActions.toggleHide(application);
           },
+        ),
+        ListTile(
+          leading: const Icon(Icons.format_paint_outlined),
+          title: Text(translation.changeIcon),
+          onTap: () => Navigator.pushReplacementNamed(
+            context,
+            IconPackSelectorScreen.route,
+            arguments: IconPackSelectorScreenArguments(
+              defaultPackage: application.package,
+              onSelect: (context, iconPack) {
+                if (iconPack == null) {
+                  Navigator.pop(context);
+                  applicationsActions.setIcon(application, null);
+                  return;
+                }
+                Navigator.pushReplacementNamed(
+                  context,
+                  IconPackDrawableSelectorScreen.route,
+                  arguments: IconPackDrawableSelectorScreenArguments(
+                    iconPack: iconPack,
+                    onSelect: (drawable) {
+                      applicationsActions.setIcon(application, drawable);
+                    },
+                  ),
+                );
+              },
+            ),
+          ),
         ),
         ListTile(
           leading: const Icon(Icons.info_outline),

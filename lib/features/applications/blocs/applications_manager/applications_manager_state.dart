@@ -96,6 +96,10 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
     );
   }
 
+  ApplicationPreferences getApplicationPreferences(String package) {
+    return _preferences[package] ?? const ApplicationPreferences();
+  }
+
   int? getApplicationIndex(String package) {
     final index = _applications.indexWhere(
       (application) => application.package == package,

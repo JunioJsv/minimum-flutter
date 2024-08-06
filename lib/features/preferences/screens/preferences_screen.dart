@@ -97,7 +97,8 @@ class PreferencesScreen extends StatelessWidget {
                     context,
                     IconPackSelectorScreen.route,
                     arguments: IconPackSelectorScreenArguments(
-                      onSelect: (value) {
+                      onSelect: (context, value) {
+                        Navigator.pop(context);
                         preferences.update((preferences) {
                           return preferences.copyWith(iconPack: () => value);
                         });

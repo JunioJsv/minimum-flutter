@@ -11,9 +11,13 @@ import 'package:minimum/routes.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 
 class IconPackSelectorScreenArguments {
-  final void Function(IconPack? value) onSelect;
+  final bool showDefault;
+  final String? defaultPackage;
+  final void Function(BuildContext context, IconPack? value) onSelect;
 
   const IconPackSelectorScreenArguments({
+    this.showDefault = true,
+    this.defaultPackage,
     required this.onSelect,
   });
 
@@ -48,18 +52,21 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
         future: iconPacks,
         builder: (context, snapshot) {
           final entries = [
-            ListEntry(
-              key: const ValueKey('system'),
-              arguments: EntryWidgetArguments(
-                icon: const ApplicationIcon(),
-                label: translation.standard,
-                onTap: () {
-                  Navigator.pop(context);
-                  arguments.onSelect(null);
-                },
-                onLongTap: () {},
+            if (arguments.showDefault)
+              ListEntry(
+                key: const ValueKey('system'),
+                arguments: EntryWidgetArguments(
+                  icon: ApplicationIcon(
+                    package: arguments.defaultPackage,
+                    ignorePreferences: true,
+                  ),
+                  label: translation.standard,
+                  onTap: () {
+                    arguments.onSelect(context, null);
+                  },
+                  onLongTap: () {},
+                ),
               ),
-            ),
             ...?snapshot.data?.map((iconPack) {
               return ListEntry(
                 key: ValueKey(iconPack.package),
@@ -67,8 +74,7 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
                   icon: ApplicationIcon(package: iconPack.package),
                   label: iconPack.label,
                   onTap: () {
-                    Navigator.pop(context);
-                    arguments.onSelect(iconPack);
+                    arguments.onSelect(context, iconPack);
                   },
                   onLongTap: () {},
                 ),

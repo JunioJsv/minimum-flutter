@@ -39,6 +39,7 @@ public class IconPackManager {
         public String name;
 
         private boolean mLoaded = false;
+        /// <ComponentName, DrawableName>
         private HashMap<String, String> mPackagesDrawables = new HashMap<String, String>();
 
         private List<Bitmap> mBackImages = new ArrayList<Bitmap>();
@@ -131,7 +132,7 @@ public class IconPackManager {
             }
         }
 
-        private Bitmap loadBitmap(String drawableName) {
+        public Bitmap loadBitmap(String drawableName) {
             int id = iconPackres.getIdentifier(drawableName, "drawable", packageName);
             if (id > 0) {
                 Drawable bitmap = iconPackres.getDrawable(id);
@@ -141,7 +142,8 @@ public class IconPackManager {
             return null;
         }
 
-        private Drawable loadDrawable(String drawableName) {
+
+        public Drawable loadDrawable(String drawableName) {
             int id = iconPackres.getIdentifier(drawableName, "drawable", packageName);
             if (id > 0) {
                 Drawable bitmap = iconPackres.getDrawable(id);
@@ -214,8 +216,18 @@ public class IconPackManager {
             return generateBitmap(appPackageName, defaultBitmap);
         }
 
+        public boolean isLoaded() {
+            return mLoaded;
+        }
+
         public int getTotalIcons() {
             return totalIcons;
+        }
+
+        public HashMap<String, String> getPackagesDrawables() {
+            if (!mLoaded)
+                load();
+            return mPackagesDrawables;
         }
 
         private Bitmap generateBitmap(String appPackageName, Bitmap defaultBitmap) {

@@ -4,14 +4,14 @@ import 'package:minimum/features/applications/widgets/grid_entry.dart';
 import 'package:minimum/features/applications/widgets/list_entry.dart';
 
 sealed class SliverApplicationsLayout {
-  final List<EntryWidget> children;
+  final Iterable<EntryWidget> children;
 
   SliverApplicationsLayout({required this.children});
 }
 
 class SliverApplicationsListLayout extends SliverApplicationsLayout {
   SliverApplicationsListLayout({
-    required List<ListEntry> children,
+    required Iterable<ListEntry> children,
   }) : super(children: children);
 }
 
@@ -20,7 +20,7 @@ class SliverApplicationsGridLayout extends SliverApplicationsLayout {
 
   SliverApplicationsGridLayout({
     required this.delegate,
-    required List<GridEntry> children,
+    required Iterable<GridEntry> children,
   }) : super(children: children);
 }
 
@@ -35,20 +35,14 @@ class SliverApplications extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = _layout.children;
-    int? findChildIndexCallback(Key key) {
-      final index = children.indexWhere((child) => child.key == key);
-      if (index == -1) return null;
-      return index;
-    }
 
     if (_layout is SliverApplicationsGridLayout) {
       return SliverGrid(
         gridDelegate: _layout.delegate,
         delegate: SliverChildBuilderDelegate(
-          findChildIndexCallback: findChildIndexCallback,
           childCount: children.length,
           (context, index) {
-            return children[index];
+            return children.elementAt(index);
           },
         ),
       );
@@ -56,10 +50,9 @@ class SliverApplications extends StatelessWidget {
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
-        findChildIndexCallback: findChildIndexCallback,
         childCount: children.length,
         (context, index) {
-          final child = children[index];
+          final child = children.elementAt(index);
           return Column(
             children: [
               child,

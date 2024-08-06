@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/models/icon_pack_drawable.dart';
 import 'package:minimum/services/applications_manager_service.dart';
 import 'package:minimum/utils/listenable_actions.dart';
 
@@ -17,6 +18,8 @@ mixin class ApplicationsActionsListener {
   void didOpenApplicationDetails(Application application) {}
 
   void didUninstallApplication(Application application) {}
+
+  void didChangeApplicationIcon(Application application) {}
 }
 
 class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
@@ -73,6 +76,16 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
     service.uninstallApplication(application.package);
     notify(
       (listener) => listener.didUninstallApplication(application),
+    );
+  }
+
+  void setIcon(Application application, IconPackDrawable? drawable) {
+    final preferences = application.preferences;
+    final updated = application.copyWith(
+      preferences: preferences.copyWith(icon: () => drawable),
+    );
+    notify(
+      (listener) => listener.didChangeApplicationIcon(updated),
     );
   }
 }
