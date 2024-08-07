@@ -71,7 +71,10 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
               return ListEntry(
                 key: ValueKey(iconPack.package),
                 arguments: EntryWidgetArguments(
-                  icon: ApplicationIcon(package: iconPack.package),
+                  icon: ApplicationIcon(
+                    package: iconPack.package,
+                    ignorePreferences: true,
+                  ),
                   label: iconPack.label,
                   onTap: () {
                     arguments.onSelect(context, iconPack);

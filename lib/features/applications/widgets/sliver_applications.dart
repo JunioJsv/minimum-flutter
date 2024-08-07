@@ -36,10 +36,18 @@ class SliverApplications extends StatelessWidget {
   Widget build(BuildContext context) {
     final children = _layout.children;
 
+    int? findChildIndexCallback(Key key) {
+      if (children is! List<EntryWidget>) return null;
+      final index = children.indexWhere((child) => child.key == key);
+      if (index == -1) return null;
+      return index;
+    }
+
     if (_layout is SliverApplicationsGridLayout) {
       return SliverGrid(
         gridDelegate: _layout.delegate,
         delegate: SliverChildBuilderDelegate(
+          findChildIndexCallback: findChildIndexCallback,
           childCount: children.length,
           (context, index) {
             return children.elementAt(index);
@@ -50,6 +58,7 @@ class SliverApplications extends StatelessWidget {
 
     return SliverList(
       delegate: SliverChildBuilderDelegate(
+        findChildIndexCallback: findChildIndexCallback,
         childCount: children.length,
         (context, index) {
           final child = children.elementAt(index);

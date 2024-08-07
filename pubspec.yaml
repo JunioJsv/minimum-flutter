@@ -2,7 +2,7 @@ name: minimum
 description: "Android app launcher"
 publish_to: 'none'
 
-version: 2.2.0+149
+version: 2.2.1+150
 
 environment:
   sdk: '>=3.4.0 <4.0.0'

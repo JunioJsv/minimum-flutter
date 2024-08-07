@@ -36,12 +36,17 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   }
 
   @override
-  void dispose() {
-    focusNode.dispose();
-    controller.dispose();
+  void deactivate() {
     Scrollable.maybeOf(context)
         ?.position
         .removeListener(_didChangeAncestralScrollablePosition);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    focusNode.dispose();
+    controller.dispose();
     observer.unsubscribe(this);
     super.dispose();
   }

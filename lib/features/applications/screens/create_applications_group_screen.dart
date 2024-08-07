@@ -194,8 +194,15 @@ class _GroupManagerState extends State<_GroupManager> {
   }
 
   @override
+  void deactivate() {
+    if (_debounce?.isActive == true) {
+      _debounce?.cancel();
+    }
+    super.deactivate();
+  }
+
+  @override
   void dispose() {
-    _debounce?.cancel();
     scroll.dispose();
     super.dispose();
   }
