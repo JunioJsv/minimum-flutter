@@ -7,6 +7,7 @@ import 'package:minimum/features/applications/widgets/list_entry.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
+import 'package:minimum/utils/ancestral_scrollable_mixin.dart';
 import 'package:minimum/widgets/warning_container.dart';
 
 class ApplicationsSearchBar extends StatefulWidget {
@@ -19,6 +20,7 @@ class ApplicationsSearchBar extends StatefulWidget {
 }
 
 class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
+    with AncestralScrollableMixin
     implements RouteAware {
   final focusNode = FocusNode();
   final controller = SearchController();
@@ -27,20 +29,9 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Scrollable.maybeOf(context)
-          ?.position
-          .addListener(_didChangeAncestralScrollablePosition);
       observer.subscribe(this, ModalRoute.of(context)!);
     });
     super.initState();
-  }
-
-  @override
-  void deactivate() {
-    Scrollable.maybeOf(context)
-        ?.position
-        .removeListener(_didChangeAncestralScrollablePosition);
-    super.deactivate();
   }
 
   @override
@@ -67,7 +58,8 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
     }
   }
 
-  void _didChangeAncestralScrollablePosition() {
+  @override
+  void didChangeAncestralScrollablePosition() {
     if (focusNode.hasFocus) {
       focusNode.unfocus();
     }

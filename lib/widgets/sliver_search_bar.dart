@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:minimum/i18n/translations.g.dart';
+import 'package:minimum/utils/ancestral_scrollable_mixin.dart';
 
 class SliverSearchBar extends StatefulWidget {
   final EdgeInsets padding;
@@ -15,32 +16,16 @@ class SliverSearchBar extends StatefulWidget {
   State<SliverSearchBar> createState() => _SliverSearchBarState();
 }
 
-class _SliverSearchBarState extends State<SliverSearchBar> {
+class _SliverSearchBarState extends State<SliverSearchBar>
+    with AncestralScrollableMixin {
   final FocusNode focusNode = FocusNode();
   final controller = TextEditingController();
 
   @override
-  void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Scrollable.maybeOf(context)
-          ?.position
-          .addListener(_didChangeAncestralScrollablePosition);
-    });
-    super.initState();
-  }
-
-  void _didChangeAncestralScrollablePosition() {
+  void didChangeAncestralScrollablePosition() {
     if (focusNode.hasFocus) {
       focusNode.unfocus();
     }
-  }
-
-  @override
-  void deactivate() {
-    Scrollable.maybeOf(context)
-        ?.position
-        .removeListener(_didChangeAncestralScrollablePosition);
-    super.deactivate();
   }
 
   @override

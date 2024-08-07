@@ -110,12 +110,13 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
                   applicationsActions.setIcon(application, null);
                   return;
                 }
-                Navigator.pushReplacementNamed(
+                Navigator.pushNamed(
                   context,
                   IconPackDrawableSelectorScreen.route,
                   arguments: IconPackDrawableSelectorScreenArguments(
                     iconPack: iconPack,
                     onSelect: (drawable) {
+                      Navigator.pop(context);
                       applicationsActions.setIcon(application, drawable);
                     },
                   ),

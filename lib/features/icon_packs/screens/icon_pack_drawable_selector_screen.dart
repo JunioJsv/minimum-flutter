@@ -53,21 +53,25 @@ class _IconPackDrawableSelectorScreenState
 
   static Future<Map<String, String>> filterDrawables(
     Map<String, String> drawables,
-    Pattern regex,
+    String query,
   ) async {
     return Map<String, String>.fromEntries(
       drawables.entries.where(
-        (entry) => entry.value.contains(regex),
+        (entry) {
+          return entry.value.toLowerCase().contains(
+                query.toLowerCase(),
+              );
+        },
       ),
     );
   }
 
   @override
-  void deactivate() {
+  void dispose() {
     if (queryDebounce?.isActive == true) {
       queryDebounce?.cancel();
     }
-    super.deactivate();
+    super.dispose();
   }
 
   @override
@@ -85,9 +89,7 @@ class _IconPackDrawableSelectorScreenState
             final query = this.query;
             if (query == null) return drawables;
 
-            final regex = RegExp(query, caseSensitive: false);
-
-            return filterDrawables(drawables, regex);
+            return filterDrawables(drawables, query);
           },
         ),
         builder: (context, snapshot) {
@@ -114,8 +116,8 @@ class _IconPackDrawableSelectorScreenState
                   ),
                   label: name,
                   onTap: () {
-                    arguments.onSelect(drawable);
                     Navigator.pop(context);
+                    arguments.onSelect(drawable);
                   },
                   onLongTap: () {},
                 ),
