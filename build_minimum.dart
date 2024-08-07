@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+
 void main() async {
   const kDebugInfoDir = 'build/debug_info';
   const kGradleProjectVar = 'ORG_GRADLE_PROJECT';
@@ -21,6 +23,7 @@ void main() async {
   final environment = <String, String>{};
 
   Process? process;
+  String outputDir;
 
   switch (buildType) {
     case '1' || '2':
@@ -42,6 +45,7 @@ void main() async {
         environment: environment,
         runInShell: true,
       );
+      outputDir = path.join('build', 'app', 'outputs', 'flutter-apk');
     case '3':
       stdout.writeln('Building AAB...');
       process = await Process.start(
@@ -55,6 +59,7 @@ void main() async {
         environment: environment,
         runInShell: true,
       );
+      outputDir = path.join('build', 'app', 'outputs', 'bundle', 'release');
     default:
       stdout.writeln('Invalid choice. The script will exit.');
       exit(1);
@@ -62,4 +67,11 @@ void main() async {
 
   stdout.addStream(process.stdout);
   stderr.addStream(process.stderr);
+  await process.exitCode;
+  Process.start(
+    'start',
+    [outputDir],
+    environment: environment,
+    runInShell: true,
+  );
 }
