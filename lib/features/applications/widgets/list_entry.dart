@@ -15,7 +15,7 @@ class ListEntry extends EntryWidget {
       :onTap,
       :onLongTap,
     ) = arguments;
-    return ListTile(
+    final child = ListTile(
       leading: SizedBox.square(
         dimension: 48,
         child: icon,
@@ -27,6 +27,13 @@ class ListEntry extends EntryWidget {
       title: Text(label),
       onTap: onTap,
       onLongPress: onLongTap,
+    );
+
+    return Column(
+      children: [
+        child,
+        const Divider(height: 0),
+      ],
     );
   }
 }

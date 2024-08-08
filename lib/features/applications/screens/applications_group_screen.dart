@@ -50,7 +50,7 @@ class ApplicationsGroupScreen extends StatelessWidget {
         );
         if (group == null) return null;
         final applications = state.applications.where(
-          (application) => group.packages.contains(application.package),
+          (application) => group.components.contains(application.component),
         );
 
         return (group: group, applications: IList(applications).sort());

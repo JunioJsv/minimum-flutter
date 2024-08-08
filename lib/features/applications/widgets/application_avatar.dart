@@ -14,7 +14,7 @@ class ApplicationAvatar extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        ApplicationIcon(package: application.package),
+        ApplicationIcon(component: application.component),
         if (preferences.isPinned)
           Align(
             alignment: Alignment.topRight * 2,

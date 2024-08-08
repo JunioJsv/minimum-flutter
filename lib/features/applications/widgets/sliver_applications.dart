@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 import 'package:minimum/features/applications/widgets/grid_entry.dart';
@@ -35,11 +36,13 @@ class SliverApplications extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = _layout.children;
-
+    final indexLookupTable = children is List<EntryWidget>
+        ? Map.fromEntries(children.mapIndexed(
+            (index, entry) => MapEntry(entry.key, index),
+          ))
+        : null;
     int? findChildIndexCallback(Key key) {
-      if (children is! List<EntryWidget>) return null;
-      final index = children.indexWhere((child) => child.key == key);
-      if (index == -1) return null;
+      final index = indexLookupTable?[key];
       return index;
     }
 
@@ -61,13 +64,7 @@ class SliverApplications extends StatelessWidget {
         findChildIndexCallback: findChildIndexCallback,
         childCount: children.length,
         (context, index) {
-          final child = children.elementAt(index);
-          return Column(
-            children: [
-              child,
-              const Divider(height: 0),
-            ],
-          );
+          return children.elementAt(index);
         },
       ),
     );

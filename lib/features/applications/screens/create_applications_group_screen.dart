@@ -45,18 +45,18 @@ class CreateApplicationsGroupScreen extends StatefulWidget {
 class CreateApplicationsGroupScreenState
     extends State<CreateApplicationsGroupScreen> {
   late final arguments = CreateApplicationsGroupScreenArguments.of(context);
-  late final packages = ValueNotifier<ISet<String>>(
-    arguments.initial?.packages.toISet() ?? const ISet.empty(),
+  late final components = ValueNotifier<ISet<String>>(
+    arguments.initial?.components.toISet() ?? const ISet.empty(),
   );
 
   @override
   void dispose() {
-    packages.dispose();
+    components.dispose();
     super.dispose();
   }
 
   void _onConfirm(BuildContext context) async {
-    final packages = this.packages.value.toSet();
+    final components = this.components.value.toSet();
     await showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -65,20 +65,20 @@ class CreateApplicationsGroupScreenState
         return _ConfirmationBottomSheet(
           title: arguments.initial?.label,
           description: arguments.initial?.description,
-          packages: packages,
+          components: components,
           onConfirm: (title, description) {
             Navigator.pop(context);
             final group = arguments.initial?.copyWith(
                   label: title,
                   description: description,
-                  packages: packages,
+                  components: components,
                 ) ??
                 ApplicationsGroup(
                   id: const Uuid().v4(),
                   isNew: true,
                   label: title,
                   description: description,
-                  packages: packages,
+                  components: components,
                 );
             arguments.onConfirm(group);
           },
@@ -93,9 +93,9 @@ class CreateApplicationsGroupScreenState
     return Scaffold(
       resizeToAvoidBottomInset: false,
       floatingActionButton: ValueListenableBuilder(
-          valueListenable: packages,
-          builder: (context, packages, child) {
-            final isEnabled = packages.length >= 2;
+          valueListenable: components,
+          builder: (context, components, child) {
+            final isEnabled = components.length >= 2;
 
             return AnimatedScale(
               duration: kThemeAnimationDuration,
@@ -114,9 +114,9 @@ class CreateApplicationsGroupScreenState
             );
           }),
       body: _GroupManager(
-        initial: packages.value,
-        onChange: (packages) {
-          this.packages.value = packages;
+        initial: components.value,
+        onChange: (components) {
+          this.components.value = components;
         },
       ),
     );
@@ -125,7 +125,7 @@ class CreateApplicationsGroupScreenState
 
 class _GroupManager extends StatefulWidget {
   final ISet<String> initial;
-  final void Function(ISet<String> packages) onChange;
+  final void Function(ISet<String> components) onChange;
 
   const _GroupManager({
     this.initial = const ISet.empty(),
@@ -140,7 +140,7 @@ class _GroupManagerState extends State<_GroupManager> {
   late ISet<String> group = widget.initial;
 
   // Group scroll controller
-  final scroll = ScrollController();
+  final _controller = ScrollController();
 
   Timer? _debounce;
 
@@ -162,15 +162,15 @@ class _GroupManagerState extends State<_GroupManager> {
     }
   }
 
-  void addSelected(String package) {
-    if (group.contains(package)) return;
+  void addSelected(String component) {
+    if (group.contains(component)) return;
 
-    group = group.add(package);
+    group = group.add(component);
     debounce(() {
       setState(() {});
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        scroll.animateTo(
-          scroll.position.maxScrollExtent,
+        _controller.animateTo(
+          _controller.position.maxScrollExtent,
           duration: const Duration(milliseconds: 100),
           curve: Curves.fastOutSlowIn,
         );
@@ -178,10 +178,10 @@ class _GroupManagerState extends State<_GroupManager> {
     });
   }
 
-  void removeSelected(String package) {
-    if (!group.contains(package)) return;
+  void removeSelected(String component) {
+    if (!group.contains(component)) return;
 
-    group = group.remove(package);
+    group = group.remove(component);
     debounce(() {
       setState(() {});
     });
@@ -203,7 +203,7 @@ class _GroupManagerState extends State<_GroupManager> {
 
   @override
   void dispose() {
-    scroll.dispose();
+    _controller.dispose();
     super.dispose();
   }
 
@@ -221,9 +221,9 @@ class _GroupManagerState extends State<_GroupManager> {
         final group = this.group.toIList();
         final applications = state.applications.where(
           (application) {
-            return group.contains(application.package) ||
+            return group.contains(application.component) ||
                 !state.groups.any(
-                  (group) => group.packages.contains(application.package),
+                  (group) => group.components.contains(application.component),
                 );
           },
         );
@@ -231,14 +231,16 @@ class _GroupManagerState extends State<_GroupManager> {
         final selected = <Application>[];
 
         for (final application in applications) {
-          if (group.contains(application.package)) {
+          if (group.contains(application.component)) {
             selected.add(application);
           } else {
             unselected.add(application);
           }
         }
         selected.sort((a, b) {
-          return group.indexOf(a.package).compareTo(group.indexOf(b.package));
+          return group
+              .indexOf(a.component)
+              .compareTo(group.indexOf(b.component));
         });
         unselected.sort((a, b) {
           return a.label.toLowerCase().compareTo(b.label.toLowerCase());
@@ -248,7 +250,7 @@ class _GroupManagerState extends State<_GroupManager> {
           Expanded(
             child: _Card(
                 child: CustomScrollView(
-              controller: scroll,
+              controller: _controller,
               slivers: [
                 SliverAppBar.medium(
                   leading: const BackButton(),
@@ -268,7 +270,7 @@ class _GroupManagerState extends State<_GroupManager> {
                     isGroup: true,
                     applications: selected,
                     onTap: (application) {
-                      removeSelected(application.package);
+                      removeSelected(application.component);
                     },
                   )
                 else
@@ -300,7 +302,7 @@ class _GroupManagerState extends State<_GroupManager> {
                   _SliverList(
                     applications: unselected,
                     onTap: (application) {
-                      addSelected(application.package);
+                      addSelected(application.component);
                     },
                   )
                 else
@@ -334,8 +336,8 @@ class _SliverList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const delegate = SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: 3,
-      childAspectRatio: 1,
+      crossAxisCount: 4,
+      childAspectRatio: 3 / 4,
     );
     return SliverPadding(
       padding: isGroup
@@ -347,7 +349,7 @@ class _SliverList extends StatelessWidget {
           children: applications.map(
             (application) {
               return GridEntry(
-                key: ValueKey(application.package),
+                key: ValueKey(application.component),
                 arguments: EntryWidgetArguments(
                   icon: _ApplicationAvatar(
                     application: application,
@@ -387,7 +389,7 @@ class _ApplicationAvatar extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        ApplicationIcon(package: application.package),
+        ApplicationIcon(component: application.component),
         Align(
           alignment: Alignment.topRight * 2,
           child: ApplicationTag(
@@ -418,13 +420,13 @@ class _Card extends StatelessWidget {
 class _ConfirmationBottomSheet extends StatefulWidget {
   final String? title;
   final String? description;
-  final Set<String> packages;
+  final Set<String> components;
   final void Function(String title, String? description) onConfirm;
 
   const _ConfirmationBottomSheet({
     this.title,
     this.description,
-    required this.packages,
+    required this.components,
     required this.onConfirm,
   });
 
@@ -458,11 +460,11 @@ class _ConfirmationBottomSheetState extends State<_ConfirmationBottomSheet> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           ListTile(
-            leading: ApplicationsGroupIcon(packages: widget.packages),
+            leading: ApplicationsGroupIcon(components: widget.components),
             title: Text(translation.confirmGroup),
             subtitle: Text(
               translation.containNThing(
-                count: widget.packages.length,
+                count: widget.components.length,
                 thing: translation.applications.toLowerCase(),
               ),
             ),

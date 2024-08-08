@@ -59,21 +59,21 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
   }
 
   void tap(Application application) {
-    service.launchApplication(application.package);
+    service.launchApplication(application.component);
     notify(
       (listener) => listener.didLongTapApplication(application),
     );
   }
 
   void openDetails(Application application) {
-    service.openApplicationDetails(application.package);
+    service.openApplicationDetails(application.component);
     notify(
       (listener) => listener.didOpenApplicationDetails(application),
     );
   }
 
   void uninstall(Application application) {
-    service.uninstallApplication(application.package);
+    service.uninstallPackage(application.package);
     notify(
       (listener) => listener.didUninstallApplication(application),
     );

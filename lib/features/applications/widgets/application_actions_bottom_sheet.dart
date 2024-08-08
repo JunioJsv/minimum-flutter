@@ -24,14 +24,14 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
     final applicationsActions = dependencies<ApplicationsActions>();
     final isApplicationPinned = application.preferences.isPinned;
     final isApplicationHidden = application.preferences.isHidden;
-    final Application(:label, :package, :version) = application;
+    final Application(:label, :package, :component, :version) = application;
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
           leading: SizedBox.square(
             dimension: 24,
-            child: ApplicationIcon(package: package),
+            child: ApplicationIcon(component: component),
           ),
           title: Text(
             label,
@@ -103,7 +103,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
             context,
             IconPackSelectorScreen.route,
             arguments: IconPackSelectorScreenArguments(
-              defaultPackage: application.package,
+              defaultComponent: application.component,
               onSelect: (context, iconPack) {
                 if (iconPack == null) {
                   Navigator.pop(context);

@@ -12,12 +12,12 @@ import 'package:minimum/services/applications_manager_service.dart';
 
 class IconPackSelectorScreenArguments {
   final bool showDefault;
-  final String? defaultPackage;
+  final String? defaultComponent;
   final void Function(BuildContext context, IconPack? value) onSelect;
 
   const IconPackSelectorScreenArguments({
     this.showDefault = true,
-    this.defaultPackage,
+    this.defaultComponent,
     required this.onSelect,
   });
 
@@ -57,7 +57,7 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
                 key: const ValueKey('system'),
                 arguments: EntryWidgetArguments(
                   icon: ApplicationIcon(
-                    package: arguments.defaultPackage,
+                    component: arguments.defaultComponent,
                     ignorePreferences: true,
                   ),
                   label: translation.standard,
@@ -71,7 +71,7 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
               return ListEntry(
                 key: ValueKey(iconPack.package),
                 arguments: EntryWidgetArguments(
-                  icon: ApplicationIcon(
+                  icon: ApplicationIcon.formPackage(
                     package: iconPack.package,
                     ignorePreferences: true,
                   ),

@@ -10,6 +10,7 @@ import 'package:minimum/services/applications_manager_service.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ApplicationIcon extends StatefulWidget {
+  final String? component;
   final String? package;
   final bool shadow;
   final IconPackDrawable? drawable;
@@ -18,20 +19,30 @@ class ApplicationIcon extends StatefulWidget {
 
   const ApplicationIcon({
     super.key,
-    this.package,
+    this.component,
     this.shadow = true,
     this.keepAlive = true,
     this.ignorePreferences = false,
-  }) : drawable = null;
+  })  : drawable = null,
+        package = null;
 
   const ApplicationIcon.fromIconPack({
     super.key,
-    this.package,
+    this.component,
     required IconPackDrawable this.drawable,
     this.shadow = true,
     this.keepAlive = true,
     this.ignorePreferences = false,
-  });
+  }) : package = null;
+
+  const ApplicationIcon.formPackage({
+    super.key,
+    this.package,
+    this.shadow = true,
+    this.keepAlive = true,
+    this.ignorePreferences = false,
+  })  : drawable = null,
+        component = null;
 
   @override
   ApplicationIconState createState() => ApplicationIconState();
@@ -49,16 +60,17 @@ class ApplicationIconState extends State<ApplicationIcon>
 
   Future<Uint8List> getIcon() async {
     final state = applications.state;
+    final component = widget.component;
     final package = widget.package;
     final preferences = !widget.ignorePreferences &&
-            package != null &&
+            component != null &&
             state is ApplicationsManagerFetchSuccess
-        ? state.getApplicationPreferences(package)
+        ? state.getApplicationPreferences(component)
         : null;
     final drawable = widget.drawable ?? preferences?.icon;
     if (drawable != null) {
       try {
-        return await service.getIconPackIcon(
+        return await service.getIconFromIconPack(
           drawable.package,
           drawable.name,
         );
@@ -67,7 +79,8 @@ class ApplicationIconState extends State<ApplicationIcon>
       }
     }
 
-    return service.getApplicationIcon(package);
+    if (component != null) return service.getApplicationIcon(component);
+    return service.getPackageIcon(package);
   }
 
   @override
@@ -79,7 +92,8 @@ class ApplicationIconState extends State<ApplicationIcon>
 
   @override
   void didChangeApplicationIcon(Application application) {
-    if (application.package == widget.package) {
+    if (application.component == widget.component ||
+        application.package == widget.package) {
       setState(() {
         icon = getIcon();
       });

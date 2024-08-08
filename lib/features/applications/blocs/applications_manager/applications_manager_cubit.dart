@@ -62,16 +62,16 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     switch (type) {
       case ApplicationEventType.onPackageAdded:
         final package = packages.first;
-        final application = await service.getApplication(package);
-        emit(state.builder.addApplication(application).build());
+        final applications = await service.getPackageApplications(package);
+        emit(state.builder.addAllApplications(applications).build());
         break;
       case ApplicationEventType.onPackageRemoved:
         final package = packages.first;
-        emit(state.builder.removeApplication(package).build());
+        emit(state.builder.removePackage(package).build());
         break;
       case ApplicationEventType.onPackageChanged:
         final package = packages.first;
-        final isEnabled = await service.isApplicationEnabled(package);
+        final isEnabled = await service.isPackageEnabled(package);
         _onApplicationEvent(
           event.copyWith(
             type: isEnabled
@@ -81,9 +81,18 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
         );
         break;
       case ApplicationEventType.onPackagesAvailable:
-      // Todo implements onPackagesAvailable event
+        final builder = state.builder;
+        for (final package in packages) {
+          final applications = await service.getPackageApplications(package);
+          builder.addAllApplications(applications);
+        }
+        emit(builder.build());
       case ApplicationEventType.onPackagesUnavailable:
-      // Todo implements onPackagesUnavailable event
+        final builder = state.builder;
+        for (final package in packages) {
+          builder.removePackage(package);
+        }
+        emit(builder.build());
     }
   }
 
@@ -95,7 +104,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
       emit(
         state.builder
             .addOrUpdateApplicationPreferences(
-              application.package,
+              application.component,
               (preferences) => preferences.copyWith(isNew: false),
             )
             .build(),
@@ -111,7 +120,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     emit(
       state.builder
           .addOrUpdateApplicationPreferences(
-            application.package,
+            application.component,
             (preferences) => preferences.copyWith(isHidden: isHidden),
           )
           .build(),
@@ -126,7 +135,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     emit(
       state.builder
           .addOrUpdateApplicationPreferences(
-            application.package,
+            application.component,
             (preferences) => preferences.copyWith(isPinned: isPinned),
           )
           .build(),
@@ -141,7 +150,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     emit(
       state.builder
           .addOrUpdateApplicationPreferences(
-            application.package,
+            application.component,
             (preferences) => preferences.copyWith(icon: () => icon),
           )
           .build(),

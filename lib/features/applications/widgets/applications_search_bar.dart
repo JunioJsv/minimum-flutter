@@ -147,7 +147,7 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
         ).map(
           (application) {
             return ListEntry(
-              key: ValueKey(application.package),
+              key: ValueKey(application.component),
               arguments: EntryWidgetArguments(
                 icon: ApplicationAvatar(application: application),
                 label: application.label,

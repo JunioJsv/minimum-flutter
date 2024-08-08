@@ -89,7 +89,10 @@ class PreferencesScreen extends StatelessWidget {
                 leading: package != null
                     ? SizedBox.square(
                         dimension: 48,
-                        child: ApplicationIcon(package: package),
+                        child: ApplicationIcon.formPackage(
+                          package: package,
+                          ignorePreferences: true,
+                        ),
                       )
                     : null,
                 onTap: () {
@@ -157,8 +160,10 @@ class PreferencesScreen extends StatelessWidget {
           ),
           const Divider(height: 32),
           CategoryText(text: translation.about),
-          FutureBuilder<Application>(
-              future: service.getApplication('juniojsv.minimum'),
+          FutureBuilder<ApplicationBase>(
+              future: service.getApplication(
+                'juniojsv.minimum/juniojsv.minimum.MainActivity',
+              ),
               builder: (context, snapshot) {
                 final application = snapshot.data;
                 return ListTile(

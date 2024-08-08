@@ -1,5 +1,6 @@
 package juniojsv.minimum.utils;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -152,6 +153,28 @@ public class IconPackManager {
             return null;
         }
 
+        public Drawable getDrawableIconForComponentName(ComponentName appComponentName, Drawable defaultDrawable) {
+            if (!mLoaded)
+                load();
+            String componentName = appComponentName.toString();
+            String drawable = mPackagesDrawables.get(componentName);
+
+            if (drawable != null) {
+                return loadDrawable(drawable);
+            } else {
+                // try to get a resource with the component filename
+                int start = componentName.indexOf("{") + 1;
+                int end = componentName.indexOf("}", start);
+                if (end > start) {
+                    drawable = componentName.substring(start, end).toLowerCase(Locale.getDefault())
+                            .replace(".", "_").replace("/", "_");
+                    if (iconPackres.getIdentifier(drawable, "drawable", packageName) > 0)
+                        return loadDrawable(drawable);
+                }
+            }
+            return defaultDrawable;
+        }
+
         public Drawable getDrawableIconForPackage(String appPackageName, Drawable defaultDrawable) {
             if (!mLoaded)
                 load();
@@ -160,27 +183,15 @@ public class IconPackManager {
 
             Intent launchIntent = pm.getLaunchIntentForPackage(appPackageName);
 
-            String componentName = null;
+            ComponentName componentName = null;
 
             if (launchIntent != null)
-                componentName = pm.getLaunchIntentForPackage(appPackageName).getComponent().toString();
+                componentName = pm.getLaunchIntentForPackage(appPackageName).getComponent();
 
-            String drawable = mPackagesDrawables.get(componentName);
-
-            if (drawable != null) {
-                return loadDrawable(drawable);
-            } else {
-                // try to get a resource with the component filename
-                if (componentName != null) {
-                    int start = componentName.indexOf("{") + 1;
-                    int end = componentName.indexOf("}", start);
-                    if (end > start) {
-                        drawable = componentName.substring(start, end).toLowerCase(Locale.getDefault()).replace(".", "_").replace("/", "_");
-                        if (iconPackres.getIdentifier(drawable, "drawable", packageName) > 0)
-                            return loadDrawable(drawable);
-                    }
-                }
+            if (componentName != null) {
+                return getDrawableIconForComponentName(componentName, defaultDrawable);
             }
+
             return defaultDrawable;
         }
 

@@ -7,7 +7,7 @@ part 'applications_group.g.dart';
 class ApplicationsGroup extends Entry {
   final String id;
   final String? description;
-  final Set<String> packages;
+  final Set<String> components;
 
   final bool isNew;
 
@@ -23,7 +23,7 @@ class ApplicationsGroup extends Entry {
     required this.id,
     required super.label,
     required this.description,
-    required this.packages,
+    required this.components,
     required this.isNew,
   });
 
@@ -37,18 +37,19 @@ class ApplicationsGroup extends Entry {
     String? id,
     String? label,
     String? description,
-    Set<String>? packages,
+    Set<String>? components,
     bool? isNew,
   }) {
     return ApplicationsGroup(
       id: id ?? this.id,
       label: label ?? this.label,
       description: description ?? this.description,
-      packages: packages ?? this.packages,
+      components: components ?? this.components,
       isNew: isNew ?? this.isNew,
     );
   }
 
   @override
-  List<Object?> get props => [...super.props, id, description, packages, isNew];
+  List<Object?> get props =>
+      [...super.props, id, description, components, isNew];
 }

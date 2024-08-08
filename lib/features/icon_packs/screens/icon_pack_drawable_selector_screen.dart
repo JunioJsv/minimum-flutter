@@ -127,7 +127,8 @@ class _IconPackDrawableSelectorScreenState
 
           final layout = SliverApplicationsGridLayout(
             delegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
+              crossAxisCount: 4,
+              childAspectRatio: 3 / 4,
             ),
             children: children,
           );

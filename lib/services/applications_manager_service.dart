@@ -16,22 +16,24 @@ class ApplicationsManagerService with WidgetsBindingObserver {
   static const kGetInstalledApplications = 'get_installed_applications';
   static const kLaunchApplication = 'launch_application';
   static const kGetApplicationIcon = 'get_application_icon';
+  static const kGetPackageIcon = "get_package_icon";
   static const kIsAlreadyCurrentLauncher = 'is_already_current_launcher';
   static const kOpenCurrentLauncherSystemSettings =
       'open_current_launcher_system_settings';
 
   static const kOpenApplicationDetails = 'open_application_details';
-  static const kUninstallApplication = 'uninstall_application';
+  static const kUninstallPackage = 'uninstall_package';
 
   static const kGetApplication = 'get_application';
+  static const kGetPackageApplications = 'get_package_applications';
   static const kGetIconPacks = 'get_icon_packs';
 
   static const kSetIconPack = 'set_icon_pack';
-  static const kIsApplicationEnabled = "is_application_enabled";
+  static const kIsPackageEnabled = "is_package_enabled";
 
   static const kGetIconPackDrawables = "get_icon_pack_drawables";
 
-  static const kGetIconPackIcon = "get_icon_pack_icon";
+  static const kGetIconFromIconPack = "get_icon_from_icon_pack";
 
   final _listeners = <ApplicationsManagerServiceListener>[];
 
@@ -61,23 +63,23 @@ class ApplicationsManagerService with WidgetsBindingObserver {
     _listeners.remove(listener);
   }
 
-  Future<void> launchApplication(String package) async {
+  Future<void> launchApplication(String component) async {
     await channel.invokeMethod(
       kLaunchApplication,
-      {'package_name': package},
+      {'component_name': component},
     );
   }
 
-  Future<Uint8List> getIconPackIcon(
+  Future<Uint8List> getIconFromIconPack(
     String package,
     String drawable, [
     int size = 96,
   ]) async {
     final bytes = await _icons.get(
-      [package, drawable].join(','),
+      [package, drawable].join('/'),
       () async {
         final bytes = await channel.invokeMethod<Uint8List>(
-          kGetIconPackIcon,
+          kGetIconFromIconPack,
           {
             'package_name': package,
             'drawable_name': drawable,
@@ -92,6 +94,27 @@ class ApplicationsManagerService with WidgetsBindingObserver {
   }
 
   Future<Uint8List> getApplicationIcon([
+    String? component,
+    int size = 96,
+  ]) async {
+    final bytes = await _icons.get(
+      component ?? 'default',
+      () async {
+        final bytes = await channel.invokeMethod<Uint8List>(
+          kGetApplicationIcon,
+          {
+            if (component != null) 'component_name': component,
+            'size': size,
+          },
+        );
+
+        return bytes!;
+      },
+    );
+    return bytes;
+  }
+
+  Future<Uint8List> getPackageIcon([
     String? package,
     int size = 96,
   ]) async {
@@ -99,7 +122,7 @@ class ApplicationsManagerService with WidgetsBindingObserver {
       package ?? 'default',
       () async {
         final bytes = await channel.invokeMethod<Uint8List>(
-          kGetApplicationIcon,
+          kGetPackageIcon,
           {
             if (package != null) 'package_name': package,
             'size': size,
@@ -124,27 +147,42 @@ class ApplicationsManagerService with WidgetsBindingObserver {
     await channel.invokeMethod(kOpenCurrentLauncherSystemSettings);
   }
 
-  Future<void> openApplicationDetails(String package) async {
+  Future<void> openApplicationDetails(String component) async {
     await channel.invokeMethod(
       kOpenApplicationDetails,
-      {'package_name': package},
+      {'component_name': component},
     );
   }
 
-  Future<void> uninstallApplication(String package) async {
+  Future<void> uninstallPackage(String package) async {
     await channel.invokeMethod(
-      kUninstallApplication,
+      kUninstallPackage,
       {'package_name': package},
     );
   }
 
-  Future<Application> getApplication(String package) async {
+  Future<ApplicationBase> getApplication(String component) async {
     final json = await channel.invokeMethod(
       kGetApplication,
+      {'component_name': component},
+    );
+
+    return ApplicationBase.fromJson((json as Map).cast());
+  }
+
+  Future<IList<ApplicationBase>> getPackageApplications(String package) async {
+    final json = await channel.invokeListMethod<Map>(
+      kGetPackageApplications,
       {'package_name': package},
     );
 
-    return Application.fromJson((json as Map).cast());
+    final applications = json
+        ?.map(
+          (json) => ApplicationBase.fromJson(json.cast()),
+        )
+        .toIList();
+
+    return applications!;
   }
 
   Future<IList<IconPack>> getIconPacks() async {
@@ -182,9 +220,9 @@ class ApplicationsManagerService with WidgetsBindingObserver {
     return isIconPackApplied;
   }
 
-  Future<bool> isApplicationEnabled(String package) async {
+  Future<bool> isPackageEnabled(String package) async {
     final isApplicationEnabled = await channel.invokeMethod<bool>(
-      kIsApplicationEnabled,
+      kIsPackageEnabled,
       {
         'package_name': package,
       },
@@ -193,6 +231,7 @@ class ApplicationsManagerService with WidgetsBindingObserver {
     return isApplicationEnabled;
   }
 
+  /// @return Map<ComponentName, DrawableName>
   Future<Map<String, String>> getIconPackDrawables(String package) async {
     final drawables = await channel.invokeMethod<Map>(
       kGetIconPackDrawables,

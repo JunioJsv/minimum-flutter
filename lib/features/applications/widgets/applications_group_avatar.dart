@@ -14,7 +14,7 @@ class ApplicationsGroupAvatar extends StatelessWidget {
     return Stack(
       alignment: Alignment.center,
       children: [
-        ApplicationsGroupIcon(packages: group.packages),
+        ApplicationsGroupIcon(components: group.components),
         if (group.isNew)
           Align(
             alignment: Alignment.bottomRight * 2,

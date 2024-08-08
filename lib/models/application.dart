@@ -9,11 +9,13 @@ part 'application.g.dart';
 class ApplicationBase extends Equatable {
   final String label;
   final String package;
+  final String component;
   final String version;
 
   const ApplicationBase({
     required this.label,
     required this.package,
+    required this.component,
     required this.version,
   });
 
@@ -24,13 +26,17 @@ class ApplicationBase extends Equatable {
   Map<String, dynamic> toJson() => _$ApplicationBaseToJson(this);
 
   @override
-  List<Object?> get props => [label, package, version];
+  List<Object?> get props => [label, package, component, version];
 }
 
 @JsonSerializable()
 class Application extends Entry implements ApplicationBase {
   @override
   final String package;
+
+  @override
+  final String component;
+
   @override
   final String version;
 
@@ -48,6 +54,7 @@ class Application extends Entry implements ApplicationBase {
   const Application({
     required super.label,
     required this.package,
+    required this.component,
     required this.version,
     this.preferences = const ApplicationPreferences(),
   });
@@ -62,17 +69,25 @@ class Application extends Entry implements ApplicationBase {
   Application copyWith({
     String? label,
     String? package,
+    String? component,
     String? version,
     ApplicationPreferences? preferences,
   }) {
     return Application(
       label: label ?? this.label,
       package: package ?? this.package,
+      component: component ?? this.component,
       version: version ?? this.version,
       preferences: preferences ?? this.preferences,
     );
   }
 
   @override
-  List<Object?> get props => [...super.props, package, version, preferences];
+  List<Object?> get props => [
+        ...super.props,
+        package,
+        component,
+        version,
+        preferences,
+      ];
 }

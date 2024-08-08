@@ -14,6 +14,7 @@ final class ApplicationsManagerFetchRunning extends ApplicationsManagerState {}
 final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
   final bool isShowingHidden;
 
+  /// Map<ComponentName, ApplicationPreferences>
   final IMap<String, ApplicationPreferences> _preferences;
   final IList<ApplicationBase> _applications;
   final IList<ApplicationsGroup> _groups;
@@ -26,11 +27,12 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
         final application = Application(
           label: raw.label,
           package: raw.package,
+          component: raw.component,
           version: raw.version,
         );
-        if (_preferences.containsKey(application.package)) {
+        if (_preferences.containsKey(application.component)) {
           return application.copyWith(
-            preferences: _preferences[application.package],
+            preferences: _preferences[application.component],
           );
         }
         return application;
@@ -44,22 +46,22 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
     return applications.toIList();
   }();
 
-  late final ISet<String> packages =
-      applications.map((application) => application.package).toISet();
+  late final ISet<String> components =
+      applications.map((application) => application.component).toISet();
 
   late final IList<ApplicationsGroup> groups = () {
     return _groups
         .map((group) {
           /// Hidden or Uninstalled packages
-          final hidden = group.packages.where((package) {
-            return !packages.contains(package);
+          final hidden = group.components.where((component) {
+            return !components.contains(component);
           }).toSet();
           if (hidden.isEmpty) return group;
           return group.copyWith(
-            packages: group.packages.difference(hidden),
+            components: group.components.difference(hidden),
           );
         })
-        .where((group) => group.packages.isNotEmpty)
+        .where((group) => group.components.isNotEmpty)
         .toIList();
   }();
 
@@ -67,7 +69,7 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
   late final IList<Entry> entries = IList([
     ...applications.where((application) {
       return !groups.any(
-        (group) => group.packages.contains(application.package),
+        (group) => group.components.contains(application.component),
       );
     }),
     ...groups
@@ -96,19 +98,20 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
     );
   }
 
-  ApplicationPreferences getApplicationPreferences(String package) {
-    return _preferences[package] ?? const ApplicationPreferences();
+  ApplicationPreferences getApplicationPreferences(String component) {
+    return _preferences[component] ?? const ApplicationPreferences();
   }
 
-  int? getApplicationIndex(String package) {
+  int? getApplicationIndex(String component) {
     final index = _applications.indexWhere(
-      (application) => application.package == package,
+      (application) => application.component == component,
     );
     if (index == -1) return null;
     return index;
   }
 
-  bool hasApplication(String package) => getApplicationIndex(package) != null;
+  bool hasApplication(String component) =>
+      getApplicationIndex(component) != null;
 
   int? getGroupIndex(String id) {
     final index = _groups.indexWhere(
@@ -156,7 +159,7 @@ final class ApplicationsManagerFetchSuccess extends ApplicationsManagerState {
         applications,
         groups,
         entries,
-        packages,
+        components,
       ];
 }
 
@@ -170,27 +173,36 @@ class ApplicationsManagerFetchSuccessBuilder {
   ApplicationsManagerFetchSuccess build() => _state;
 
   ApplicationsManagerFetchSuccessBuilder addApplication(
-    Application application,
+    ApplicationBase application,
   ) {
-    if (!_state.hasApplication(application.package)) {
+    if (!_state.hasApplication(application.component)) {
       final applications = _state._applications.add(application);
       _state = _state.copyWith(applications: applications);
       addOrUpdateApplicationPreferences(
-        application.package,
+        application.component,
         (preferences) => preferences.copyWith(isNew: true),
       );
     }
     return this;
   }
 
+  ApplicationsManagerFetchSuccessBuilder addAllApplications(
+    IList<ApplicationBase> applications,
+  ) {
+    for (final application in applications) {
+      addApplication(application);
+    }
+    return this;
+  }
+
   ApplicationsManagerFetchSuccessBuilder addOrUpdateApplicationPreferences(
-    String package,
+    String component,
     ApplicationPreferences Function(
       ApplicationPreferences preferences,
     ) callback,
   ) {
     final preferences = _state._preferences.update(
-      package,
+      component,
       callback,
       ifAbsent: () => callback(const ApplicationPreferences()),
     );
@@ -198,12 +210,20 @@ class ApplicationsManagerFetchSuccessBuilder {
     return this;
   }
 
-  ApplicationsManagerFetchSuccessBuilder removeApplication(String package) {
-    final index = _state.getApplicationIndex(package);
+  ApplicationsManagerFetchSuccessBuilder removeApplication(String component) {
+    final index = _state.getApplicationIndex(component);
     if (index != null) {
       final applications = _state._applications.removeAt(index);
       _state = _state.copyWith(applications: applications);
     }
+    return this;
+  }
+
+  ApplicationsManagerFetchSuccessBuilder removePackage(String package) {
+    final applications = _state._applications.removeWhere(
+      (application) => application.package == package,
+    );
+    _state = _state.copyWith(applications: applications);
     return this;
   }
 

@@ -145,7 +145,7 @@ class _SliverEntriesState extends State<SliverEntries>
   final applicationsActions = dependencies<ApplicationsActions>();
   final applicationsGroupsActions = dependencies<ApplicationsGroupsActions>();
   final preferences = dependencies<PreferencesManagerCubit>();
-  late var packages = getPackages();
+  late var components = getComponents();
 
   @override
   void initState() {
@@ -161,14 +161,14 @@ class _SliverEntriesState extends State<SliverEntries>
 
   @override
   void didUpdateWidget(SliverEntries oldWidget) {
-    packages = getPackages();
+    components = getComponents();
     super.didUpdateWidget(oldWidget);
   }
 
-  IList<String> getPackages() {
+  IList<String> getComponents() {
     return widget.entries
         .whereType<Application>()
-        .map((application) => application.package)
+        .map((application) => application.component)
         .toIList();
   }
 
@@ -183,7 +183,7 @@ class _SliverEntriesState extends State<SliverEntries>
   @override
   void didToggleApplicationPin(Application application) {
     final isPinned = application.preferences.isPinned;
-    if (isPinned && packages.anyIs(application.package)) {
+    if (isPinned && components.anyIs(application.component)) {
       onScrollTo(0);
     }
   }
@@ -205,7 +205,7 @@ class _SliverEntriesState extends State<SliverEntries>
       (entry) {
         if (entry is Application) {
           return EntryWidgetArguments(
-            id: entry.package,
+            id: entry.component,
             icon: ApplicationAvatar(application: entry),
             label: entry.label,
             onTap: () => applicationsActions.tap(entry),
@@ -241,9 +241,8 @@ class _SliverEntriesState extends State<SliverEntries>
             ? SliverApplicationsGridLayout(
                 children: entries.mapIndexed(
                   (index, arguments) {
-                    final package = arguments.id!;
                     return GridEntry(
-                      key: ValueKey(package),
+                      key: ValueKey(arguments.id!),
                       arguments: arguments,
                     );
                   },
@@ -256,9 +255,8 @@ class _SliverEntriesState extends State<SliverEntries>
             : SliverApplicationsListLayout(
                 children: entries.mapIndexed(
                 (index, arguments) {
-                  final package = arguments.id!;
                   return ListEntry(
-                    key: ValueKey(package),
+                    key: ValueKey(arguments.id!),
                     arguments: arguments,
                   );
                 },
