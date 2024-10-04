@@ -61,7 +61,7 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
   void tap(Application application) {
     service.launchApplication(application.component);
     notify(
-      (listener) => listener.didLongTapApplication(application),
+      (listener) => listener.didTapApplication(application),
     );
   }
 
