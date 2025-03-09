@@ -45,9 +45,7 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
     final arguments = IconPackSelectorScreenArguments.of(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(translation.iconPacks),
-      ),
+      appBar: AppBar(title: Text(translation.iconPacks)),
       body: FutureBuilder<IList<IconPack>>(
         future: iconPacks,
         builder: (context, snapshot) {
@@ -82,13 +80,11 @@ class _IconPackSelectorScreenState extends State<IconPackSelectorScreen> {
                   onLongTap: () {},
                 ),
               );
-            })
+            }),
           ];
           final layout = SliverApplicationsListLayout(children: entries);
           return CustomScrollView(
-            slivers: [
-              SliverApplications(layout: layout),
-            ],
+            slivers: [SliverApplications(layout: layout)],
           );
         },
       ),

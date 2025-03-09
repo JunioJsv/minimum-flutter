@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:minimum/environment.dart';
 import 'package:minimum/features/applications/blocs/applications_manager/applications_manager_cubit.dart';
 import 'package:minimum/features/applications/screens/applications_screen.dart';
 import 'package:minimum/features/applications/utils/applications_actions.dart';
@@ -15,6 +16,7 @@ import 'package:minimum/services/applications_manager_service.dart';
 import 'package:minimum/services/local_authentication_service.dart';
 import 'package:minimum/themes.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 final dependencies = GetIt.instance;
 final observer = RouteObserver<ModalRoute>();
@@ -23,10 +25,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LocaleSettings.useDeviceLocale();
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: await getApplicationDocumentsDirectory(),
+    storageDirectory: HydratedStorageDirectory(
+      (await getApplicationDocumentsDirectory()).path,
+    ),
   );
-  runApp(
-    TranslationProvider(child: const MinimumApp()),
+  SentryFlutter.init(
+    (options) {
+      options.dsn = kSentryDSN;
+    },
+    appRunner: () {
+      runApp(
+        SentryWidget(child: TranslationProvider(child: const MinimumApp())),
+      );
+    },
   );
 }
 
@@ -87,22 +98,21 @@ class _MinimumAppState extends State<MinimumApp> {
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
-    return DynamicColorBuilder(builder: (
-      ColorScheme? lightDynamic,
-      ColorScheme? darkDynamic,
-    ) {
-      return MaterialApp(
-        title: translation.appName,
-        locale: TranslationProvider.of(context).flutterLocale,
-        supportedLocales: AppLocaleUtils.supportedLocales,
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        theme: theme(lightDynamic ?? const ColorScheme.light()),
-        darkTheme: theme(darkDynamic ?? const ColorScheme.dark()),
-        themeMode: ThemeMode.system,
-        initialRoute: ApplicationsScreen.route,
-        navigatorObservers: [observer],
-        onGenerateRoute: onGenerateRoute,
-      );
-    });
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        return MaterialApp(
+          title: translation.appName,
+          locale: TranslationProvider.of(context).flutterLocale,
+          supportedLocales: AppLocaleUtils.supportedLocales,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          theme: theme(lightDynamic ?? const ColorScheme.light()),
+          darkTheme: theme(darkDynamic ?? const ColorScheme.dark()),
+          themeMode: ThemeMode.system,
+          initialRoute: ApplicationsScreen.route,
+          navigatorObservers: [observer, SentryNavigatorObserver()],
+          onGenerateRoute: onGenerateRoute,
+        );
+      },
+    );
   }
 }

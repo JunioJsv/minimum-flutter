@@ -44,14 +44,18 @@ class PreferencesScreen extends StatelessWidget {
               return SwitchListTile(
                 title: Text(translation.gridView),
                 value: value,
-                onChanged: (value) => preferences.update((preferences) {
-                  return preferences.copyWith(isGridLayoutEnabled: value);
-                }),
+                onChanged:
+                    (value) => preferences.update((preferences) {
+                      return preferences.copyWith(isGridLayoutEnabled: value);
+                    }),
               );
             },
           ),
-          BlocSelector<PreferencesManagerCubit, PreferencesManagerState,
-              ({bool isEnabled, int count})>(
+          BlocSelector<
+            PreferencesManagerCubit,
+            PreferencesManagerState,
+            ({bool isEnabled, int count})
+          >(
             bloc: preferences,
             selector: (state) {
               return (
@@ -67,14 +71,18 @@ class PreferencesScreen extends StatelessWidget {
                 subtitle: translation.defineApplicationsPerLine,
                 isEnabled: preference.isEnabled,
                 value: preference.count,
-                onChange: (int value) => preferences.update((preferences) {
-                  return preferences.copyWith(gridCrossAxisCount: value);
-                }),
+                onChange:
+                    (int value) => preferences.update((preferences) {
+                      return preferences.copyWith(gridCrossAxisCount: value);
+                    }),
               );
             },
           ),
-          BlocSelector<PreferencesManagerCubit, PreferencesManagerState,
-              IconPack?>(
+          BlocSelector<
+            PreferencesManagerCubit,
+            PreferencesManagerState,
+            IconPack?
+          >(
             bloc: preferences,
             selector: (state) {
               return state.iconPack;
@@ -86,15 +94,16 @@ class PreferencesScreen extends StatelessWidget {
                 key: ValueKey(package ?? 'system'),
                 title: Text(translation.iconPack),
                 subtitle: Text(subtitle),
-                leading: package != null
-                    ? SizedBox.square(
-                        dimension: 48,
-                        child: ApplicationIcon.formPackage(
-                          package: package,
-                          ignorePreferences: true,
-                        ),
-                      )
-                    : null,
+                leading:
+                    package != null
+                        ? SizedBox.square(
+                          dimension: 48,
+                          child: ApplicationIcon.formPackage(
+                            package: package,
+                            ignorePreferences: true,
+                          ),
+                        )
+                        : null,
                 onTap: () {
                   Navigator.pushNamed(
                     context,
@@ -130,15 +139,17 @@ class PreferencesScreen extends StatelessWidget {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       showDialog(
                         context: context,
-                        builder: (context) => ConfirmationDialog(
-                          icon: const Icon(Icons.visibility_outlined),
-                          title: translation.lockscreenRequired,
-                          message: translation.setupLockscreen(
-                            to: translation.showHiddenApplications
-                                .toLowerCase(),
-                          ),
-                          confirm: translation.understood,
-                        ),
+                        builder:
+                            (context) => ConfirmationDialog(
+                              icon: const Icon(Icons.visibility_outlined),
+                              title: translation.lockscreenRequired,
+                              message: translation.setupLockscreen(
+                                to:
+                                    translation.showHiddenApplications
+                                        .toLowerCase(),
+                              ),
+                              confirm: translation.understood,
+                            ),
                       );
                     });
                     return;
@@ -161,24 +172,26 @@ class PreferencesScreen extends StatelessWidget {
           const Divider(height: 32),
           CategoryText(text: translation.about),
           FutureBuilder<ApplicationBase>(
-              future: service.getApplication(
-                'juniojsv.minimum/juniojsv.minimum.MainActivity',
-              ),
-              builder: (context, snapshot) {
-                final application = snapshot.data;
-                return ListTile(
-                  title: Text(translation.appName),
-                  subtitle: application != null
-                      ? Text(
+            future: service.getApplication(
+              'juniojsv.minimum/juniojsv.minimum.MainActivity',
+            ),
+            builder: (context, snapshot) {
+              final application = snapshot.data;
+              return ListTile(
+                title: Text(translation.appName),
+                subtitle:
+                    application != null
+                        ? Text(
                           '${translation.version}'
                           ' ${application.version}',
                         )
-                      : null,
-                  onTap: () {
-                    launchUrlString(kGithubProjectUrl);
-                  },
-                );
-              }),
+                        : null,
+                onTap: () {
+                  launchUrlString(kGithubProjectUrl);
+                },
+              );
+            },
+          ),
           ListTile(
             title: Text(translation.author),
             subtitle: Text(translation.createdByJuniojsv),

@@ -56,13 +56,9 @@ class _IconPackDrawableSelectorScreenState
     String query,
   ) async {
     return Map<String, String>.fromEntries(
-      drawables.entries.where(
-        (entry) {
-          return entry.value.toLowerCase().contains(
-                query.toLowerCase(),
-              );
-        },
-      ),
+      drawables.entries.where((entry) {
+        return entry.value.toLowerCase().contains(query.toLowerCase());
+      }),
     );
   }
 
@@ -80,50 +76,42 @@ class _IconPackDrawableSelectorScreenState
     final theme = Theme.of(context);
     final translation = context.translations;
     return Scaffold(
-      appBar: AppBar(
-        title: Text(iconPack.label),
-      ),
+      appBar: AppBar(title: Text(iconPack.label)),
       body: FutureBuilder<Map<String, String>>(
-        future: drawables.then(
-          (drawables) async {
-            final query = this.query;
-            if (query == null) return drawables;
+        future: drawables.then((drawables) async {
+          final query = this.query;
+          if (query == null) return drawables;
 
-            return filterDrawables(drawables, query);
-          },
-        ),
+          return filterDrawables(drawables, query);
+        }),
         builder: (context, snapshot) {
           final drawables = snapshot.data;
           if (drawables == null) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
-          final children = drawables.mapTo(
-            (component, name) {
-              final drawable = IconPackDrawable(
-                name: name,
-                component: component,
-                package: iconPack.package,
-              );
-              return GridEntry(
-                key: ValueKey(component),
-                arguments: EntryWidgetArguments(
-                  icon: ApplicationIcon.fromIconPack(
-                    drawable: drawable,
-                    keepAlive: false,
-                  ),
-                  label: name,
-                  onTap: () {
-                    Navigator.pop(context);
-                    arguments.onSelect(drawable);
-                  },
-                  onLongTap: () {},
+          final children = drawables.mapTo((component, name) {
+            final drawable = IconPackDrawable(
+              name: name,
+              component: component,
+              package: iconPack.package,
+            );
+            return GridEntry(
+              key: ValueKey(component),
+              arguments: EntryWidgetArguments(
+                icon: ApplicationIcon.fromIconPack(
+                  drawable: drawable,
+                  keepAlive: false,
                 ),
-              );
-            },
-          );
+                label: name,
+                onTap: () {
+                  Navigator.pop(context);
+                  arguments.onSelect(drawable);
+                },
+                onLongTap: () {},
+              ),
+            );
+          });
 
           final layout = SliverApplicationsGridLayout(
             delegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -141,14 +129,11 @@ class _IconPackDrawableSelectorScreenState
                   if (queryDebounce?.isActive == true) {
                     queryDebounce?.cancel();
                   }
-                  queryDebounce = Timer(
-                    const Duration(milliseconds: 400),
-                    () {
-                      setState(() {
-                        this.query = query.isNotEmpty ? query : null;
-                      });
-                    },
-                  );
+                  queryDebounce = Timer(const Duration(milliseconds: 400), () {
+                    setState(() {
+                      this.query = query.isNotEmpty ? query : null;
+                    });
+                  });
                 },
               ),
               if (children.isEmpty)

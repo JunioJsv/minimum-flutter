@@ -30,9 +30,7 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
     final updated = application.copyWith(
       preferences: preferences.copyWith(isHidden: !preferences.isHidden),
     );
-    notify(
-      (listener) => listener.didToggleApplicationHide(updated),
-    );
+    notify((listener) => listener.didToggleApplicationHide(updated));
   }
 
   void togglePin(Application application) {
@@ -40,9 +38,7 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
     final updated = application.copyWith(
       preferences: preferences.copyWith(isPinned: !preferences.isPinned),
     );
-    notify(
-      (listener) => listener.didToggleApplicationPin(updated),
-    );
+    notify((listener) => listener.didToggleApplicationPin(updated));
   }
 
   void longTap(BuildContext context, Application application) {
@@ -53,30 +49,22 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
         return ApplicationActionsBottomSheet(application: application);
       },
     );
-    notify(
-      (listener) => listener.didLongTapApplication(application),
-    );
+    notify((listener) => listener.didLongTapApplication(application));
   }
 
   void tap(Application application) {
     service.launchApplication(application.component);
-    notify(
-      (listener) => listener.didTapApplication(application),
-    );
+    notify((listener) => listener.didTapApplication(application));
   }
 
   void openDetails(Application application) {
     service.openApplicationDetails(application.component);
-    notify(
-      (listener) => listener.didOpenApplicationDetails(application),
-    );
+    notify((listener) => listener.didOpenApplicationDetails(application));
   }
 
   void uninstall(Application application) {
     service.uninstallPackage(application.package);
-    notify(
-      (listener) => listener.didUninstallApplication(application),
-    );
+    notify((listener) => listener.didUninstallApplication(application));
   }
 
   void setIcon(Application application, IconPackDrawable? drawable) {
@@ -84,8 +72,6 @@ class ApplicationsActions with ListenableActions<ApplicationsActionsListener> {
     final updated = application.copyWith(
       preferences: preferences.copyWith(icon: () => drawable),
     );
-    notify(
-      (listener) => listener.didChangeApplicationIcon(updated),
-    );
+    notify((listener) => listener.didChangeApplicationIcon(updated));
   }
 }

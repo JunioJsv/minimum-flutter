@@ -44,3 +44,6 @@ app.*.map.json
 
 # Flutter build runner gerated files
 lib/**/*.g.dart
+
+# Environment files
+environment.json

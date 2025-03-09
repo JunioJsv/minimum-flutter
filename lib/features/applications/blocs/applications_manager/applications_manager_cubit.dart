@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart'
     hide Entry;
-import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:minimum/features/applications/utils/applications_actions.dart';
 import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
@@ -15,6 +14,7 @@ import 'package:minimum/models/applications_group.dart';
 import 'package:minimum/models/entry.dart';
 import 'package:minimum/models/order.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:minimum/utils/capture_throwable.dart';
 
 part 'applications_manager_state.dart';
 
@@ -37,9 +37,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
         if (state is! ApplicationsManagerFetchSuccess) return;
         final isShowingHidden = preferences.showHidden;
         if (isShowingHidden != state.isShowingHidden) {
-          emit(state.copyWith(
-            isShowingHidden: isShowingHidden,
-          ));
+          emit(state.copyWith(isShowingHidden: isShowingHidden));
         }
       }),
     );
@@ -47,7 +45,11 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     applicationsGroupsActions.addListener(this);
     Future.microtask(() async {
       await for (final event in service.eventsStream) {
-        await _onApplicationEvent(event);
+        try {
+          await _onApplicationEvent(event);
+        } catch (e, s) {
+          captureThrowable(e, stacktrace: s, label: '$runtimeType');
+        }
       }
     });
   }
@@ -74,9 +76,10 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
         final isEnabled = await service.isPackageEnabled(package);
         _onApplicationEvent(
           event.copyWith(
-            type: isEnabled
-                ? ApplicationEventType.onPackageAdded
-                : ApplicationEventType.onPackageRemoved,
+            type:
+                isEnabled
+                    ? ApplicationEventType.onPackageAdded
+                    : ApplicationEventType.onPackageRemoved,
           ),
         );
         break;
@@ -163,11 +166,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     if (state is! ApplicationsManagerFetchSuccess) return;
     if (group.isNew) {
       emit(
-        state.builder
-            .addOrUpdateGroup(
-              group.copyWith(isNew: false),
-            )
-            .build(),
+        state.builder.addOrUpdateGroup(group.copyWith(isNew: false)).build(),
       );
     }
   }
@@ -196,11 +195,9 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
             ? state.copyWith(applications: applications)
             : ApplicationsManagerFetchSuccess(applications: applications),
       );
-    } catch (_, s) {
+    } catch (e, s) {
       emit(ApplicationsManagerFetchFailure());
-      if (kDebugMode) {
-        print(s);
-      }
+      captureThrowable(e, stacktrace: s, label: '$runtimeType');
     }
   }
 
@@ -229,11 +226,11 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     }
 
     try {
-      return ApplicationsManagerFetchSuccess.fromJson(json).copyWith(
-        isShowingHidden: preferences.state.showHidden,
-      );
-    } catch (_, s) {
-      debugPrintStack(stackTrace: s, label: '$runtimeType');
+      return ApplicationsManagerFetchSuccess.fromJson(
+        json,
+      ).copyWith(isShowingHidden: preferences.state.showHidden);
+    } catch (e, s) {
+      captureThrowable(e, stacktrace: s, label: '$runtimeType');
     }
     return null;
   }
@@ -244,8 +241,8 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
       if (state is ApplicationsManagerFetchSuccess) {
         return state.toJson();
       }
-    } catch (_, s) {
-      debugPrintStack(stackTrace: s, label: '$runtimeType');
+    } catch (e, s) {
+      captureThrowable(e, stacktrace: s, label: '$runtimeType');
     }
 
     return null;

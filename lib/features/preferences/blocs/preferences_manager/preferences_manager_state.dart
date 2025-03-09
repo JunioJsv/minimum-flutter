@@ -38,9 +38,9 @@ class PreferencesManagerState extends Equatable {
 
   @override
   List<Object?> get props => [
-        isGridLayoutEnabled,
-        gridCrossAxisCount,
-        showHidden,
-        iconPack,
-      ];
+    isGridLayoutEnabled,
+    gridCrossAxisCount,
+    showHidden,
+    iconPack,
+  ];
 }

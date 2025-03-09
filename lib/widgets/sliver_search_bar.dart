@@ -82,12 +82,13 @@ class _SliverSearchBarDelegate extends SliverPersistentHeaderDelegate {
             valueListenable: controller,
             builder: (context, value, child) {
               return IconButton(
-                onPressed: value.text.isNotEmpty
-                    ? () {
-                        controller.clear();
-                        onChange('');
-                      }
-                    : null,
+                onPressed:
+                    value.text.isNotEmpty
+                        ? () {
+                          controller.clear();
+                          onChange('');
+                        }
+                        : null,
                 icon: const Icon(Icons.clear),
               );
             },

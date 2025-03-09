@@ -11,8 +11,9 @@ class CategoryText extends StatelessWidget {
     return ListTile(
       title: Text(
         text,
-        style: theme.textTheme.labelLarge!
-            .copyWith(color: theme.colorScheme.primary),
+        style: theme.textTheme.labelLarge!.copyWith(
+          color: theme.colorScheme.primary,
+        ),
       ),
     );
   }

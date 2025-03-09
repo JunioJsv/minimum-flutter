@@ -11,13 +11,15 @@ void main() async {
     await Directory(kDebugInfoDir).create(recursive: true);
   }
 
-  stdout.write([
-    'Choose build type:',
-    '1. APK',
-    '2. Github APK',
-    '3. AAB',
-    'Select build type: ',
-  ].join('\n'));
+  stdout.write(
+    [
+      'Choose build type:',
+      '1. APK',
+      '2. Github APK',
+      '3. AAB',
+      'Select build type: ',
+    ].join('\n'),
+  );
 
   final buildType = stdin.readLineSync();
   final environment = <String, String>{};
@@ -31,7 +33,7 @@ void main() async {
       environment.addAll({
         if (buildType == '2')
           '${kGradleProjectVar}_KEYSTORE_PROPERTIES_FILE':
-              'key.github.properties'
+              'key.github.properties',
       });
       process = await Process.start(
         'flutter',
@@ -40,7 +42,8 @@ void main() async {
           'apk',
           '--split-per-abi',
           '--obfuscate',
-          '--split-debug-info=$kDebugInfoDir'
+          '--split-debug-info=$kDebugInfoDir',
+          '--dart-define-from-file=environment.json',
         ],
         environment: environment,
         runInShell: true,
@@ -54,7 +57,8 @@ void main() async {
           'build',
           'appbundle',
           '--obfuscate',
-          '--split-debug-info=$kDebugInfoDir'
+          '--split-debug-info=$kDebugInfoDir',
+          '--dart-define-from-file=environment.json',
         ],
         environment: environment,
         runInShell: true,

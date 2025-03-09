@@ -23,10 +23,8 @@ class ApplicationsGroupArgumentsScreen {
   }
 }
 
-typedef _GroupState = ({
-  ApplicationsGroup group,
-  IList<Application> applications
-});
+typedef _GroupState =
+    ({ApplicationsGroup group, IList<Application> applications});
 
 class ApplicationsGroupScreen extends StatelessWidget {
   static final route = '$ApplicationsGroupScreen';
@@ -39,8 +37,11 @@ class ApplicationsGroupScreen extends StatelessWidget {
     final applications = dependencies<ApplicationsManagerCubit>();
     final applicationsGroupsActions = dependencies<ApplicationsGroupsActions>();
     final translation = context.translations;
-    final content = BlocSelector<ApplicationsManagerCubit,
-        ApplicationsManagerState, _GroupState?>(
+    final content = BlocSelector<
+      ApplicationsManagerCubit,
+      ApplicationsManagerState,
+      _GroupState?
+    >(
       bloc: applications,
       selector: (state) {
         if (state is! ApplicationsManagerFetchSuccess) return null;
@@ -93,23 +94,24 @@ class ApplicationsGroupScreen extends StatelessWidget {
                     icon: const Icon(Icons.dashboard_customize_outlined),
                   ),
                   IconButton(
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (context) {
-                        return ConfirmationDialog(
-                          title: translation.wantDeleteGroup,
-                          message: translation.groupDeleteHint(
-                            count: state.applications.length,
-                          ),
-                          confirm: translation.confirm,
-                          decline: translation.cancel,
-                        );
-                      },
-                    ).then((confirmation) {
-                      if (confirmation == true) {
-                        applicationsGroupsActions.remove(group);
-                      }
-                    }),
+                    onPressed:
+                        () => showDialog(
+                          context: context,
+                          builder: (context) {
+                            return ConfirmationDialog(
+                              title: translation.wantDeleteGroup,
+                              message: translation.groupDeleteHint(
+                                count: state.applications.length,
+                              ),
+                              confirm: translation.confirm,
+                              decline: translation.cancel,
+                            );
+                          },
+                        ).then((confirmation) {
+                          if (confirmation == true) {
+                            applicationsGroupsActions.remove(group);
+                          }
+                        }),
                     icon: const Icon(Icons.delete_outline),
                   ),
                 ],
@@ -118,8 +120,9 @@ class ApplicationsGroupScreen extends StatelessWidget {
             if (description != null && description.isNotEmpty)
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8)
-                      .add(const EdgeInsets.only(bottom: 16)),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                  ).add(const EdgeInsets.only(bottom: 16)),
                   child: Card.outlined(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
@@ -129,16 +132,12 @@ class ApplicationsGroupScreen extends StatelessWidget {
                 ),
               ),
             SliverEntries(entries: state.applications),
-            const SliverToBoxAdapter(
-              child: SizedBox(height: kToolbarHeight),
-            )
+            const SliverToBoxAdapter(child: SizedBox(height: kToolbarHeight)),
           ],
         );
       },
     );
 
-    return Scaffold(
-      body: content,
-    );
+    return Scaffold(body: content);
   }
 }

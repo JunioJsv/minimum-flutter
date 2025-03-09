@@ -61,12 +61,13 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
   Future<void> _showSetAsCurrentLauncherDialog(BuildContext context) async {
     final confirmation = await showDialog<bool?>(
       context: context,
-      builder: (context) => ConfirmationDialog(
-        title: translation.setHasDefaultLauncher,
-        message: translation.askSetHasDefaultLauncher,
-        confirm: translation.yes,
-        decline: translation.no,
-      ),
+      builder:
+          (context) => ConfirmationDialog(
+            title: translation.setHasDefaultLauncher,
+            message: translation.askSetHasDefaultLauncher,
+            confirm: translation.yes,
+            decline: translation.no,
+          ),
     );
     if (confirmation == true) {
       await applications.service.openCurrentLauncherSystemSettings();
@@ -104,9 +105,10 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
               slivers: [
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8)
-                            .add(const EdgeInsets.only(top: 8)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ).add(const EdgeInsets.only(top: 8)),
                     child: ApplicationsSearchBar(
                       applications: state.applications,
                     ),
@@ -121,7 +123,7 @@ class _ApplicationsScreenState extends State<ApplicationsScreen> {
                 SliverEntries(entries: state.entries),
                 const SliverToBoxAdapter(
                   child: SizedBox(height: kToolbarHeight),
-                )
+                ),
               ],
             );
           },
@@ -174,10 +176,10 @@ class _SliverEntriesState extends State<SliverEntries>
 
   Future<void> onScrollTo(double offset) {
     return Scrollable.of(context).position.animateTo(
-          offset,
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.fastOutSlowIn,
-        );
+      offset,
+      duration: const Duration(milliseconds: 500),
+      curve: Curves.fastOutSlowIn,
+    );
   }
 
   @override
@@ -201,30 +203,30 @@ class _SliverEntriesState extends State<SliverEntries>
 
   @override
   Widget build(BuildContext context) {
-    final entries = widget.entries.map(
-      (entry) {
-        if (entry is Application) {
-          return EntryWidgetArguments(
-            id: entry.component,
-            icon: ApplicationAvatar(application: entry),
-            label: entry.label,
-            onTap: () => applicationsActions.tap(entry),
-            onLongTap: () => applicationsActions.longTap(context, entry),
-          );
-        }
-        if (entry is ApplicationsGroup) {
-          return EntryWidgetArguments(
-            id: entry.id,
-            icon: ApplicationsGroupAvatar(group: entry),
-            label: entry.label,
-            onTap: () => applicationsGroupsActions.tap(context, entry),
-            onLongTap: () {},
-          );
-        }
+    final entries =
+        widget.entries.map((entry) {
+          if (entry is Application) {
+            return EntryWidgetArguments(
+              id: entry.component,
+              icon: ApplicationAvatar(application: entry),
+              label: entry.label,
+              onTap: () => applicationsActions.tap(entry),
+              onLongTap: () => applicationsActions.longTap(context, entry),
+            );
+          }
+          if (entry is ApplicationsGroup) {
+            return EntryWidgetArguments(
+              id: entry.id,
+              icon: ApplicationsGroupAvatar(group: entry),
+              label: entry.label,
+              onTap: () => applicationsGroupsActions.tap(context, entry),
+              onLongTap:
+                  () => applicationsGroupsActions.longTap(context, entry),
+            );
+          }
 
-        throw UnimplementedError();
-      },
-    ).toList();
+          throw UnimplementedError();
+        }).toList();
 
     return BlocConsumer<PreferencesManagerCubit, PreferencesManagerState>(
       bloc: preferences,
@@ -233,34 +235,34 @@ class _SliverEntriesState extends State<SliverEntries>
           onScrollTo(0);
         }
       },
-      listenWhen: (previous, current) =>
-          previous.showHidden != current.showHidden,
+      listenWhen:
+          (previous, current) => previous.showHidden != current.showHidden,
       buildWhen: hasPreferencesChanges,
       builder: (context, preferences) {
-        final layout = preferences.isGridLayoutEnabled
-            ? SliverApplicationsGridLayout(
-                children: entries.mapIndexed(
-                  (index, arguments) {
-                    return GridEntry(
-                      key: ValueKey(arguments.id!),
-                      arguments: arguments,
-                    );
-                  },
-                ).toList(),
-                delegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: preferences.gridCrossAxisCount,
-                  childAspectRatio: 3 / 4,
-                ),
-              )
-            : SliverApplicationsListLayout(
-                children: entries.mapIndexed(
-                (index, arguments) {
-                  return ListEntry(
-                    key: ValueKey(arguments.id!),
-                    arguments: arguments,
-                  );
-                },
-              ).toList());
+        final layout =
+            preferences.isGridLayoutEnabled
+                ? SliverApplicationsGridLayout(
+                  children:
+                      entries.mapIndexed((index, arguments) {
+                        return GridEntry(
+                          key: ValueKey(arguments.id!),
+                          arguments: arguments,
+                        );
+                      }).toList(),
+                  delegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: preferences.gridCrossAxisCount,
+                    childAspectRatio: 3 / 4,
+                  ),
+                )
+                : SliverApplicationsListLayout(
+                  children:
+                      entries.mapIndexed((index, arguments) {
+                        return ListEntry(
+                          key: ValueKey(arguments.id!),
+                          arguments: arguments,
+                        );
+                      }).toList(),
+                );
         return SliverApplications(layout: layout);
       },
     );

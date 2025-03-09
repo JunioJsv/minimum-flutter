@@ -69,12 +69,10 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
   void didUpdateWidget(covariant ApplicationsSearchBar oldWidget) {
     if (widget.applications != oldWidget.applications) {
       if (controller.isOpen) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) {
-            controller.closeView('');
-            focusNode.unfocus();
-          },
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          controller.closeView('');
+          focusNode.unfocus();
+        });
       }
     }
     super.didUpdateWidget(oldWidget);
@@ -138,31 +136,29 @@ class _ApplicationsSearchBarState extends State<ApplicationsSearchBar>
       },
       suggestionsBuilder: (context, controller) {
         if (controller.text.isEmpty) return [];
-        return applications.where(
-          (application) {
-            return application.label
-                .toLowerCase()
-                .contains(controller.text.toLowerCase());
-          },
-        ).map(
-          (application) {
-            return ListEntry(
-              key: ValueKey(application.component),
-              arguments: EntryWidgetArguments(
-                icon: ApplicationAvatar(application: application),
-                label: application.label,
-                onTap: () {
-                  applicationsActions.tap(application);
-                  controller.closeView('');
-                  focusNode.unfocus();
-                },
-                onLongTap: () {
-                  applicationsActions.longTap(context, application);
-                },
-              ),
-            );
-          },
-        );
+        return applications
+            .where((application) {
+              return application.label.toLowerCase().contains(
+                controller.text.toLowerCase(),
+              );
+            })
+            .map((application) {
+              return ListEntry(
+                key: ValueKey(application.component),
+                arguments: EntryWidgetArguments(
+                  icon: ApplicationAvatar(application: application),
+                  label: application.label,
+                  onTap: () {
+                    applicationsActions.tap(application);
+                    controller.closeView('');
+                    focusNode.unfocus();
+                  },
+                  onLongTap: () {
+                    applicationsActions.longTap(context, application);
+                  },
+                ),
+              );
+            });
       },
     );
   }
