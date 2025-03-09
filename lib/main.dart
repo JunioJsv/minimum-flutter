@@ -23,11 +23,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   LocaleSettings.useDeviceLocale();
   HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: await getApplicationDocumentsDirectory(),
+    storageDirectory: HydratedStorageDirectory(
+      (await getApplicationDocumentsDirectory()).path,
+    ),
   );
-  runApp(
-    TranslationProvider(child: const MinimumApp()),
-  );
+  runApp(TranslationProvider(child: const MinimumApp()));
 }
 
 class MinimumApp extends StatefulWidget {
@@ -87,22 +87,21 @@ class _MinimumAppState extends State<MinimumApp> {
   @override
   Widget build(BuildContext context) {
     final translation = context.translations;
-    return DynamicColorBuilder(builder: (
-      ColorScheme? lightDynamic,
-      ColorScheme? darkDynamic,
-    ) {
-      return MaterialApp(
-        title: translation.appName,
-        locale: TranslationProvider.of(context).flutterLocale,
-        supportedLocales: AppLocaleUtils.supportedLocales,
-        localizationsDelegates: GlobalMaterialLocalizations.delegates,
-        theme: theme(lightDynamic ?? const ColorScheme.light()),
-        darkTheme: theme(darkDynamic ?? const ColorScheme.dark()),
-        themeMode: ThemeMode.system,
-        initialRoute: ApplicationsScreen.route,
-        navigatorObservers: [observer],
-        onGenerateRoute: onGenerateRoute,
-      );
-    });
+    return DynamicColorBuilder(
+      builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+        return MaterialApp(
+          title: translation.appName,
+          locale: TranslationProvider.of(context).flutterLocale,
+          supportedLocales: AppLocaleUtils.supportedLocales,
+          localizationsDelegates: GlobalMaterialLocalizations.delegates,
+          theme: theme(lightDynamic ?? const ColorScheme.light()),
+          darkTheme: theme(darkDynamic ?? const ColorScheme.dark()),
+          themeMode: ThemeMode.system,
+          initialRoute: ApplicationsScreen.route,
+          navigatorObservers: [observer],
+          onGenerateRoute: onGenerateRoute,
+        );
+      },
+    );
   }
 }

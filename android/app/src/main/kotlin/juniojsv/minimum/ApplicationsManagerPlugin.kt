@@ -135,7 +135,8 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     private fun isPackageEnabled(call: MethodCall, result: MethodChannel.Result) {
         try {
             val packageName = call.argument<String>("package_name")!!
-            result.success(getPackageInfo(packageName).applicationInfo.enabled)
+            val isEnabled = getPackageInfo(packageName).applicationInfo?.enabled ?: false
+            result.success(isEnabled)
         } catch (e: Exception) {
             result.error(IS_PACKAGE_ENABLED, e.message, null)
         }
@@ -149,7 +150,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
                 val label = it.label as String
                 val componentName = it.componentName
                 val packageName = componentName.packageName
-                val versionName = getPackageInfo(packageName).versionName
+                val versionName = getPackageInfo(packageName).versionName ?: ""
                 if (packageName == BuildConfig.APPLICATION_ID) return@mapNotNull null
                 Application(
                     label,
@@ -176,7 +177,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
                 it.componentName == componentName
             }.let {
                 val label = it.label as String
-                val versionName = getPackageInfo(packageName).versionName
+                val versionName = getPackageInfo(packageName).versionName ?: ""
                 Application(
                     label,
                     packageName,
@@ -196,7 +197,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             val applications = launcherManager.getActivityList(packageName, user).map {
                 val label = it.label as String
                 val componentName = it.componentName
-                val versionName = getPackageInfo(packageName).versionName
+                val versionName = getPackageInfo(packageName).versionName ?: ""
                 Application(
                     label,
                     packageName,
