@@ -14,9 +14,9 @@ class ConfirmationDialog extends StatelessWidget {
     String? confirm,
     String? decline,
     this.icon,
-  })  : _confirm = confirm,
-        _decline = decline,
-        _message = message;
+  }) : _confirm = confirm,
+       _decline = decline,
+       _message = message;
 
   @override
   Widget build(BuildContext context) {

@@ -15,40 +15,34 @@ class WarningContainer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: LayoutBuilder(builder: (context, constraints) {
-        return TweenAnimationBuilder(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: kThemeAnimationDuration,
-          builder: (context, value, child) {
-            return Opacity(
-              opacity: value,
-              child: child,
-            );
-          },
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: color,
-              ),
-              Container(
-                width: constraints.maxWidth / 2,
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  message,
-                  style: Theme.of(context)
-                      .textTheme
-                      .titleMedium!
-                      .copyWith(color: color),
-                  textAlign: TextAlign.center,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          return TweenAnimationBuilder(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: kThemeAnimationDuration,
+            builder: (context, value, child) {
+              return Opacity(opacity: value, child: child);
+            },
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 48, color: color),
+                Container(
+                  width: constraints.maxWidth / 2,
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    message,
+                    style: Theme.of(
+                      context,
+                    ).textTheme.titleMedium!.copyWith(color: color),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      }),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

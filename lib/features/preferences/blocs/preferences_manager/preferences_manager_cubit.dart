@@ -12,12 +12,11 @@ class PreferencesManagerCubit extends HydratedCubit<PreferencesManagerState> {
   final ApplicationsManagerService service;
 
   PreferencesManagerCubit(this.service)
-      : super(const PreferencesManagerState());
+    : super(const PreferencesManagerState());
 
   Future<void> update(
-    PreferencesManagerState Function(
-      PreferencesManagerState preferences,
-    ) callback,
+    PreferencesManagerState Function(PreferencesManagerState preferences)
+    callback,
   ) async {
     final previousState = state;
     var newState = callback(previousState);
@@ -32,8 +31,9 @@ class PreferencesManagerCubit extends HydratedCubit<PreferencesManagerState> {
   }
 
   Future<bool> _onApplyIconPack(String? package) async {
-    final isIconPackApplied =
-        await service.setIconPack(package).catchError((e) => false);
+    final isIconPackApplied = await service
+        .setIconPack(package)
+        .catchError((e) => false);
     return isIconPackApplied;
   }
 

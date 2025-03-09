@@ -9,7 +9,7 @@ enum ApplicationEventType {
   onPackageAdded,
   onPackageChanged,
   onPackagesAvailable,
-  onPackagesUnavailable
+  onPackagesUnavailable,
 }
 
 @JsonSerializable()
@@ -17,10 +17,7 @@ class ApplicationEvent extends Equatable {
   final ApplicationEventType type;
   final List<String> packages;
 
-  const ApplicationEvent({
-    required this.type,
-    required this.packages,
-  });
+  const ApplicationEvent({required this.type, required this.packages});
 
   factory ApplicationEvent.fromJson(Map<String, dynamic> json) {
     return _$ApplicationEventFromJson(json);

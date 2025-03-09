@@ -2,19 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:minimum/features/applications/widgets/entry_widget.dart';
 
 class GridEntry extends EntryWidget {
-  const GridEntry({
-    super.key,
-    required super.arguments,
-  });
+  const GridEntry({super.key, required super.arguments});
 
   @override
   Widget build(BuildContext context) {
-    final EntryWidgetArguments(
-      :label,
-      :icon,
-      :onTap,
-      :onLongTap,
-    ) = arguments;
+    final EntryWidgetArguments(:label, :icon, :onTap, :onLongTap) = arguments;
     return InkWell(
       borderRadius: BorderRadius.circular(8),
       onTap: onTap,
@@ -33,8 +25,9 @@ class GridEntry extends EntryWidget {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 2)
-                    .add(const EdgeInsets.only(top: 8)),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 2,
+                ).add(const EdgeInsets.only(top: 8)),
                 child: Text(
                   label,
                   textAlign: TextAlign.center,
@@ -42,7 +35,7 @@ class GridEntry extends EntryWidget {
                   maxLines: 2,
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

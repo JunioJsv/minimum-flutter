@@ -68,7 +68,8 @@ class CreateApplicationsGroupScreenState
           components: components,
           onConfirm: (title, description) {
             Navigator.pop(context);
-            final group = arguments.initial?.copyWith(
+            final group =
+                arguments.initial?.copyWith(
                   label: title,
                   description: description,
                   components: components,
@@ -93,26 +94,26 @@ class CreateApplicationsGroupScreenState
     return Scaffold(
       resizeToAvoidBottomInset: false,
       floatingActionButton: ValueListenableBuilder(
-          valueListenable: components,
-          builder: (context, components, child) {
-            final isEnabled = components.length >= 2;
+        valueListenable: components,
+        builder: (context, components, child) {
+          final isEnabled = components.length >= 2;
 
-            return AnimatedScale(
-              duration: kThemeAnimationDuration,
-              scale: isEnabled ? 1 : 0,
-              child: FloatingActionButton.extended(
-                onPressed: isEnabled
-                    ? () {
+          return AnimatedScale(
+            duration: kThemeAnimationDuration,
+            scale: isEnabled ? 1 : 0,
+            child: FloatingActionButton.extended(
+              onPressed:
+                  isEnabled
+                      ? () {
                         _onConfirm(context);
                       }
-                    : null,
-                label: Text(translation.confirm),
-                icon: const Icon(
-                  Icons.save,
-                ),
-              ),
-            );
-          }),
+                      : null,
+              label: Text(translation.confirm),
+              icon: const Icon(Icons.save),
+            ),
+          );
+        },
+      ),
       body: _GroupManager(
         initial: components.value,
         onChange: (components) {
@@ -219,14 +220,12 @@ class _GroupManagerState extends State<_GroupManager> {
         }
 
         final group = this.group.toIList();
-        final applications = state.applications.where(
-          (application) {
-            return group.contains(application.component) ||
-                !state.groups.any(
-                  (group) => group.components.contains(application.component),
-                );
-          },
-        );
+        final applications = state.applications.where((application) {
+          return group.contains(application.component) ||
+              !state.groups.any(
+                (group) => group.components.contains(application.component),
+              );
+        });
         final unselected = <Application>[];
         final selected = <Application>[];
 
@@ -246,77 +245,78 @@ class _GroupManagerState extends State<_GroupManager> {
           return a.label.toLowerCase().compareTo(b.label.toLowerCase());
         });
 
-        return Column(children: [
-          Expanded(
-            child: _Card(
+        return Column(
+          children: [
+            Expanded(
+              child: _Card(
                 child: CustomScrollView(
-              controller: _controller,
-              slivers: [
-                SliverAppBar.medium(
-                  leading: const BackButton(),
-                  title: Text(translation.added),
-                  actions: [
-                    IconButton(
-                      onPressed: clearSelected,
-                      icon: const Icon(
-                        Icons.clear_all,
-                        size: 32,
-                      ),
+                  controller: _controller,
+                  slivers: [
+                    SliverAppBar.medium(
+                      leading: const BackButton(),
+                      title: Text(translation.added),
+                      actions: [
+                        IconButton(
+                          onPressed: clearSelected,
+                          icon: const Icon(Icons.clear_all, size: 32),
+                        ),
+                      ],
                     ),
+                    if (selected.isNotEmpty)
+                      _SliverList(
+                        isGroup: true,
+                        applications: selected,
+                        onTap: (application) {
+                          removeSelected(application.component);
+                        },
+                      )
+                    else
+                      SliverFillRemaining(
+                        child: WarningContainer(
+                          icon: Icons.apps_outage,
+                          message: translation.noApplicationsAddedOnGroup,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
                   ],
                 ),
-                if (selected.isNotEmpty)
-                  _SliverList(
-                    isGroup: true,
-                    applications: selected,
-                    onTap: (application) {
-                      removeSelected(application.component);
-                    },
-                  )
-                else
-                  SliverFillRemaining(
-                    child: WarningContainer(
-                      icon: Icons.apps_outage,
-                      message: translation.noApplicationsAddedOnGroup,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  )
-              ],
-            )),
-          ),
-          const Divider(height: 0),
-          Flexible(
-            child: _Card(
+              ),
+            ),
+            const Divider(height: 0),
+            Flexible(
+              child: _Card(
                 child: CustomScrollView(
-              slivers: [
-                SliverPadding(
-                  sliver: SliverToBoxAdapter(
-                    child: Text(
-                      translation.applications,
-                      style: theme.textTheme.headlineSmall,
+                  slivers: [
+                    SliverPadding(
+                      sliver: SliverToBoxAdapter(
+                        child: Text(
+                          translation.applications,
+                          style: theme.textTheme.headlineSmall,
+                        ),
+                      ),
+                      padding: const EdgeInsets.all(16),
                     ),
-                  ),
-                  padding: const EdgeInsets.all(16),
+                    if (unselected.isNotEmpty)
+                      _SliverList(
+                        applications: unselected,
+                        onTap: (application) {
+                          addSelected(application.component);
+                        },
+                      )
+                    else
+                      SliverFillRemaining(
+                        child: WarningContainer(
+                          icon: Icons.apps_outage,
+                          message: translation.noApplicationsAvailable,
+                          color: theme.colorScheme.onSurface,
+                        ),
+                      ),
+                  ],
                 ),
-                if (unselected.isNotEmpty)
-                  _SliverList(
-                    applications: unselected,
-                    onTap: (application) {
-                      addSelected(application.component);
-                    },
-                  )
-                else
-                  SliverFillRemaining(
-                    child: WarningContainer(
-                      icon: Icons.apps_outage,
-                      message: translation.noApplicationsAvailable,
-                      color: theme.colorScheme.onSurface,
-                    ),
-                  ),
-              ],
-            )),
-          ),
-        ]);
+              ),
+            ),
+          ],
+        );
       },
     );
   }
@@ -340,30 +340,30 @@ class _SliverList extends StatelessWidget {
       childAspectRatio: 3 / 4,
     );
     return SliverPadding(
-      padding: isGroup
-          ? const EdgeInsets.only(bottom: 24)
-          : const EdgeInsets.only(bottom: 56 + 16),
+      padding:
+          isGroup
+              ? const EdgeInsets.only(bottom: 24)
+              : const EdgeInsets.only(bottom: 56 + 16),
       sliver: SliverApplications(
         layout: SliverApplicationsGridLayout(
           delegate: delegate,
-          children: applications.map(
-            (application) {
-              return GridEntry(
-                key: ValueKey(application.component),
-                arguments: EntryWidgetArguments(
-                  icon: _ApplicationAvatar(
-                    application: application,
-                    isSelected: isGroup,
+          children:
+              applications.map((application) {
+                return GridEntry(
+                  key: ValueKey(application.component),
+                  arguments: EntryWidgetArguments(
+                    icon: _ApplicationAvatar(
+                      application: application,
+                      isSelected: isGroup,
+                    ),
+                    label: application.label,
+                    onTap: () {
+                      onTap(application);
+                    },
+                    onLongTap: () {},
                   ),
-                  label: application.label,
-                  onTap: () {
-                    onTap(application);
-                  },
-                  onLongTap: () {},
-                ),
-              );
-            },
-          ).toList(),
+                );
+              }).toList(),
         ),
       ),
     );
@@ -450,9 +450,7 @@ class _ConfirmationBottomSheetState extends State<_ConfirmationBottomSheet> {
   @override
   Widget build(BuildContext context) {
     final translation = Translations.of(context);
-    const inputDecoration = InputDecoration(
-      border: OutlineInputBorder(),
-    );
+    const inputDecoration = InputDecoration(border: OutlineInputBorder());
     final content = Form(
       key: form,
       child: Column(
@@ -523,9 +521,6 @@ class _ConfirmationBottomSheetState extends State<_ConfirmationBottomSheet> {
       ),
     );
 
-    return Padding(
-      padding: MediaQuery.viewInsetsOf(context),
-      child: content,
-    );
+    return Padding(padding: MediaQuery.viewInsetsOf(context), child: content);
   }
 }

@@ -37,9 +37,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
         if (state is! ApplicationsManagerFetchSuccess) return;
         final isShowingHidden = preferences.showHidden;
         if (isShowingHidden != state.isShowingHidden) {
-          emit(state.copyWith(
-            isShowingHidden: isShowingHidden,
-          ));
+          emit(state.copyWith(isShowingHidden: isShowingHidden));
         }
       }),
     );
@@ -47,7 +45,11 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     applicationsGroupsActions.addListener(this);
     Future.microtask(() async {
       await for (final event in service.eventsStream) {
-        await _onApplicationEvent(event);
+        try {
+          await _onApplicationEvent(event);
+        } catch (e, s) {
+          debugPrintStack(stackTrace: s, label: '$runtimeType');
+        }
       }
     });
   }
@@ -74,9 +76,10 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
         final isEnabled = await service.isPackageEnabled(package);
         _onApplicationEvent(
           event.copyWith(
-            type: isEnabled
-                ? ApplicationEventType.onPackageAdded
-                : ApplicationEventType.onPackageRemoved,
+            type:
+                isEnabled
+                    ? ApplicationEventType.onPackageAdded
+                    : ApplicationEventType.onPackageRemoved,
           ),
         );
         break;
@@ -163,11 +166,7 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     if (state is! ApplicationsManagerFetchSuccess) return;
     if (group.isNew) {
       emit(
-        state.builder
-            .addOrUpdateGroup(
-              group.copyWith(isNew: false),
-            )
-            .build(),
+        state.builder.addOrUpdateGroup(group.copyWith(isNew: false)).build(),
       );
     }
   }
@@ -229,9 +228,9 @@ class ApplicationsManagerCubit extends HydratedCubit<ApplicationsManagerState>
     }
 
     try {
-      return ApplicationsManagerFetchSuccess.fromJson(json).copyWith(
-        isShowingHidden: preferences.state.showHidden,
-      );
+      return ApplicationsManagerFetchSuccess.fromJson(
+        json,
+      ).copyWith(isShowingHidden: preferences.state.showHidden);
     } catch (_, s) {
       debugPrintStack(stackTrace: s, label: '$runtimeType');
     }

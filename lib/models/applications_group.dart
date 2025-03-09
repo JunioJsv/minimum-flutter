@@ -50,6 +50,11 @@ class ApplicationsGroup extends Entry {
   }
 
   @override
-  List<Object?> get props =>
-      [...super.props, id, description, components, isNew];
+  List<Object?> get props => [
+    ...super.props,
+    id,
+    description,
+    components,
+    isNew,
+  ];
 }

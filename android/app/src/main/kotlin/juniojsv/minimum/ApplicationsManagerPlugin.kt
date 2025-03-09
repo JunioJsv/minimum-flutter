@@ -8,12 +8,12 @@ import android.content.pm.LauncherApps
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Build
 import android.os.UserHandle
 import android.provider.Settings
 import android.util.Log
 import androidx.core.content.getSystemService
+import androidx.core.net.toUri
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -172,7 +172,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
         try {
             val componentName = call.argument<String>("component_name")!!
                 .let { ComponentName.unflattenFromString(it)!! }
-            val packageName = componentName.packageName;
+            val packageName = componentName.packageName
             val application = launcherManager.getActivityList(packageName, user).first {
                 it.componentName == componentName
             }.let {
@@ -264,7 +264,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
     private fun getIconPackDrawables(call: MethodCall, result: MethodChannel.Result) {
         try {
             val packageName = call.argument<String>("package_name")!!
-            val iconPacks = iconPackManager.getAvailableIconPacks(false);
+            val iconPacks = iconPackManager.getAvailableIconPacks(false)
             val iconPack = iconPacks[packageName]!!
             result.success(iconPack.packagesDrawables)
         } catch (e: Exception) {
@@ -277,7 +277,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             val packageName = call.argument<String>("package_name")!!
             val drawableName = call.argument<String>("drawable_name")!!
             val size = call.argument<Int>("size")
-            val iconPacks = iconPackManager.getAvailableIconPacks(false);
+            val iconPacks = iconPackManager.getAvailableIconPacks(false)
             val iconPack = iconPacks[packageName]!!.apply {
                 if (!isLoaded) load()
             }
@@ -294,7 +294,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             val componentName = call.argument<String>("component_name")?.let {
                 ComponentName.unflattenFromString(it)
             }
-            val packageName = componentName?.packageName;
+            val packageName = componentName?.packageName
             val size = call.argument<Int>("size")
 
             if (componentName != null && iconPackPackageName != null) {
@@ -378,7 +378,7 @@ class ApplicationsManagerPlugin : FlutterPlugin, ActivityAware, CoroutineScope {
             activity.startActivity(
                 Intent(
                     ACTION_DELETE,
-                    Uri.parse("package:${packageName}")
+                    "package:${packageName}".toUri()
                 )
             )
             result.success(null)

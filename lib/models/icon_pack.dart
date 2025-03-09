@@ -8,10 +8,7 @@ class IconPack extends Equatable {
   final String label;
   final String package;
 
-  const IconPack({
-    required this.label,
-    required this.package,
-  });
+  const IconPack({required this.label, required this.package});
 
   factory IconPack.fromJson(Map<String, dynamic> json) {
     return _$IconPackFromJson(json);

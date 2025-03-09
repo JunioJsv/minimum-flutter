@@ -13,10 +13,7 @@ import 'package:minimum/widgets/confirmation_dialog.dart';
 class ApplicationActionsBottomSheet extends StatelessWidget {
   final Application application;
 
-  const ApplicationActionsBottomSheet({
-    super.key,
-    required this.application,
-  });
+  const ApplicationActionsBottomSheet({super.key, required this.application});
 
   @override
   Widget build(BuildContext context) {
@@ -33,11 +30,7 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
             dimension: 24,
             child: ApplicationIcon(component: component),
           ),
-          title: Text(
-            label,
-            overflow: TextOverflow.ellipsis,
-            maxLines: 1,
-          ),
+          title: Text(label, overflow: TextOverflow.ellipsis, maxLines: 1),
           subtitle: Text(
             '${translation.version} $version',
             overflow: TextOverflow.ellipsis,
@@ -80,14 +73,15 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
               WidgetsBinding.instance.addPostFrameCallback((_) {
                 showDialog(
                   context: context,
-                  builder: (context) => ConfirmationDialog(
-                    icon: const Icon(Icons.visibility_off_outlined),
-                    title: translation.lockscreenRequired,
-                    message: translation.setupLockscreen(
-                      to: translation.hideApplications.toLowerCase(),
-                    ),
-                    confirm: translation.understood,
-                  ),
+                  builder:
+                      (context) => ConfirmationDialog(
+                        icon: const Icon(Icons.visibility_off_outlined),
+                        title: translation.lockscreenRequired,
+                        message: translation.setupLockscreen(
+                          to: translation.hideApplications.toLowerCase(),
+                        ),
+                        confirm: translation.understood,
+                      ),
                 );
               });
               return;
@@ -99,31 +93,32 @@ class ApplicationActionsBottomSheet extends StatelessWidget {
         ListTile(
           leading: const Icon(Icons.format_paint_outlined),
           title: Text(translation.changeIcon),
-          onTap: () => Navigator.pushReplacementNamed(
-            context,
-            IconPackSelectorScreen.route,
-            arguments: IconPackSelectorScreenArguments(
-              defaultComponent: application.component,
-              onSelect: (context, iconPack) {
-                if (iconPack == null) {
-                  Navigator.pop(context);
-                  applicationsActions.setIcon(application, null);
-                  return;
-                }
-                Navigator.pushNamed(
-                  context,
-                  IconPackDrawableSelectorScreen.route,
-                  arguments: IconPackDrawableSelectorScreenArguments(
-                    iconPack: iconPack,
-                    onSelect: (drawable) {
+          onTap:
+              () => Navigator.pushReplacementNamed(
+                context,
+                IconPackSelectorScreen.route,
+                arguments: IconPackSelectorScreenArguments(
+                  defaultComponent: application.component,
+                  onSelect: (context, iconPack) {
+                    if (iconPack == null) {
                       Navigator.pop(context);
-                      applicationsActions.setIcon(application, drawable);
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
+                      applicationsActions.setIcon(application, null);
+                      return;
+                    }
+                    Navigator.pushNamed(
+                      context,
+                      IconPackDrawableSelectorScreen.route,
+                      arguments: IconPackDrawableSelectorScreenArguments(
+                        iconPack: iconPack,
+                        onSelect: (drawable) {
+                          Navigator.pop(context);
+                          applicationsActions.setIcon(application, drawable);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
         ),
         ListTile(
           leading: const Icon(Icons.info_outline),

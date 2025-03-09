@@ -5,10 +5,7 @@ import 'package:minimum/features/applications/widgets/application_icon.dart';
 class ApplicationsGroupIcon extends StatelessWidget {
   final Set<String> components;
 
-  const ApplicationsGroupIcon({
-    super.key,
-    required this.components,
-  });
+  const ApplicationsGroupIcon({super.key, required this.components});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +22,7 @@ class ApplicationsGroupIcon extends StatelessWidget {
             color: Colors.black.withOpacity(.1),
             blurRadius: 10,
             offset: const Offset(0, 0),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -48,7 +45,7 @@ class ApplicationsGroupIcon extends StatelessWidget {
                   if (row.length == 1) const Spacer(),
                 ],
               ),
-            )
+            ),
         ],
       ),
     );

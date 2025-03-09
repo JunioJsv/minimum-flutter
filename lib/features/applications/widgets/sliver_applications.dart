@@ -11,9 +11,8 @@ sealed class SliverApplicationsLayout {
 }
 
 class SliverApplicationsListLayout extends SliverApplicationsLayout {
-  SliverApplicationsListLayout({
-    required Iterable<ListEntry> children,
-  }) : super(children: children);
+  SliverApplicationsListLayout({required Iterable<ListEntry> children})
+    : super(children: children);
 }
 
 class SliverApplicationsGridLayout extends SliverApplicationsLayout {
@@ -36,11 +35,12 @@ class SliverApplications extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final children = _layout.children;
-    final indexLookupTable = children is List<EntryWidget>
-        ? Map.fromEntries(children.mapIndexed(
-            (index, entry) => MapEntry(entry.key, index),
-          ))
-        : null;
+    final indexLookupTable =
+        children is List<EntryWidget>
+            ? Map.fromEntries(
+              children.mapIndexed((index, entry) => MapEntry(entry.key, index)),
+            )
+            : null;
     int? findChildIndexCallback(Key key) {
       final index = indexLookupTable?[key];
       return index;

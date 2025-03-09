@@ -14,19 +14,16 @@ Route<dynamic>? onGenerateRoute(RouteSettings settings) {
   final builder = routes[settings.name];
   if (builder == null) return null;
 
-  return MaterialPageRoute(
-    settings: settings,
-    builder: builder,
-  );
+  return MaterialPageRoute(settings: settings, builder: builder);
 }
 
 final Map<String, WidgetBuilder> routes = {
   ApplicationsScreen.route: (context) => const ApplicationsScreen(),
   PreferencesScreen.route: (context) => const PreferencesScreen(),
-  CreateApplicationsGroupScreen.route: (context) =>
-      const CreateApplicationsGroupScreen(),
+  CreateApplicationsGroupScreen.route:
+      (context) => const CreateApplicationsGroupScreen(),
   ApplicationsGroupScreen.route: (context) => const ApplicationsGroupScreen(),
   IconPackSelectorScreen.route: (context) => const IconPackSelectorScreen(),
-  IconPackDrawableSelectorScreen.route: (context) =>
-      const IconPackDrawableSelectorScreen(),
+  IconPackDrawableSelectorScreen.route:
+      (context) => const IconPackDrawableSelectorScreen(),
 };

@@ -84,10 +84,10 @@ class Application extends Entry implements ApplicationBase {
 
   @override
   List<Object?> get props => [
-        ...super.props,
-        package,
-        component,
-        version,
-        preferences,
-      ];
+    ...super.props,
+    package,
+    component,
+    version,
+    preferences,
+  ];
 }

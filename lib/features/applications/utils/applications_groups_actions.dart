@@ -18,9 +18,7 @@ class ApplicationsGroupsActions
       ApplicationsGroupScreen.route,
       arguments: ApplicationsGroupArgumentsScreen(id: group.id),
     );
-    notify(
-      (listener) => listener.didTapApplicationsGroup(group),
-    );
+    notify((listener) => listener.didTapApplicationsGroup(group));
   }
 
   void addOrUpdate(ApplicationsGroup group) {

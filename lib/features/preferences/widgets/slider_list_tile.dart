@@ -26,9 +26,9 @@ class SliderListTile extends StatefulWidget {
 
 class _SliderListTileState extends State<SliderListTile> {
   late double _value = widget.value.toDouble().clamp(
-        widget.min.toDouble(),
-        widget.max.toDouble(),
-      );
+    widget.min.toDouble(),
+    widget.max.toDouble(),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -48,13 +48,14 @@ class _SliderListTileState extends State<SliderListTile> {
                 min: widget.min.toDouble(),
                 max: widget.max.toDouble(),
                 // label: '${_value.round()}',
-                onChanged: widget.isEnabled
-                    ? (value) {
-                        setState(() {
-                          _value = value;
-                        });
-                      }
-                    : null,
+                onChanged:
+                    widget.isEnabled
+                        ? (value) {
+                          setState(() {
+                            _value = value;
+                          });
+                        }
+                        : null,
                 onChangeEnd: (value) {
                   widget.onChange(value.round());
                 },
@@ -64,7 +65,7 @@ class _SliderListTileState extends State<SliderListTile> {
             Padding(
               padding: const EdgeInsets.only(left: 8, right: 24),
               child: Text('${_value.round()}'),
-            )
+            ),
           ],
         ),
       ],

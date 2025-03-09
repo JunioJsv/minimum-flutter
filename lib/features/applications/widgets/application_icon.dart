@@ -23,8 +23,8 @@ class ApplicationIcon extends StatefulWidget {
     this.shadow = true,
     this.keepAlive = true,
     this.ignorePreferences = false,
-  })  : drawable = null,
-        package = null;
+  }) : drawable = null,
+       package = null;
 
   const ApplicationIcon.fromIconPack({
     super.key,
@@ -41,8 +41,8 @@ class ApplicationIcon extends StatefulWidget {
     this.shadow = true,
     this.keepAlive = true,
     this.ignorePreferences = false,
-  })  : drawable = null,
-        component = null;
+  }) : drawable = null,
+       component = null;
 
   @override
   ApplicationIconState createState() => ApplicationIconState();
@@ -62,11 +62,12 @@ class ApplicationIconState extends State<ApplicationIcon>
     final state = applications.state;
     final component = widget.component;
     final package = widget.package;
-    final preferences = !widget.ignorePreferences &&
-            component != null &&
-            state is ApplicationsManagerFetchSuccess
-        ? state.getApplicationPreferences(component)
-        : null;
+    final preferences =
+        !widget.ignorePreferences &&
+                component != null &&
+                state is ApplicationsManagerFetchSuccess
+            ? state.getApplicationPreferences(component)
+            : null;
     final drawable = widget.drawable ?? preferences?.icon;
     if (drawable != null) {
       try {
@@ -123,23 +124,25 @@ class ApplicationIconState extends State<ApplicationIcon>
         final bytes = snapshot.data;
         return DecoratedBox(
           decoration: BoxDecoration(
-            boxShadow: widget.shadow
-                ? <BoxShadow>[
-                    BoxShadow(
-                      color: Colors.black.withOpacity(.1),
-                      blurRadius: 10,
-                      offset: const Offset(0, 0),
-                    )
-                  ]
-                : null,
+            boxShadow:
+                widget.shadow
+                    ? <BoxShadow>[
+                      BoxShadow(
+                        color: Colors.black.withOpacity(.1),
+                        blurRadius: 10,
+                        offset: const Offset(0, 0),
+                      ),
+                    ]
+                    : null,
           ),
           child: SizedBox.expand(
-            child: bytes != null
-                ? FadeInImage(
-                    placeholder: MemoryImage(kTransparentImage),
-                    image: MemoryImage(bytes),
-                  )
-                : Container(),
+            child:
+                bytes != null
+                    ? FadeInImage(
+                      placeholder: MemoryImage(kTransparentImage),
+                      image: MemoryImage(bytes),
+                    )
+                    : Container(),
           ),
         );
       },
