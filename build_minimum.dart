@@ -27,8 +27,22 @@ void main() async {
   Process? process;
   String outputDir;
 
+  Future<void> runBuildRunner() async {
+    stdout.writeln('Running build runner...');
+    final process = await Process.start('dart', [
+      'run',
+      'build_runner',
+      'build',
+      '-d',
+    ], runInShell: true);
+    stdout.addStream(process.stdout);
+    stderr.addStream(process.stderr);
+    await process.exitCode;
+  }
+
   switch (buildType) {
     case '1' || '2':
+      await runBuildRunner();
       stdout.writeln('Building APK...');
       environment.addAll({
         if (buildType == '2')
@@ -50,6 +64,7 @@ void main() async {
       );
       outputDir = path.join('build', 'app', 'outputs', 'flutter-apk');
     case '3':
+      await runBuildRunner();
       stdout.writeln('Building AAB...');
       process = await Process.start(
         'flutter',
