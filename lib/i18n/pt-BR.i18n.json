@@ -47,6 +47,8 @@
   "confirm_group": "@:confirm grupo",
   "contain_n_thing": "Contém ${count} ${thing}",
   "want_delete_group": "Deseja excluir o grupo?",
+  "delete": "Excluir",
+  "that_group_delete_hint": "O grupo ${that} será desfeito.",
   "group_delete_hint": "O grupo contendo ${count} aplicativos será desfeito.",
   "cancel": "Cancelar",
   "take_pictures_with": "Tire fotos com",

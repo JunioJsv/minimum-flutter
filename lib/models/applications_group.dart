@@ -11,9 +11,12 @@ class ApplicationsGroup extends Entry {
 
   final bool isNew;
 
+  final bool isPinned;
+
   @override
   int get priority {
     var value = 0;
+    if (isPinned) value += 1;
     if (isNew) value += 4;
 
     return value;
@@ -25,6 +28,7 @@ class ApplicationsGroup extends Entry {
     required this.description,
     required this.components,
     required this.isNew,
+    this.isPinned = false,
   });
 
   factory ApplicationsGroup.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,7 @@ class ApplicationsGroup extends Entry {
     String? description,
     Set<String>? components,
     bool? isNew,
+    bool? isPinned,
   }) {
     return ApplicationsGroup(
       id: id ?? this.id,
@@ -46,6 +51,7 @@ class ApplicationsGroup extends Entry {
       description: description ?? this.description,
       components: components ?? this.components,
       isNew: isNew ?? this.isNew,
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 
@@ -56,5 +62,6 @@ class ApplicationsGroup extends Entry {
     description,
     components,
     isNew,
+    isPinned,
   ];
 }

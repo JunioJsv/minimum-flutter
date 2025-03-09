@@ -15,6 +15,15 @@ class ApplicationsGroupAvatar extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         ApplicationsGroupIcon(components: group.components),
+        if (group.isPinned)
+          Align(
+            alignment: Alignment.topRight * 2,
+            child: ApplicationTag(
+              background: theme.colorScheme.primary,
+              foreground: theme.colorScheme.onPrimary,
+              icon: Icons.push_pin,
+            ),
+          ),
         if (group.isNew)
           Align(
             alignment: Alignment.bottomRight * 2,

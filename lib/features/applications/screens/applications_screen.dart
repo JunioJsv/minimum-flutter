@@ -220,7 +220,8 @@ class _SliverEntriesState extends State<SliverEntries>
               icon: ApplicationsGroupAvatar(group: entry),
               label: entry.label,
               onTap: () => applicationsGroupsActions.tap(context, entry),
-              onLongTap: () {},
+              onLongTap:
+                  () => applicationsGroupsActions.longTap(context, entry),
             );
           }
 

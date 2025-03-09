@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:fast_immutable_collections/fast_immutable_collections.dart'
     hide Entry;
-import 'package:flutter/foundation.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:minimum/features/applications/utils/applications_actions.dart';
 import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
