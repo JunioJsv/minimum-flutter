@@ -7,6 +7,7 @@ import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';
 import 'package:minimum/models/icon_pack_drawable.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:minimum/utils/capture_throwable.dart';
 import 'package:transparent_image/transparent_image.dart';
 
 class ApplicationIcon extends StatefulWidget {
@@ -75,8 +76,8 @@ class ApplicationIconState extends State<ApplicationIcon>
           drawable.package,
           drawable.name,
         );
-      } catch (e) {
-        debugPrint(e.toString());
+      } catch (e, s) {
+        captureThrowable(e, stacktrace: s, label: '$runtimeType');
       }
     }
 

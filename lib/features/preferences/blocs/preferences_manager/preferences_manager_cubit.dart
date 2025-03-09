@@ -4,6 +4,7 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:minimum/models/icon_pack.dart';
 import 'package:minimum/services/applications_manager_service.dart';
+import 'package:minimum/utils/capture_throwable.dart';
 
 part 'preferences_manager_cubit.g.dart';
 part 'preferences_manager_state.dart';
@@ -50,7 +51,8 @@ class PreferencesManagerCubit extends HydratedCubit<PreferencesManagerState> {
         });
       }
       return state;
-    } catch (_) {
+    } catch (e, s) {
+      captureThrowable(e, stacktrace: s, label: '$runtimeType');
       return null;
     }
   }

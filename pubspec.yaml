@@ -28,6 +28,7 @@ dependencies:
   fast_immutable_collections: 11.0.3
   android_intent_plus: 5.3.0
   transparent_image: 2.0.1
+  sentry_flutter: 8.13.2
 
 dev_dependencies:
   flutter_test:
