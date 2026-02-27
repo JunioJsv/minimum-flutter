@@ -1,7 +1,10 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
-  exclude: [build/**, lib/**/*.g.dart]
+  exclude:
+    - build/**
+    - lib/**/*.g.dart
+    - android/**
 linter:
   rules:
     # avoid_print: false  # Uncomment to disable the `avoid_print` rule

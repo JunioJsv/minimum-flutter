@@ -18,8 +18,8 @@ SearchBarThemeData searchBarTheme(ColorScheme colorScheme) {
   );
 }
 
-CardTheme cardTheme(ColorScheme colorScheme) {
-  return const CardTheme();
+CardThemeData cardTheme(ColorScheme colorScheme) {
+  return const CardThemeData();
 }
 
 ThemeData theme(ColorScheme colorScheme) {
