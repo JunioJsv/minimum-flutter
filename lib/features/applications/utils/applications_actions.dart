@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:minimum/features/applications/widgets/application_actions_bottom_sheet.dart';
 import 'package:minimum/main.dart';
 import 'package:minimum/models/application.dart';

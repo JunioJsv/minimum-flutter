@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const useMaterial3 = true;
 const appBarTheme = AppBarTheme(elevation: 1);

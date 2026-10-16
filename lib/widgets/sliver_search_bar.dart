@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:minimum/utils/ancestral_scrollable_mixin.dart';
 

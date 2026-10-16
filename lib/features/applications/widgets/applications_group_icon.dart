@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:minimum/features/applications/widgets/application_icon.dart';
 
 class ApplicationsGroupIcon extends StatelessWidget {

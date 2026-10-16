@@ -1,5 +1,5 @@
 import 'package:android_intent_plus/android_intent.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:minimum/features/preferences/screens/preferences_screen.dart';
 import 'package:minimum/i18n/translations.g.dart';
 import 'package:url_launcher/url_launcher.dart';

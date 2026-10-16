@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:minimum/features/applications/screens/create_applications_group_screen.dart';
 import 'package:minimum/features/applications/utils/applications_groups_actions.dart';
 import 'package:minimum/features/applications/widgets/applications_group_icon.dart';
